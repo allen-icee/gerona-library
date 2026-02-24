@@ -3,36 +3,57 @@
 namespace App\Http\Controllers;
 
 use App\Models\VisitorLog;
+use App\Models\Patron;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class VisitorLogController extends Controller
 {
-    // Handles the "Time In"
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            // Regex strictly allows only letters, spaces, hyphens, and periods.
-            'visitor_name' => ['required', 'string', 'max:255', 'regex:/^[\pL\s\-\.]+$/u'],
-            'address' => 'required|string|max:255',
-            'school' => 'nullable|string|max:255',
-            'contact_number' => 'nullable|string|max:20',
-            'purpose' => 'required|string|max:255',
-            'signature' => 'nullable|string',
-        ], [
-            // Custom error message for the React frontend
-            'visitor_name.regex' => 'Please enter a valid name (letters only, no numbers).',
-        ]);
+        $visitorName = $request->visitor_name;
+        $address = $request->address;
 
-        VisitorLog::create($validated);
+        // 1. If they provided a Patron ID, look them up!
+        if ($request->filled('patron_id')) {
+            $patron = Patron::where('patron_id', strtoupper($request->patron_id))->first();
+
+            if (!$patron) {
+                return back()->withErrors(['patron_id' => 'Library Card Number not found. Please try again or sign in as a guest.']);
+            }
+
+            $request->validate([
+                'purpose' => 'required|string|max:255',
+            ]);
+
+            // Auto-fill from database
+            $visitorName = $patron->name;
+            $address = $patron->address;
+        } else {
+            // 2. Otherwise, they are a guest and must type everything
+            $request->validate([
+                'visitor_name' => 'required|string|max:255',
+                'address' => 'required|string|max:255',
+                'purpose' => 'required|string|max:255',
+            ]);
+        }
+
+        // 3. Log them in
+        VisitorLog::create([
+            'visitor_name' => $visitorName,
+            'address' => $address,
+            'purpose' => $request->purpose,
+            'time_in' => now(),
+        ]);
 
         return redirect()->back();
     }
 
-    // Handles the "Time Out"
     public function checkout(VisitorLog $visitorLog)
     {
-        // Stamps the exact current time into the database
-        $visitorLog->update(['time_out' => now()]);
+        $visitorLog->update([
+            'time_out' => now(),
+        ]);
 
         return redirect()->back();
     }

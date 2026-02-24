@@ -4,48 +4,39 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
+    /**
+     * Seed the application's database.
+     */
     public function run(): void
     {
-        // 1. Create the Roles
-        $adminRole = Role::firstOrCreate(['name' => 'Super Admin']);
+        // 1. Create the Official Access Roles (Just Two Now!)
         $librarianRole = Role::firstOrCreate(['name' => 'Librarian']);
         $kioskRole = Role::firstOrCreate(['name' => 'Kiosk']);
 
-        // 2. Create the IT / Super Admin Account
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@geronalibrary.gov.ph'],
-            [
-                'name' => 'System Administrator',
-                'password' => Hash::make('password123'),
-            ]
-        );
-        $admin->assignRole($adminRole);
-
-        // 3. Create the Head Librarian Account
+        // 2. Create the Master Librarian Account
         $librarian = User::firstOrCreate(
-            ['email' => 'librarian@geronalibrary.gov.ph'],
+            ['username' => 'librarian'], // <-- New official username
             [
                 'name' => 'Head Librarian',
-                'password' => Hash::make('password123'),
+                'email' => 'librarian@geronalibrary.gov.ph',
+                'password' => bcrypt('Librarian@2026!'),
             ]
         );
         $librarian->assignRole($librarianRole);
 
-        // 4. Create the Kiosk Front Desk Account
+        // 3. Create the locked-down Kiosk Account
         $kiosk = User::firstOrCreate(
-            ['email' => 'kiosk@geronalibrary.gov.ph'],
+            ['username' => 'kiosk'],
             [
-                'name' => 'Entrance Kiosk',
-                'password' => Hash::make('password123'),
+                'name' => 'Front Desk Kiosk',
+                'email' => 'kiosk@geronalibrary.gov.ph',
+                'password' => bcrypt('Kiosk@2026!'),
             ]
         );
         $kiosk->assignRole($kioskRole);
-
-        $this->command->info('Roles and default accounts created successfully!');
     }
 }

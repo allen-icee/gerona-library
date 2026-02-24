@@ -14,7 +14,7 @@ class Patron extends Model
         'type',
         'school_or_barangay',
         'contact_number',
-        'status'
+        'status',
     ];
 
     public function transactions(): HasMany

@@ -16,15 +16,17 @@ class BorrowTransaction extends Model
         'due_at',
         'returned_at',
         'fine_amount',
-        'status'
+        'status',
     ];
 
+    // Cast the dates so we can format them easily in React
     protected $casts = [
         'borrowed_at' => 'datetime',
         'due_at' => 'datetime',
         'returned_at' => 'datetime',
     ];
 
+    // Relationships to pull in the Patron, Book, and Librarian data
     public function patron(): BelongsTo
     {
         return $this->belongsTo(Patron::class);
@@ -35,7 +37,7 @@ class BorrowTransaction extends Model
         return $this->belongsTo(BookCopy::class);
     }
 
-    public function issuedBy(): BelongsTo
+    public function issuer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'issued_by');
     }

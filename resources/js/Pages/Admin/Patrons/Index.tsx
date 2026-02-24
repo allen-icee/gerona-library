@@ -13,21 +13,20 @@ import {
     TableRow,
 } from "@/Components/ui/table";
 
-// Import our new cleanly separated components
-import AddBookModal from "./Partials/AddBookModal";
-import BookActions from "./Partials/BookActions";
+import AddPatronModal from "./Partials/AddPatronModal";
+import PatronActions from "./Partials/PatronActions";
 
-export default function BookIndex({
-    books,
+export default function PatronIndex({
+    patrons,
     filters,
-}: PageProps<{ books: any; filters: { search?: string } }>) {
+}: PageProps<{ patrons: any; filters: { search?: string } }>) {
     const [search, setSearch] = useState(filters.search || "");
 
     useEffect(() => {
         const delayBounceFn = setTimeout(() => {
             if (search !== filters.search) {
                 router.get(
-                    route("books.index"),
+                    route("patrons.index"),
                     { search },
                     { preserveState: true, replace: true },
                 );
@@ -38,17 +37,17 @@ export default function BookIndex({
 
     return (
         <AdminLayout>
-            <Head title="Master Catalog" />
+            <Head title="Patron Registry" />
 
             <div className="max-w-7xl mx-auto space-y-6">
                 {/* Header Area */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h1 className="text-2xl font-bold text-stone-800">
-                            Master Catalog
+                            Patron Registry
                         </h1>
                         <p className="text-stone-500 text-sm">
-                            Manage master book records and inventory.
+                            Manage library borrowers and their access status.
                         </p>
                     </div>
 
@@ -56,15 +55,14 @@ export default function BookIndex({
                         <div className="relative w-full sm:w-72">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
                             <Input
-                                placeholder="Search title, author, or ISBN..."
+                                placeholder="Search name, card, or school..."
                                 className="pl-9 bg-white border-stone-300"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
                         </div>
 
-                        {/* Our isolated Add Book Component */}
-                        <AddBookModal />
+                        <AddPatronModal />
                     </div>
                 </div>
 
@@ -74,55 +72,61 @@ export default function BookIndex({
                         <TableHeader className="bg-stone-50">
                             <TableRow>
                                 <TableHead className="font-semibold text-stone-700">
-                                    Title
+                                    Card Number
                                 </TableHead>
                                 <TableHead className="font-semibold text-stone-700">
-                                    Author
+                                    Name
                                 </TableHead>
                                 <TableHead className="font-semibold text-stone-700">
-                                    Category
+                                    Type
+                                </TableHead>
+                                <TableHead className="font-semibold text-stone-700">
+                                    School/Barangay
                                 </TableHead>
                                 <TableHead className="font-semibold text-stone-700 text-center">
-                                    Physical Copies
+                                    Status
                                 </TableHead>
                                 <TableHead className="font-semibold text-stone-700 w-[80px]"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {books.data.length === 0 ? (
+                            {patrons.data.length === 0 ? (
                                 <TableRow>
                                     <TableCell
-                                        colSpan={5}
+                                        colSpan={6}
                                         className="h-32 text-center text-stone-500"
                                     >
-                                        No books found in the catalog.
+                                        No patrons found in the registry.
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                books.data.map((book: any) => (
+                                patrons.data.map((patron: any) => (
                                     <TableRow
-                                        key={book.id}
-                                        className="hover:bg-stone-50 transition-colors"
+                                        key={patron.id}
+                                        className={`hover:bg-stone-50 transition-colors ${patron.status === "Suspended" ? "opacity-60" : ""}`}
                                     >
+                                        <TableCell className="font-mono text-slate-900 text-sm">
+                                            {patron.library_card_number}
+                                        </TableCell>
                                         <TableCell className="font-medium text-slate-900">
-                                            {book.title}
+                                            {patron.first_name}{" "}
+                                            {patron.last_name}
                                         </TableCell>
                                         <TableCell className="text-stone-600">
-                                            {book.author}
+                                            {patron.type}
                                         </TableCell>
                                         <TableCell className="text-stone-500 text-sm">
-                                            {book.category || "-"}
+                                            {patron.school_or_barangay}
                                         </TableCell>
                                         <TableCell className="text-center">
                                             <span
-                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${book.copies_count > 0 ? "bg-emerald-100 text-emerald-800" : "bg-stone-100 text-stone-600"}`}
+                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${patron.status === "Active" ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"}`}
                                             >
-                                                {book.copies_count} copies
+                                                {patron.status}
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            {/* Our isolated Row Actions Component */}
-                                            <BookActions book={book} />
+                                            <PatronActions patron={patron} />
                                         </TableCell>
                                     </TableRow>
                                 ))
@@ -132,17 +136,18 @@ export default function BookIndex({
                 </div>
 
                 {/* Pagination Controls */}
-                {books.total > 15 && (
+                {patrons.total > 15 && (
                     <div className="flex items-center justify-between">
                         <p className="text-sm text-stone-500">
                             Showing{" "}
-                            <span className="font-medium">{books.from}</span> to{" "}
-                            <span className="font-medium">{books.to}</span> of{" "}
-                            <span className="font-medium">{books.total}</span>{" "}
-                            books
+                            <span className="font-medium">{patrons.from}</span>{" "}
+                            to <span className="font-medium">{patrons.to}</span>{" "}
+                            of{" "}
+                            <span className="font-medium">{patrons.total}</span>{" "}
+                            patrons
                         </p>
                         <div className="flex gap-1">
-                            {books.links.map((link: any, index: number) => (
+                            {patrons.links.map((link: any, index: number) => (
                                 <button
                                     key={index}
                                     onClick={() =>
