@@ -18,18 +18,21 @@ use App\Http\Controllers\PublicPatronController;
 use App\Http\Controllers\PublicCatalogController;
 
 // ==========================================
-// PUBLIC ROUTES
+// PUBLIC ROUTES (MODAL-DRIVEN)
 // ==========================================
 
-// 1. Public Search Catalog (Homepage)
-Route::get('/', [PublicCatalogController::class, 'index'])->name('catalog.index');
+// 1. The New Digital Lobby (Welcome Page)
+Route::get('/', function () {
+    return Inertia::render('Public/Home');
+})->name('home');
 
-// 2. Public Patron Registration (Changed URI to avoid Auth conflict!)
-Route::get('/register-patron', [PublicPatronController::class, 'create'])->name('register-patron.create');
+// 2. Public Search Catalog
+Route::get('/catalog', [PublicCatalogController::class, 'index'])->name('catalog.index');
+
+// 3. Public Patron Registration (POST)
 Route::post('/register-patron', [PublicPatronController::class, 'store'])->name('register-patron.store');
 
-// 3. Public Print Station
-Route::get('/print-station', [PrintStationController::class, 'index'])->name('print-station.index');
+// 4. Public Print Station (POST)
 Route::post('/print-station/upload', [PrintStationController::class, 'upload'])->name('print-station.upload');
 
 // ==========================================

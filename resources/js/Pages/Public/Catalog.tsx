@@ -1,22 +1,8 @@
 import { FormEventHandler } from "react";
-import { Head, Link, useForm } from "@inertiajs/react";
-import { PageProps } from "@/types";
-import {
-    Search,
-    BookOpen,
-    Library,
-    CheckCircle2,
-    XCircle,
-    Printer,
-} from "lucide-react";
-import { Button } from "@/Components/ui/button";
+import PublicLayout from "@/Layouts/PublicLayout";
+import { Head, useForm, Link } from "@inertiajs/react";
+import { Icon } from "@iconify/react";
 import { Input } from "@/Components/ui/input";
-import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
-} from "@/Components/ui/card";
 
 interface Book {
     id: number;
@@ -24,18 +10,11 @@ interface Book {
     author: string;
     isbn: string;
     category: string;
-    published_year: string;
-    total_copies: number;
     available_copies: number;
 }
 
-export default function Catalog({
-    books,
-    filters,
-}: PageProps<{ books: any; filters: any }>) {
-    const { data, setData, get, processing } = useForm({
-        search: filters.search || "",
-    });
+export default function Catalog({ books, filters }: any) {
+    const { data, setData, get } = useForm({ search: filters.search || "" });
 
     const handleSearch: FormEventHandler = (e) => {
         e.preventDefault();
@@ -43,175 +22,148 @@ export default function Catalog({
     };
 
     return (
-        <div className="min-h-screen bg-stone-100 flex flex-col">
+        <PublicLayout>
             <Head title="Library Catalog" />
 
-            {/* Public Navigation Bar */}
-            <header className="bg-slate-900 text-white shadow-md">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <Library className="w-8 h-8 text-amber-500" />
-                        <span className="text-xl font-serif font-bold tracking-tight">
-                            Gerona Municipal Library
-                        </span>
+            <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                {/* --- COMPACT HEADER & SEARCH --- */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-pink-50">
+                    <div className="space-y-1">
+                        <div className="inline-flex items-center gap-2 text-rose-500 font-potta text-[10px] uppercase tracking-widest mb-1">
+                            <Icon
+                                icon="solar:library-bold-duotone"
+                                className="w-4 h-4"
+                            />
+                            Public Collection
+                        </div>
+                        <h1 className="text-3xl md:text-4xl font-serif font-black text-slate-800 tracking-tight">
+                            Browse{" "}
+                            <span className="text-rose-500">Catalog</span>
+                        </h1>
+                        <p className="text-stone-400 text-sm font-medium">
+                            Explore {books.total || 0} items in our municipal
+                            collection.
+                        </p>
                     </div>
-                    <div className="flex items-center gap-4">
-                        <Link
-                            href={route("print-station.index")}
-                            className="text-sm font-medium text-slate-300 hover:text-white flex items-center transition-colors"
-                        >
-                            <Printer className="w-4 h-4 mr-2" /> Print Station
-                        </Link>
-                        <div className="w-px h-6 bg-slate-700 mx-2"></div>
-                        <Link
-                            href={route("login")}
-                            className="text-sm font-medium text-amber-500 hover:text-amber-400 transition-colors"
-                        >
-                            Staff Login
-                        </Link>
-                    </div>
-                </div>
-            </header>
-
-            {/* Hero Search Section */}
-            <div className="bg-slate-800 py-16 px-4 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-amber-400 to-transparent"></div>
-                <div className="max-w-3xl mx-auto text-center relative z-10 space-y-6">
-                    <h1 className="text-4xl md:text-5xl font-serif font-bold text-white">
-                        Find Your Next Great Read
-                    </h1>
-                    <p className="text-slate-300 text-lg">
-                        Search the complete catalog of books, modules, and
-                        resources available at the Gerona Municipal Library.
-                    </p>
 
                     <form
                         onSubmit={handleSearch}
-                        className="flex gap-2 max-w-2xl mx-auto mt-8"
+                        className="w-full md:w-96 relative group"
                     >
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-500 w-5 h-5" />
-                            <Input
-                                type="text"
-                                placeholder="Search by title, author, category, or ISBN..."
-                                value={data.search}
-                                onChange={(e) =>
-                                    setData("search", e.target.value)
-                                }
-                                className="w-full pl-10 h-14 text-lg rounded-full bg-white border-none shadow-inner text-stone-800 placeholder:text-stone-400 focus-visible:ring-amber-500"
-                            />
-                        </div>
-                        <Button
-                            type="submit"
-                            disabled={processing}
-                            className="h-14 px-8 rounded-full bg-amber-600 hover:bg-amber-500 text-white font-bold text-lg shadow-md transition-all"
-                        >
-                            Search
-                        </Button>
+                        <Input
+                            value={data.search}
+                            onChange={(e) => setData("search", e.target.value)}
+                            placeholder="Title, Author, or ISBN..."
+                            className="h-12 pl-12 pr-4 rounded-2xl border-2 border-pink-100 focus:border-rose-300 text-sm shadow-sm transition-all bg-pink-50/30"
+                        />
+                        <Icon
+                            icon="solar:magnifer-bold-duotone"
+                            className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400 group-focus-within:text-rose-500 transition-colors"
+                        />
                     </form>
                 </div>
-            </div>
 
-            {/* Book Grid Section */}
-            <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+                {/* --- BOOK GRID --- */}
                 {books.data.length === 0 ? (
-                    <div className="text-center py-24 bg-white rounded-2xl border border-stone-200 shadow-sm">
-                        <BookOpen className="w-16 h-16 text-stone-300 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold text-stone-800">
+                    <div className="text-center py-20 bg-rose-50/30 rounded-[2rem] border-2 border-dashed border-pink-100">
+                        <Icon
+                            icon="solar:ghost-bold-duotone"
+                            className="w-16 h-16 text-rose-200 mx-auto mb-4"
+                        />
+                        <h3 className="text-xl font-black text-stone-700 font-potta uppercase tracking-wide">
                             No books found
                         </h3>
-                        <p className="text-stone-500 mt-2">
-                            Try adjusting your search terms or browse a
-                            different category.
+                        <p className="text-stone-400 text-sm mt-1">
+                            Try searching for something else!
                         </p>
-                        {data.search && (
-                            <Button
-                                variant="outline"
-                                className="mt-6"
-                                onClick={() => {
-                                    setData("search", "");
-                                    get(route("catalog.index"));
-                                }}
-                            >
-                                Clear Search
-                            </Button>
-                        )}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-10">
                         {books.data.map((book: Book) => (
-                            <Card
+                            <div
                                 key={book.id}
-                                className="flex flex-col h-full hover:shadow-lg transition-shadow duration-300 border-stone-200 overflow-hidden group"
+                                className="group cursor-pointer flex flex-col h-full"
                             >
-                                <CardHeader className="bg-stone-50 border-b border-stone-100 pb-4">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <span className="text-xs font-bold uppercase tracking-wider text-amber-600 bg-amber-100 px-2 py-1 rounded">
-                                            {book.category}
-                                        </span>
-                                    </div>
-                                    <h2 className="text-lg font-bold text-stone-800 leading-tight group-hover:text-amber-700 transition-colors line-clamp-2">
-                                        {book.title}
-                                    </h2>
-                                    <p className="text-sm text-stone-600 font-medium">
-                                        {book.author}
-                                    </p>
-                                </CardHeader>
-                                <CardContent className="flex-1 pt-4 space-y-2">
-                                    <div className="text-sm text-stone-500 grid grid-cols-2 gap-y-1">
-                                        <span className="font-semibold text-stone-700">
-                                            ISBN:
-                                        </span>
-                                        <span className="text-right truncate">
-                                            {book.isbn || "N/A"}
-                                        </span>
-                                        <span className="font-semibold text-stone-700">
-                                            Published:
-                                        </span>
-                                        <span className="text-right">
-                                            {book.published_year || "Unknown"}
-                                        </span>
-                                    </div>
-                                </CardContent>
-                                <CardFooter className="bg-stone-50 border-t border-stone-100 py-3">
-                                    {book.available_copies > 0 ? (
-                                        <div className="flex items-center text-emerald-700 text-sm font-bold w-full">
-                                            <CheckCircle2 className="w-5 h-5 mr-2 text-emerald-500" />
-                                            Available ({book.available_copies}{" "}
-                                            of {book.total_copies})
-                                        </div>
+                                {/* Cover Art Container */}
+                                <div className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-white shadow-md border-2 border-pink-50 group-hover:shadow-xl group-hover:border-rose-200 group-hover:-translate-y-1 transition-all duration-300">
+                                    {book.isbn ? (
+                                        <img
+                                            src={`https://covers.openlibrary.org/b/isbn/${book.isbn}-L.jpg?default=false`}
+                                            alt={book.title}
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                                (
+                                                    e.target as HTMLImageElement
+                                                ).src =
+                                                    "https://placehold.co/400x600/fff1f2/e11d48?text=No+Cover";
+                                            }}
+                                        />
                                     ) : (
-                                        <div className="flex items-center text-red-700 text-sm font-bold w-full">
-                                            <XCircle className="w-5 h-5 mr-2 text-red-500" />
-                                            Currently Borrowed
+                                        <div className="w-full h-full bg-rose-50 flex items-center justify-center">
+                                            <Icon
+                                                icon="solar:book-2-bold-duotone"
+                                                className="w-10 h-10 text-rose-200"
+                                            />
                                         </div>
                                     )}
-                                </CardFooter>
-                            </Card>
+
+                                    {/* Status Badge */}
+                                    <div className="absolute top-2 right-2">
+                                        <div
+                                            className={`backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-lg shadow-sm flex items-center gap-1 ${book.available_copies > 0 ? "bg-emerald-500/80" : "bg-stone-800/80"}`}
+                                        >
+                                            <Icon
+                                                icon={
+                                                    book.available_copies > 0
+                                                        ? "solar:check-circle-bold"
+                                                        : "solar:clock-circle-bold"
+                                                }
+                                                className="w-3 h-3"
+                                            />
+                                            {book.available_copies > 0
+                                                ? "In"
+                                                : "Out"}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Book Info */}
+                                <div className="mt-4 flex flex-col px-1">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-rose-400 mb-1 font-potta">
+                                        {book.category}
+                                    </span>
+                                    <h3 className="font-serif font-black text-slate-800 text-sm leading-snug group-hover:text-rose-500 transition-colors line-clamp-2">
+                                        {book.title}
+                                    </h3>
+                                    <p className="text-stone-400 text-xs mt-1 font-medium">
+                                        {book.author}
+                                    </p>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 )}
 
-                {/* Pagination (If more than 12 books) */}
+                {/* --- PAGINATION --- */}
                 {books.links && books.links.length > 3 && (
-                    <div className="mt-12 flex justify-center gap-1 flex-wrap">
+                    <div className="mt-12 mb-6 flex justify-center gap-1.5 flex-wrap">
                         {books.links.map((link: any, index: number) => (
                             <Link
                                 key={index}
                                 href={link.url || "#"}
-                                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                                className={`h-10 px-4 flex items-center justify-center text-xs font-black rounded-xl transition-all ${
                                     link.active
-                                        ? "bg-amber-600 text-white shadow"
+                                        ? "bg-rose-500 text-white shadow-md shadow-rose-200"
                                         : !link.url
-                                          ? "text-stone-400 cursor-not-allowed hidden md:inline-block"
-                                          : "bg-white text-stone-700 border border-stone-300 hover:bg-stone-50"
+                                          ? "text-stone-300 cursor-not-allowed opacity-50"
+                                          : "bg-white text-stone-500 border-2 border-pink-50 hover:border-rose-200 hover:text-rose-500"
                                 }`}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                             />
                         ))}
                     </div>
                 )}
-            </main>
-        </div>
+            </div>
+        </PublicLayout>
     );
 }
