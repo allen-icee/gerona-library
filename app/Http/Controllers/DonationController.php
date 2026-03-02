@@ -6,6 +6,8 @@ use App\Models\Donation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\DonationsExport;
 
 class DonationController extends Controller
 {
@@ -51,5 +53,9 @@ class DonationController extends Controller
     {
         $donation->delete();
         return redirect()->back();
+    }
+    public function export()
+    {
+        return Excel::download(new DonationsExport, 'gerona_donations.csv');
     }
 }

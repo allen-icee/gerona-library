@@ -6,27 +6,34 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('patrons', function (Blueprint $table) {
             $table->id();
-            $table->string('library_card_number')->unique(); // The Patron's QR ID Card
+            $table->string('library_card_number')->unique();
             $table->string('first_name');
             $table->string('last_name');
-            $table->string('type'); // e.g., Student, Teacher, General Public
-            $table->string('school_or_barangay');
+            $table->enum('type', ['Citizen', 'Student', 'Teacher/LGU Staff']);
+
+            // New Demographic & Contact Info
+            $table->string('email')->unique();
+            $table->enum('gender', ['Male', 'Female', 'Other']);
             $table->string('contact_number')->nullable();
-            $table->enum('status', ['Active', 'Suspended'])->default('Active'); // Access control
+
+            // Address Fields
+            $table->string('province');
+            $table->string('municipality');
+            $table->string('barangay');
+            $table->string('street')->nullable();
+
+            // Conditional Field
+            $table->string('school')->nullable(); // Only filled if type is 'Student'
+
+            $table->enum('status', ['Active', 'Suspended'])->default('Active');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('patrons');

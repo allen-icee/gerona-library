@@ -5,6 +5,13 @@ import RegisterModal from "@/Components/Public/Modals/RegisterModal";
 import PrintModal from "@/Components/Public/Modals/PrintModal";
 import Footer from "@/Components/Public/Footer";
 
+// Define the shape of our Donation data
+interface Donation {
+    id: number;
+    donor_name: string;
+    items_donated: string;
+}
+
 export default function PublicLayout({
     children,
 }: {
@@ -12,7 +19,10 @@ export default function PublicLayout({
 }) {
     const [isRegisterOpen, setRegisterOpen] = useState(false);
     const [isPrintOpen, setPrintOpen] = useState(false);
-    const { url } = usePage();
+
+    // We can grab the recentDonations straight from the page props!
+    const { url, props } = usePage();
+    const recentDonations = props.recentDonations as Donation[] | undefined;
 
     // Exact matches for Home vs Catalog
     const isHome = url === "/";
@@ -25,12 +35,65 @@ export default function PublicLayout({
                 {`
                     @import url('https://fonts.googleapis.com/css2?family=Potta+One&display=swap');
                     .font-potta { font-family: 'Potta One', system-ui, sans-serif; }
+
+                    /* Custom Marquee Animation */
+                    @keyframes marquee-scroll {
+                        0% { transform: translateX(0); }
+                        100% { transform: translateX(-50%); }
+                    }
+                    .animate-marquee {
+                        display: flex;
+                        width: max-content;
+                        animation: marquee-scroll 40s linear infinite;
+                    }
+                    .animate-marquee:hover {
+                        animation-play-state: paused;
+                    }
                 `}
             </style>
 
             {/* Background Blobs */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-pink-200/40 rounded-full blur-3xl pointer-events-none z-0"></div>
             <div className="absolute bottom-[10%] right-[-5%] w-[30%] h-[50%] bg-rose-200/30 rounded-full blur-3xl pointer-events-none z-0"></div>
+
+            {/* ================= FLOATING DONATION MARQUEE ================= */}
+            {/* Soft pink theme, floating at the absolute top of the layout */}
+            {recentDonations && recentDonations.length > 0 && (
+                <div className="absolute top-0 left-0 w-full bg-pink-100/80 backdrop-blur-sm border-b border-pink-200 text-rose-800 overflow-hidden py-1.5 shadow-sm z-40 flex items-center">
+                    <div className="animate-marquee cursor-default pl-32 md:pl-48">
+                        {/* We render the list TWICE side-by-side so it loops seamlessly forever */}
+                        {[1, 2].map((set) => (
+                            <div
+                                key={set}
+                                className="flex items-center gap-12 px-6"
+                            >
+                                {recentDonations.map((donation) => (
+                                    <div
+                                        key={`${set}-${donation.id}`}
+                                        className="flex items-center gap-2 whitespace-nowrap"
+                                    >
+                                        <Icon
+                                            icon="fluent-emoji:sparkling-heart"
+                                            className="w-4 h-4"
+                                        />
+                                        <span className="font-semibold text-[11px] tracking-wider uppercase">
+                                            Thank you{" "}
+                                            <span className="text-rose-600 font-black">
+                                                {donation.donor_name}
+                                            </span>{" "}
+                                            for donating{" "}
+                                            <span className="underline decoration-1 underline-offset-2">
+                                                {donation.items_donated}
+                                            </span>
+                                            !
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* ================= THE BOOKMARK LOGO ================= */}
             <Link
@@ -119,10 +182,6 @@ export default function PublicLayout({
 
                 {/* FOLDER BODY & FOOTER CONTAINER */}
                 <div className="w-full relative z-10 flex flex-col">
-                    {/* The White Folder Paper
-                        - Removed 'flex-1' so it hugs the content naturally instead of forcing a full screen height.
-                        - Reverted to soft, beautiful drop shadows.
-                    */}
                     <main className="bg-white rounded-3xl shadow-xl shadow-pink-200/50 border-2 border-pink-200 p-6 md:p-10 flex flex-col">
                         {children}
                     </main>

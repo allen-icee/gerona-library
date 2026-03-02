@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Patron;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\LibraryCardGenerated;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\PatronsExport;
 
 class PatronController extends Controller
 {
@@ -35,13 +39,21 @@ class PatronController extends Controller
             'library_card_number' => 'required|string|unique:patrons,library_card_number',
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'type' => 'required|string|max:255',
-            'school_or_barangay' => 'required|string|max:255',
+            'type' => 'required|in:Citizen,Student,Teacher/LGU Staff',
+            'email' => 'required|email|unique:patrons,email',
+            'gender' => 'required|in:Male,Female,Other',
+            'province' => 'required|string|max:255',
+            'municipality' => 'required|string|max:255',
+            'barangay' => 'required|string|max:255',
+            'street' => 'nullable|string|max:255',
+            'school' => 'nullable|string|max:255',
             'contact_number' => 'nullable|string|max:255',
             'status' => 'required|in:Active,Suspended',
         ]);
 
-        Patron::create($validated);
+        $patron = Patron::create($validated);
+
+        Mail::to($patron->email)->send(new LibraryCardGenerated($patron));
 
         return redirect()->back();
     }
@@ -68,5 +80,10 @@ class PatronController extends Controller
         $patron->delete();
 
         return redirect()->back();
+    }
+    public function export()
+    {
+        // This will instantly download a file named "gerona_patrons.csv"
+        return Excel::download(new PatronsExport, 'gerona_patrons.csv');
     }
 }

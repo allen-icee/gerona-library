@@ -22,8 +22,14 @@ export default function AddPatronModal() {
             library_card_number: "",
             first_name: "",
             last_name: "",
-            type: "Student", // Default value
-            school_or_barangay: "",
+            type: "Citizen", // Default changed
+            email: "",
+            gender: "Male",
+            province: "Tarlac", // Default for convenience
+            municipality: "Gerona", // Default for convenience
+            barangay: "",
+            street: "",
+            school: "",
             contact_number: "",
             status: "Active",
         });
@@ -56,46 +62,89 @@ export default function AddPatronModal() {
                     Register Patron
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] bg-white">
+            <DialogContent className="sm:max-w-[600px] bg-white max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Register New Patron</DialogTitle>
                     <DialogDescription>
-                        Add a new borrower to the Gerona Library system.
+                        Add a new borrower. A QR code will be sent to their
+                        email.
                     </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={submitNewPatron} className="space-y-4 py-4">
-                    <div className="space-y-2">
-                        <Label
-                            htmlFor="library_card_number"
-                            className="text-stone-700"
-                        >
-                            Library Card / QR Code Number *
-                        </Label>
-                        <Input
-                            id="library_card_number"
-                            value={data.library_card_number}
-                            onChange={(e) =>
-                                setData("library_card_number", e.target.value)
-                            }
-                            required
-                            placeholder="e.g. PAT-2026-001"
-                        />
-                        {errors.library_card_number && (
-                            <p className="text-sm text-red-600">
-                                {errors.library_card_number}
-                            </p>
-                        )}
-                    </div>
-
+                    {/* ID & Type */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label
-                                htmlFor="first_name"
-                                className="text-stone-700"
-                            >
-                                First Name *
+                            <Label htmlFor="library_card_number">
+                                Library Card Number *
                             </Label>
+                            <Input
+                                id="library_card_number"
+                                value={data.library_card_number}
+                                onChange={(e) =>
+                                    setData(
+                                        "library_card_number",
+                                        e.target.value,
+                                    )
+                                }
+                                required
+                                placeholder="e.g. PAT-2026-001"
+                            />
+                            {errors.library_card_number && (
+                                <p className="text-sm text-red-600">
+                                    {errors.library_card_number}
+                                </p>
+                            )}
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="type">Patron Type *</Label>
+                            <select
+                                id="type"
+                                value={data.type}
+                                onChange={(e) =>
+                                    setData("type", e.target.value)
+                                }
+                                className="flex h-9 w-full rounded-md border border-stone-200 bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-stone-950"
+                            >
+                                <option value="Citizen">Citizen</option>
+                                <option value="Student">Student</option>
+                                <option value="Teacher/LGU Staff">
+                                    Teacher / LGU Staff
+                                </option>
+                            </select>
+                            {errors.type && (
+                                <p className="text-sm text-red-600">
+                                    {errors.type}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Conditional School Field - Smoothly reveals if Student is selected */}
+                    {data.type === "Student" && (
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <Label htmlFor="school">School *</Label>
+                            <Input
+                                id="school"
+                                value={data.school}
+                                onChange={(e) =>
+                                    setData("school", e.target.value)
+                                }
+                                placeholder="e.g. Gerona National High School"
+                                required={data.type === "Student"}
+                            />
+                            {errors.school && (
+                                <p className="text-sm text-red-600">
+                                    {errors.school}
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Name */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="first_name">First Name *</Label>
                             <Input
                                 id="first_name"
                                 value={data.first_name}
@@ -111,12 +160,7 @@ export default function AddPatronModal() {
                             )}
                         </div>
                         <div className="space-y-2">
-                            <Label
-                                htmlFor="last_name"
-                                className="text-stone-700"
-                            >
-                                Last Name *
-                            </Label>
+                            <Label htmlFor="last_name">Last Name *</Label>
                             <Input
                                 id="last_name"
                                 value={data.last_name}
@@ -133,103 +177,124 @@ export default function AddPatronModal() {
                         </div>
                     </div>
 
+                    {/* Contact & Gender */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="type" className="text-stone-700">
-                                Patron Type *
-                            </Label>
-                            <select
-                                id="type"
-                                value={data.type}
+                            <Label htmlFor="email">Email Address *</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                value={data.email}
                                 onChange={(e) =>
-                                    setData("type", e.target.value)
+                                    setData("email", e.target.value)
                                 }
-                                className="flex h-9 w-full items-center justify-between rounded-md border border-stone-200 bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-stone-950"
-                            >
-                                <option value="Student">Student</option>
-                                <option value="Teacher">Teacher</option>
-                                <option value="General Public">
-                                    General Public
-                                </option>
-                                <option value="LGU Official">
-                                    LGU Official
-                                </option>
-                            </select>
-                            {errors.type && (
+                                required
+                                placeholder="user@example.com"
+                            />
+                            {errors.email && (
                                 <p className="text-sm text-red-600">
-                                    {errors.type}
+                                    {errors.email}
+                                </p>
+                            )}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div className="space-y-2">
+                                <Label htmlFor="contact_number">
+                                    Contact #
+                                </Label>
+                                <Input
+                                    id="contact_number"
+                                    value={data.contact_number}
+                                    onChange={(e) =>
+                                        setData(
+                                            "contact_number",
+                                            e.target.value,
+                                        )
+                                    }
+                                    placeholder="09..."
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="gender">Gender</Label>
+                                <select
+                                    id="gender"
+                                    value={data.gender}
+                                    onChange={(e) =>
+                                        setData("gender", e.target.value)
+                                    }
+                                    className="flex h-9 w-full rounded-md border border-stone-200 bg-transparent px-3 py-2 text-sm shadow-sm"
+                                >
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Address Line 1 */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="province">Province *</Label>
+                            <Input
+                                id="province"
+                                value={data.province}
+                                onChange={(e) =>
+                                    setData("province", e.target.value)
+                                }
+                                required
+                            />
+                            {errors.province && (
+                                <p className="text-sm text-red-600">
+                                    {errors.province}
                                 </p>
                             )}
                         </div>
                         <div className="space-y-2">
-                            <Label
-                                htmlFor="school_or_barangay"
-                                className="text-stone-700"
-                            >
-                                School / Barangay *
-                            </Label>
+                            <Label htmlFor="municipality">Municipality *</Label>
                             <Input
-                                id="school_or_barangay"
-                                value={data.school_or_barangay}
+                                id="municipality"
+                                value={data.municipality}
                                 onChange={(e) =>
-                                    setData(
-                                        "school_or_barangay",
-                                        e.target.value,
-                                    )
+                                    setData("municipality", e.target.value)
                                 }
                                 required
-                                placeholder="e.g. Gerona North"
                             />
-                            {errors.school_or_barangay && (
+                            {errors.municipality && (
                                 <p className="text-sm text-red-600">
-                                    {errors.school_or_barangay}
+                                    {errors.municipality}
                                 </p>
                             )}
                         </div>
                     </div>
 
+                    {/* Address Line 2 */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label
-                                htmlFor="contact_number"
-                                className="text-stone-700"
-                            >
-                                Contact Number
-                            </Label>
+                            <Label htmlFor="barangay">Barangay *</Label>
                             <Input
-                                id="contact_number"
-                                value={data.contact_number}
+                                id="barangay"
+                                value={data.barangay}
                                 onChange={(e) =>
-                                    setData("contact_number", e.target.value)
+                                    setData("barangay", e.target.value)
                                 }
-                                placeholder="09..."
+                                required
                             />
-                            {errors.contact_number && (
+                            {errors.barangay && (
                                 <p className="text-sm text-red-600">
-                                    {errors.contact_number}
+                                    {errors.barangay}
                                 </p>
                             )}
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="status" className="text-stone-700">
-                                Status *
-                            </Label>
-                            <select
-                                id="status"
-                                value={data.status}
+                            <Label htmlFor="street">Street (Optional)</Label>
+                            <Input
+                                id="street"
+                                value={data.street}
                                 onChange={(e) =>
-                                    setData("status", e.target.value)
+                                    setData("street", e.target.value)
                                 }
-                                className="flex h-9 w-full items-center justify-between rounded-md border border-stone-200 bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-stone-950"
-                            >
-                                <option value="Active">Active</option>
-                                <option value="Suspended">Suspended</option>
-                            </select>
-                            {errors.status && (
-                                <p className="text-sm text-red-600">
-                                    {errors.status}
-                                </p>
-                            )}
+                            />
                         </div>
                     </div>
 
@@ -246,7 +311,9 @@ export default function AddPatronModal() {
                             disabled={processing}
                             className="bg-amber-600 hover:bg-amber-500 text-white"
                         >
-                            {processing ? "Saving..." : "Register Patron"}
+                            {processing
+                                ? "Saving & Emailing..."
+                                : "Register Patron"}
                         </Button>
                     </DialogFooter>
                 </form>

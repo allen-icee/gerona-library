@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth; // <-- Added this import
 use Inertia\Inertia;
 use Carbon\Carbon;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\CirculationExport;
 
 class CirculationController extends Controller
 {
@@ -82,5 +84,9 @@ class CirculationController extends Controller
         $transaction->bookCopy->update(['status' => 'Available']);
 
         return redirect()->back();
+    }
+    public function export()
+    {
+        return Excel::download(new CirculationExport, 'gerona_circulation_logs.csv');
     }
 }

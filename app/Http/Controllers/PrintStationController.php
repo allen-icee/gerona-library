@@ -3,14 +3,29 @@
 namespace App\Http\Controllers;
 
 use App\Models\PrintLog;
+use App\Models\VisitorLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\PrintLogsExport;
 
 class PrintStationController extends Controller
 {
+    // --- KIOSK API LINKUP ---
+    public function activeVisitors()
+    {
+        // Fetch visitors who have timed in but haven't timed out yet
+        return response()->json(
+            VisitorLog::whereNull('time_out')
+                ->select('id', 'visitor_name', 'school', 'address')
+                ->orderBy('time_in', 'desc')
+                ->get()
+        );
+    }
+
     // --- PUBLIC STUDENT ROUTE ---
     public function index()
     {
@@ -19,57 +34,40 @@ class PrintStationController extends Controller
 
     public function upload(Request $request)
     {
-        // Notice we made name and school nullable, because they might use patron_id instead!
         $request->validate([
-            'patron_id' => 'nullable|string',
-            'visitor_name' => 'nullable|string|max:255',
+            'visitor_name' => 'required|string|max:255',
             'school_or_barangay' => 'nullable|string|max:255',
-            'paper_size' => 'required|string',
-            'copies' => 'required|integer|min:1',
-            'documents' => 'required|array',
-            'documents.*' => 'required|file|max:204800',
+            'documents' => 'required|array|min:1',
+            'documents.*.file' => 'required|file|max:204800', // 200MB max per file
+            'documents.*.custom_name' => 'required|string|max:255',
+            'documents.*.copies' => 'required|integer|min:1',
+            'documents.*.paper_size' => 'required|string',
         ]);
 
-        $visitorName = $request->visitor_name;
-        $school = $request->school_or_barangay;
+        $safeName = Str::slug($request->visitor_name);
+        $safeSchool = Str::slug($request->school_or_barangay ?? 'Guest');
 
-        // If they provided a Patron ID, look them up in the database!
-        if ($request->filled('patron_id')) {
-            $patron = \App\Models\Patron::where('patron_id', strtoupper($request->patron_id))->first();
+        foreach ($request->documents as $doc) {
+            $file = $doc['file'];
+            $customName = Str::slug($doc['custom_name']);
+            $copies = $doc['copies'];
+            $safePaper = Str::slug($doc['paper_size']);
 
-            if (!$patron) {
-                return back()->withErrors(['patron_id' => 'Library Card Number not found. Please check and try again.']);
-            }
-
-            // Auto-fill their details for the print queue
-            $visitorName = $patron->name;
-            $school = $patron->address;
-        } else {
-            // If they are a guest, ensure they typed their name!
-            $request->validate([
-                'visitor_name' => 'required|string|max:255',
-                'school_or_barangay' => 'required|string|max:255',
-            ]);
-        }
-
-        $safeName = Str::slug($visitorName);
-        $safeSchool = Str::slug($school);
-        $safePaper = Str::slug($request->paper_size);
-        $copies = $request->copies;
-
-        foreach ($request->file('documents') as $file) {
-            $originalName = $file->getClientOriginalName();
+            $extension = $file->getClientOriginalExtension();
             $uniqueId = uniqid();
-            $filename = time() . "_{$uniqueId}---{$safeName}---{$safeSchool}---{$safePaper}---{$copies}---{$originalName}";
+
+            // Format: timestamp_uniqid---Name---School---Paper---Copies---CustomName.ext
+            $filename = time() . "_{$uniqueId}---{$safeName}---{$safeSchool}---{$safePaper}---{$copies}---{$customName}.{$extension}";
+
             $file->storeAs('print_queue', $filename, 'local');
         }
 
         return back()->with('success', 'Files sent to the Librarian successfully!');
     }
+
     // --- ADMIN ROUTES ---
     public function adminIndex()
     {
-        // 1. Fetch active queue
         $files = Storage::disk('local')->files('print_queue');
         $printQueue = [];
 
@@ -86,12 +84,11 @@ class PrintStationController extends Controller
                     'school_or_barangay' => ucwords(str_replace('-', ' ', $parts[2])),
                     'paper_size' => ucwords(str_replace('-', ' ', $parts[3])),
                     'copies' => $parts[4],
-                    'original_name' => $parts[5],
+                    'original_name' => $parts[5], // This now represents the user's custom name
                 ];
             }
         }
 
-        // 2. Fetch past print logs (with librarian's name)
         $printLogs = PrintLog::with('logger:id,name')->latest()->paginate(15);
 
         return Inertia::render('Admin/PrintStation/Index', [
@@ -128,5 +125,9 @@ class PrintStationController extends Controller
         }
 
         return back();
+    }
+    public function export()
+    {
+        return Excel::download(new PrintLogsExport, 'gerona_print_logs.csv');
     }
 }

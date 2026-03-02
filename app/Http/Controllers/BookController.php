@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\BooksExport;
 
 class BookController extends Controller
 {
@@ -70,5 +72,10 @@ class BookController extends Controller
         $book->delete();
 
         return redirect()->back();
+    }
+
+    public function export()
+    {
+        return Excel::download(new BooksExport, 'gerona_library_books.csv');
     }
 }

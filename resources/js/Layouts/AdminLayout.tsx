@@ -11,6 +11,7 @@ import {
     Printer,
     Gift,
     Settings,
+    MonitorPlay,
 } from "lucide-react";
 
 import {
@@ -29,6 +30,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
     const isActive = (path: string) => url.startsWith(path);
 
     // Added unique active and inactive color shades (Rose, Pink, Fuchsia variations)
+    // Kiosk uses Emerald to signify "Live/Active"
     const navItems = [
         {
             name: "Dashboard",
@@ -38,6 +40,15 @@ export default function AdminLayout({ children }: PropsWithChildren) {
             active: "from-rose-400 to-rose-600 shadow-rose-400/50 border-rose-200",
             inactive:
                 "bg-rose-100/70 text-rose-500 hover:border-rose-200 hover:text-rose-600",
+        },
+        {
+            name: "Kiosk",
+            href: route("admin.kiosk.index"),
+            icon: MonitorPlay,
+            path: "/admin/kiosk",
+            active: "from-emerald-400 to-emerald-600 shadow-emerald-400/50 border-emerald-200",
+            inactive:
+                "bg-emerald-100/70 text-emerald-500 hover:border-emerald-200 hover:text-emerald-600",
         },
         {
             name: "Catalog",

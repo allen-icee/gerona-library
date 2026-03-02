@@ -5,9 +5,29 @@ namespace App\Http\Controllers;
 use App\Models\VisitorLog;
 use App\Models\Patron;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\VisitorLogsExport;
 
 class VisitorLogController extends Controller
 {
+    public function adminIndex(Request $request)
+    {
+        $query = VisitorLog::query();
+
+        // If they want to see history instead of just active people
+        if ($request->has('history') && $request->history === 'true') {
+            $logs = $query->orderBy('time_in', 'desc')->paginate(15);
+        } else {
+            // Default: Show only people currently inside
+            $logs = $query->whereNull('time_out')->orderBy('time_in', 'desc')->paginate(15);
+        }
+
+        return Inertia::render('Admin/Kiosk/Index', [
+            'visitorLogs' => $logs,
+            'isHistoryMode' => $request->history === 'true'
+        ]);
+    }
     public function store(Request $request)
     {
         $visitorName = $request->visitor_name;
@@ -56,5 +76,9 @@ class VisitorLogController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Time out logged successfully. Goodbye!');
+    }
+    public function export()
+    {
+        return Excel::download(new VisitorLogsExport, 'gerona_kiosk_logs.csv');
     }
 }

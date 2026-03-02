@@ -62,6 +62,29 @@ export default function BookIndex({
                                 onChange={(e) => setSearch(e.target.value)}
                             />
                         </div>
+                        {/* NEW EXPORT BUTTON */}
+                        <a
+                            href={route("books.export")}
+                            className="inline-flex items-center justify-center h-10 px-4 py-2 text-sm font-medium transition-colors bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-md shadow-sm whitespace-nowrap"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="mr-2"
+                            >
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" x2="12" y1="15" y2="3" />
+                            </svg>
+                            Export CSV
+                        </a>
 
                         {/* Our isolated Add Book Component */}
                         <AddBookModal />

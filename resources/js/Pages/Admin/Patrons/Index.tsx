@@ -15,12 +15,14 @@ import {
 
 import AddPatronModal from "./Partials/AddPatronModal";
 import PatronActions from "./Partials/PatronActions";
+import LibraryCard from "@/Components/LibraryCard";
 
 export default function PatronIndex({
     patrons,
     filters,
 }: PageProps<{ patrons: any; filters: { search?: string } }>) {
     const [search, setSearch] = useState(filters.search || "");
+    const [patronToPrint, setPatronToPrint] = useState<any>(null); // State to hold the patron being printed
 
     useEffect(() => {
         const delayBounceFn = setTimeout(() => {
@@ -34,6 +36,18 @@ export default function PatronIndex({
         }, 500);
         return () => clearTimeout(delayBounceFn);
     }, [search]);
+
+    // This effect listens for when patronToPrint is set, then automatically triggers the browser print dialog
+    useEffect(() => {
+        if (patronToPrint) {
+            // Give React 100ms to render the hidden card before asking the browser to print
+            const printTimeout = setTimeout(() => {
+                window.print();
+                setPatronToPrint(null); // Clear it after the print dialog closes
+            }, 100);
+            return () => clearTimeout(printTimeout);
+        }
+    }, [patronToPrint]);
 
     return (
         <AdminLayout>
@@ -55,12 +69,36 @@ export default function PatronIndex({
                         <div className="relative w-full sm:w-72">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
                             <Input
-                                placeholder="Search name, card, or school..."
+                                placeholder="Search name or card..."
                                 className="pl-9 bg-white border-stone-300"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
                         </div>
+
+                        {/* ADD THIS EXPORT BUTTON */}
+                        <a
+                            href={route("patrons.export")}
+                            className="inline-flex items-center justify-center h-10 px-4 py-2 text-sm font-medium transition-colors bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-md shadow-sm whitespace-nowrap"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="mr-2"
+                            >
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" x2="12" y1="15" y2="3" />
+                            </svg>
+                            Export CSV
+                        </a>
 
                         <AddPatronModal />
                     </div>
@@ -81,7 +119,7 @@ export default function PatronIndex({
                                     Type
                                 </TableHead>
                                 <TableHead className="font-semibold text-stone-700">
-                                    School/Barangay
+                                    Address
                                 </TableHead>
                                 <TableHead className="font-semibold text-stone-700 text-center">
                                     Status
@@ -116,7 +154,8 @@ export default function PatronIndex({
                                             {patron.type}
                                         </TableCell>
                                         <TableCell className="text-stone-500 text-sm">
-                                            {patron.school_or_barangay}
+                                            {patron.barangay},{" "}
+                                            {patron.municipality}
                                         </TableCell>
                                         <TableCell className="text-center">
                                             <span
@@ -126,7 +165,12 @@ export default function PatronIndex({
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <PatronActions patron={patron} />
+                                            <PatronActions
+                                                patron={patron}
+                                                onPrint={() =>
+                                                    setPatronToPrint(patron)
+                                                }
+                                            />
                                         </TableCell>
                                     </TableRow>
                                 ))
@@ -159,13 +203,7 @@ export default function PatronIndex({
                                         )
                                     }
                                     disabled={!link.url || link.active}
-                                    className={`px-3 py-1 text-sm border rounded-md transition-colors ${
-                                        link.active
-                                            ? "bg-amber-600 text-white border-amber-600"
-                                            : !link.url
-                                              ? "bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed"
-                                              : "bg-white text-stone-700 border-stone-300 hover:bg-stone-50"
-                                    }`}
+                                    className={`px-3 py-1 text-sm border rounded-md transition-colors ${link.active ? "bg-amber-600 text-white border-amber-600" : !link.url ? "bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed" : "bg-white text-stone-700 border-stone-300 hover:bg-stone-50"}`}
                                     dangerouslySetInnerHTML={{
                                         __html: link.label,
                                     }}
@@ -175,6 +213,14 @@ export default function PatronIndex({
                     </div>
                 )}
             </div>
+
+            {/* HIDDEN PRINT COMPONENT */}
+            {/* The CSS in LibraryCard ensures ONLY this div shows up on the printer paper */}
+            {patronToPrint && (
+                <div className="hidden print:block absolute top-0 left-0 bg-white">
+                    <LibraryCard patron={patronToPrint} />
+                </div>
+            )}
         </AdminLayout>
     );
 }
