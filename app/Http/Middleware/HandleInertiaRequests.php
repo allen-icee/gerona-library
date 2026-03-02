@@ -40,6 +40,13 @@ class HandleInertiaRequests extends Middleware
                     'roles' => $request->user()->getRoleNames(),
                 ] : null,
             ],
+            // Add this flash section so React can catch the success data!
+            'flash' => [
+                'success' => fn() => $request->session()->get('success'),
+                'library_card_number' => fn() => $request->session()->get('library_card_number'),
+                'patron_name' => fn() => $request->session()->get('patron_name'),
+                'error' => fn() => $request->session()->get('error'),
+            ],
         ];
     }
 }

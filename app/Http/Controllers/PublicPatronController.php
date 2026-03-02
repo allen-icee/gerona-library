@@ -18,27 +18,28 @@ class PublicPatronController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|string', // e.g., Student, Professional
-            'contact_number' => 'required|string|max:255',
-            'address' => 'required|string|max:255', // School or Barangay
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'type' => 'required|string', // e.g., Student, Teacher, General Public
+            'contact_number' => 'nullable|string|max:255',
+            'school_or_barangay' => 'required|string|max:255', // Open to everyone!
         ]);
 
-        // Auto-generate the next PAT-XXXXX ID
+        // Auto-generate the next GER-YYYY-XXXXX ID
         $latestPatron = Patron::latest('id')->first();
         $nextId = $latestPatron ? $latestPatron->id + 1 : 1;
-        $patronId = 'PAT-' . str_pad($nextId, 5, '0', STR_PAD_LEFT);
+        $cardNumber = 'GER-' . date('Y') . '-' . str_pad($nextId, 5, '0', STR_PAD_LEFT);
 
-        $validated['patron_id'] = $patronId;
+        $validated['library_card_number'] = $cardNumber;
         $validated['status'] = 'Active';
 
         $patron = Patron::create($validated);
 
-        // Return back with their new ID so they can see it!
+        // Return back with their new ID so the frontend can generate the QR Code!
         return back()->with([
             'success' => true,
-            'new_patron_id' => $patron->patron_id,
-            'patron_name' => $patron->name
+            'library_card_number' => $patron->library_card_number,
+            'patron_name' => $patron->first_name . ' ' . $patron->last_name
         ]);
     }
 }

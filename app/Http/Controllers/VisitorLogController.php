@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\VisitorLog;
 use App\Models\Patron;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class VisitorLogController extends Controller
 {
@@ -14,23 +13,24 @@ class VisitorLogController extends Controller
         $visitorName = $request->visitor_name;
         $address = $request->address;
 
-        // 1. If they provided a Patron ID, look them up!
-        if ($request->filled('patron_id')) {
-            $patron = Patron::where('patron_id', strtoupper($request->patron_id))->first();
+        // 1. If the webcam scanned a QR Code, look them up!
+        if ($request->filled('library_card_number')) {
+            $patron = Patron::where('library_card_number', strtoupper($request->library_card_number))->first();
 
             if (!$patron) {
-                return back()->withErrors(['patron_id' => 'Library Card Number not found. Please try again or sign in as a guest.']);
+                return back()->withErrors(['library_card_number' => 'Library Card Number not found. Please try again or sign in as a guest.']);
             }
 
+            // We still want to know WHY they are visiting today
             $request->validate([
                 'purpose' => 'required|string|max:255',
             ]);
 
-            // Auto-fill from database
-            $visitorName = $patron->name;
-            $address = $patron->address;
+            // Auto-fill from database (fixing the column mismatches)
+            $visitorName = $patron->first_name . ' ' . $patron->last_name;
+            $address = $patron->school_or_barangay;
         } else {
-            // 2. Otherwise, they are a guest and must type everything
+            // 2. Otherwise, they are a guest and must type everything manually
             $request->validate([
                 'visitor_name' => 'required|string|max:255',
                 'address' => 'required|string|max:255',
@@ -38,7 +38,7 @@ class VisitorLogController extends Controller
             ]);
         }
 
-        // 3. Log them in
+        // 3. Log them in (Time_in is handled automatically by the DB migration)
         VisitorLog::create([
             'visitor_name' => $visitorName,
             'address' => $address,
@@ -46,7 +46,7 @@ class VisitorLogController extends Controller
             'time_in' => now(),
         ]);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Welcome to the Library, ' . $visitorName . '!');
     }
 
     public function checkout(VisitorLog $visitorLog)
@@ -55,6 +55,6 @@ class VisitorLogController extends Controller
             'time_out' => now(),
         ]);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Time out logged successfully. Goodbye!');
     }
 }
