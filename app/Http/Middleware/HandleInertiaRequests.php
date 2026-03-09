@@ -47,6 +47,8 @@ class HandleInertiaRequests extends Middleware
                 'patron_name' => fn() => $request->session()->get('patron_name'),
                 'error' => fn() => $request->session()->get('error'),
             ],
+            // 🌟 Global public data for the floating marquee
+            'recentDonations' => fn() => \App\Models\Donation::latest()->take(10)->get(),
         ];
     }
 }
