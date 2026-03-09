@@ -3,88 +3,155 @@ import { Head, Link } from "@inertiajs/react";
 import PublicLayout from "@/Layouts/PublicLayout";
 import { Icon } from "@iconify/react";
 import Carousel from "@/Components/Public/Carousel";
+import { ReactNode } from "react";
 
 export default function Home() {
     return (
         <PublicLayout>
             <Head title="Welcome to Gerona Library" />
 
-            <div className="w-full py-4 md:py-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-2 w-full max-w-6xl mx-auto items-center">
-                    <div className="flex flex-col gap-8 w-full max-w-200 mx-auto lg:ml-auto lg:mr-0 px-4 lg:px-0">
-                        {/* 1. Welcome Text */}
-                        <div className="text-center lg:text-left flex flex-col items-center lg:items-start">
-                            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-rose-100 text-rose-600 rounded-full font-potta text-[10px] uppercase tracking-wider mb-4 border border-rose-200 shadow-sm">
-                                <Icon icon="solar:stars-bold-duotone" className="w-4 h-4" />
+            <div className="w-full py-6 md:py-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="grid grid-cols-1 xl:grid-cols-12 gap-10 lg:gap-16 w-full max-w-7xl mx-auto items-center">
+                    
+                    {/* LEFT COLUMN: Text & Actions */}
+                    <div className="xl:col-span-7 flex flex-col gap-10 w-full px-4 lg:px-0">
+                        
+                        {/* Welcome Header */}
+                        <div className="text-center xl:text-left flex flex-col items-center xl:items-start space-y-5">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-rose-50 text-rose-600 rounded-full font-potta text-xs uppercase tracking-widest border border-rose-200/60 shadow-sm backdrop-blur-sm">
+                                <Icon icon="solar:stars-bold-duotone" className="w-4 h-4 text-rose-500" />
                                 Municipal Portal
                             </div>
-                            <h1 className="text-5xl md:text-6xl font-serif font-black text-slate-800 tracking-tight leading-[1.05]">
-                                Hello, <br className="hidden lg:block" />
-                                <span className="text-rose-500">Reader!</span> ✨
+                            
+                            <h1 className="text-5xl sm:text-6xl md:text-7xl font-serif font-black text-slate-800 tracking-tight leading-[1.1]">
+                                Hello, <br className="hidden xl:block" />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-500">
+                                    Reader!
+                                </span> ✨
                             </h1>
-                            <p className="mt-4 text-stone-500 font-medium text-sm md:text-base leading-relaxed">
-                                Welcome back to the Gerona Municipal Library. Your next great story or service is just a click away.
+                            
+                            <p className="max-w-xl text-stone-500 font-medium text-base md:text-lg leading-relaxed">
+                                Welcome back to the Gerona Municipal Library. Your next great story, research material, or digital service is just a click away.
                             </p>
                         </div>
 
-                        {/* 2. Action Cards (BENTO BOX GRID) */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                        {/* Action Cards (Bento Grid) */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-3xl mx-auto xl:mx-0">
+                            
+                            {/* Primary Action: Browse Catalog */}
                             <Link
                                 href={route("catalog.index")}
-                                className="sm:row-span-2 h-full w-full bg-gradient-to-br from-white to-rose-50/50 p-6 rounded-[2rem] border-2 border-pink-100 shadow-lg shadow-pink-200/20 group relative overflow-hidden flex flex-col justify-between transition-transform hover:-translate-y-1 hover:border-rose-300"
+                                className="sm:row-span-2 sm:col-span-1 h-full min-h-[280px] w-full bg-gradient-to-br from-white to-rose-50 p-8 rounded-[2rem] border-2 border-pink-100/80 shadow-xl shadow-rose-200/20 group relative overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-rose-200/40 hover:border-rose-300"
                             >
-                                <div className="relative z-10">
-                                    <div className="w-12 h-12 bg-white rounded-2xl shadow-sm border border-rose-100 flex items-center justify-center mb-4 group-hover:rotate-6 transition-transform">
-                                        <Icon icon="fluent-emoji:magnifying-glass-tilted-right" className="w-7 h-7" />
+                                <div className="relative z-10 flex flex-col h-full">
+                                    <div className="w-14 h-14 bg-white rounded-2xl shadow-sm border border-rose-100 flex items-center justify-center mb-6 group-hover:rotate-12 transition-transform duration-300">
+                                        <Icon icon="fluent-emoji:magnifying-glass-tilted-right" className="w-8 h-8" />
                                     </div>
-                                    <h2 className="text-2xl font-serif font-black text-slate-800 mb-1 leading-tight">
+                                    <h2 className="text-3xl font-serif font-black text-slate-800 mb-3 leading-tight">
                                         Browse <br /> Catalog
                                     </h2>
-                                    <p className="text-stone-500 text-[11px] md:text-xs max-w-[10rem] leading-relaxed">
-                                        Search our physical books and digital modules.
+                                    <p className="text-stone-500 text-sm max-w-[12rem] leading-relaxed mb-6">
+                                        Search our physical books and digital learning modules.
                                     </p>
+                                    
+                                    <div className="mt-auto flex items-center gap-2 text-rose-500 font-black text-xs uppercase tracking-widest font-potta group-hover:translate-x-2 transition-transform duration-300">
+                                        Start Searching <Icon icon="solar:arrow-right-bold" className="w-4 h-4" />
+                                    </div>
                                 </div>
-                                <div className="mt-6 flex items-center gap-1.5 text-rose-500 font-black text-[10px] uppercase tracking-widest font-potta group-hover:translate-x-1 transition-transform">
-                                    Start Searching <Icon icon="solar:arrow-right-bold" className="w-3.5 h-3.5" />
-                                </div>
-                                <Icon icon="fluent-emoji:books" className="absolute -right-4 -bottom-4 w-32 h-32 opacity-10 group-hover:scale-110 transition-transform pointer-events-none" />
+                                {/* Decorative Background Icon */}
+                                <Icon icon="fluent-emoji:books" className="absolute -right-8 -bottom-8 w-48 h-48 opacity-5 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-500 pointer-events-none" />
                             </Link>
 
-                            {/* SECONDARY ACTION 1: PRINT STATION */}
-                            <Link
-                                href={route("print.index")}
-                                className="w-full h-full bg-white p-4 md:p-5 rounded-[1.5rem] border-2 border-pink-100 shadow-sm hover:shadow-md shadow-pink-200/20 group text-left flex flex-col items-start gap-3 hover:border-fuchsia-200 transition-all hover:-translate-y-1"
-                            >
-                                <div className="w-10 h-10 bg-fuchsia-50 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform border border-fuchsia-100">
-                                    <Icon icon="fluent-emoji:printer" className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h3 className="text-sm font-black text-slate-800 group-hover:text-fuchsia-600 transition-colors leading-tight">Print Station</h3>
-                                    <p className="text-stone-400 text-[9px] mt-0.5">Upload documents</p>
-                                </div>
-                            </Link>
+                            {/* Secondary Actions */}
+                            <div className="flex flex-col gap-5 sm:col-span-1">
+                                <SecondaryActionCard
+                                    href={route("print.index")}
+                                    icon="fluent-emoji:printer"
+                                    title="Print Station"
+                                    description="Upload & print documents"
+                                    theme="fuchsia"
+                                />
+                                
+                                <SecondaryActionCard
+                                    href={route("register.index")}
+                                    icon="fluent-emoji:star"
+                                    title="Get a Card"
+                                    description="Apply for a library card"
+                                    theme="amber"
+                                />
+                            </div>
 
-                            {/* SECONDARY ACTION 2: REGISTER CARD */}
-                            <Link
-                                href={route("register.index")}
-                                className="w-full h-full bg-white p-4 md:p-5 rounded-[1.5rem] border-2 border-pink-100 shadow-sm hover:shadow-md shadow-pink-200/20 group text-left flex flex-col items-start gap-3 hover:border-amber-200 transition-all hover:-translate-y-1"
-                            >
-                                <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform border border-amber-100">
-                                    <Icon icon="fluent-emoji:star" className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h3 className="text-sm font-black text-slate-800 group-hover:text-amber-600 transition-colors leading-tight">Get a Card</h3>
-                                    <p className="text-stone-400 text-[9px] mt-0.5">Official registration</p>
-                                </div>
-                            </Link>
                         </div>
                     </div>
 
-                    <div className="w-full flex justify-center lg:justify-start items-center relative z-[9999] px-4 lg:px-20">
-                        <Carousel />
+                    {/* RIGHT COLUMN: Visuals (Lottie + Carousel) */}
+                    <div className="xl:col-span-5 w-full flex flex-col items-center justify-center gap-8 relative z-[9999] px-4">
+                        
+                        {/* =========================================
+                            LOTTIE ANIMATION SLOT 
+                            Recommendation: Use `lottie-react`
+                            npm install lottie-react
+                            Example: <Lottie animationData={readingAnimation} loop={true} className="w-64 h-64" />
+                        ========================================= */}
+                        <div className="w-full max-w-sm aspect-video sm:aspect-square xl:aspect-auto xl:h-64 bg-gradient-to-tr from-rose-50 to-pink-50/50 rounded-[2rem] border-2 border-dashed border-rose-200 flex flex-col items-center justify-center text-rose-400 p-8 text-center relative overflow-hidden group hover:border-rose-300 transition-colors">
+                            <Icon icon="solar:magic-stick-3-bold-duotone" className="w-12 h-12 mb-3 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300 text-rose-400" />
+                            <span className="text-base font-bold text-rose-500 mb-1">Lottie Animation Slot</span>
+                            <span className="text-sm font-medium opacity-80 max-w-[200px]">
+                                Replace this container with your Lottie player component.
+                            </span>
+                        </div>
+
+                        {/* Carousel Wrapper */}
+                        <div className="w-full max-w-sm xl:max-w-full rounded-[2rem] overflow-hidden shadow-2xl shadow-rose-900/10 border-4 border-white">
+                            <Carousel />
+                        </div>
+
                     </div>
                 </div>
             </div>
         </PublicLayout>
+    );
+}
+
+// --- Subcomponents ---
+// Extracted to keep the main component clean. You can move this to a separate file later if reused.
+
+interface SecondaryActionCardProps {
+    href: string;
+    icon: string;
+    title: string;
+    description: string;
+    theme: 'fuchsia' | 'amber' | 'rose';
+}
+
+function SecondaryActionCard({ href, icon, title, description, theme }: SecondaryActionCardProps) {
+    const themeStyles = {
+        fuchsia: "hover:border-fuchsia-300 hover:shadow-fuchsia-200/40 text-fuchsia-600 bg-fuchsia-50 border-fuchsia-100",
+        amber: "hover:border-amber-300 hover:shadow-amber-200/40 text-amber-600 bg-amber-50 border-amber-100",
+        rose: "hover:border-rose-300 hover:shadow-rose-200/40 text-rose-600 bg-rose-50 border-rose-100",
+    };
+
+    return (
+        <Link
+            href={href}
+            className={`w-full h-full min-h-[130px] bg-white p-6 rounded-[2rem] border-2 border-slate-100 shadow-lg shadow-slate-200/20 group text-left flex flex-row sm:flex-col xl:flex-row items-center sm:items-start xl:items-center gap-5 transition-all duration-300 hover:-translate-y-1 ${themeStyles[theme].split(' ')[0]} ${themeStyles[theme].split(' ')[1]}`}
+        >
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 border ${themeStyles[theme].split(' ').slice(3).join(' ')}`}>
+                <Icon icon={icon} className="w-7 h-7" />
+            </div>
+            <div className="flex-1">
+                <h3 className={`text-lg font-black text-slate-800 group-hover:${themeStyles[theme].split(' ')[2]} transition-colors leading-tight mb-1`}>
+                    {title}
+                </h3>
+                <p className="text-stone-500 text-xs md:text-sm leading-snug">
+                    {description}
+                </p>
+            </div>
+            
+            {/* Arrow icon visible on hover for desktop */}
+            <div className="hidden sm:block opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                <Icon icon="solar:alt-arrow-right-bold-duotone" className={`w-6 h-6 ${themeStyles[theme].split(' ')[2]}`} />
+            </div>
+        </Link>
     );
 }
