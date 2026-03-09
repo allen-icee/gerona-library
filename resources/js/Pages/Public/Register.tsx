@@ -1,4 +1,5 @@
 // resources/js/Pages/Public/Register.tsx
+
 import { useForm, usePage, Head } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
 import { QRCodeSVG } from "qrcode.react";
@@ -19,6 +20,7 @@ export default function Register() {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
+
         post(route("register-patron.store"), {
             preserveScroll: true,
             onSuccess: () => reset(),
@@ -27,137 +29,220 @@ export default function Register() {
 
     return (
         <PublicLayout>
-            <Head title="Get a Library Card - Gerona Library" />
+            <Head title="Library Card Registration - Gerona Library" />
 
-            <div className="max-w-2xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-700 mt-8">
-                
+            <div className="w-full space-y-6">
+
+                {/* PAGE HEADER — SAME STYLE AS CATALOG */}
+
+                <div className="flex items-end justify-between flex-wrap gap-4">
+
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-serif font-black text-slate-800 flex items-center gap-2">
+                            <Icon icon="fluent-emoji:star" className="w-7 h-7" />
+                            Library Card Registration
+                        </h1>
+
+                        <p className="text-stone-500 text-sm font-medium mt-1">
+                            Register and instantly receive your digital QR library card.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                {/* SUCCESS STATE */}
+
                 {isSuccess ? (
-                    <div className="bg-white p-8 md:p-12 rounded-[2rem] border-2 border-emerald-100 shadow-xl shadow-emerald-100/50 text-center flex flex-col items-center">
-                        <div className="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mb-6 border-4 border-emerald-50">
-                            <Icon icon="solar:check-circle-bold-duotone" className="w-12 h-12" />
+
+                    <div className="bg-white border border-emerald-100 rounded-2xl p-8 shadow-sm flex flex-col items-center text-center">
+
+                        <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4">
+                            <Icon icon="solar:check-circle-bold-duotone" className="w-10 h-10" />
                         </div>
-                        <h2 className="text-3xl md:text-4xl font-serif font-black text-slate-800 mb-2">
-                            Registration Complete!
+
+                        <h2 className="text-2xl font-serif font-black text-slate-800 mb-2">
+                            Registration Complete
                         </h2>
-                        <p className="text-stone-500 text-base mb-8 max-w-md">
-                            Welcome to the library, <span className="font-bold text-stone-700">{flash.patron_name}</span>! Here is your official Digital Library Card. Take a screenshot to save it.
+
+                        <p className="text-sm text-stone-500 mb-6">
+                            Welcome <span className="font-bold">{flash.patron_name}</span>.
+                            Save your digital library card below.
                         </p>
 
-                        <div className="bg-gradient-to-br from-amber-50 to-orange-100 p-8 rounded-[2.5rem] border-2 border-amber-200 shadow-inner flex flex-col items-center w-full max-w-[320px]">
-                            <div className="bg-white p-5 rounded-3xl shadow-sm border border-amber-100 mb-5">
+                        <div className="bg-amber-50 p-6 rounded-2xl border border-amber-200 flex flex-col items-center">
+
+                            <div className="bg-white p-4 rounded-xl border mb-4">
                                 <QRCodeSVG
-                                    id="qr-code-svg"
                                     value={flash.library_card_number}
-                                    size={180}
+                                    size={150}
                                     level="H"
-                                    includeMargin={true}
-                                    fgColor="#1c1917"
+                                    includeMargin
                                 />
                             </div>
-                            <div className="bg-white/90 px-6 py-2 rounded-full font-potta text-base tracking-widest text-amber-700 shadow-sm border border-amber-200">
+
+                            <div className="px-4 py-1 rounded-full bg-white border text-amber-700 font-mono text-sm">
                                 {flash.library_card_number}
                             </div>
+
                         </div>
 
                         <button
                             onClick={() => window.location.reload()}
-                            className="mt-10 px-10 bg-stone-800 text-white font-bold py-4 rounded-2xl hover:bg-stone-700 transition-colors"
+                            className="mt-6 px-6 py-3 bg-stone-800 text-white text-sm font-bold rounded-xl hover:bg-stone-700 transition"
                         >
                             Register Another Person
                         </button>
+
                     </div>
+
                 ) : (
-                    <>
-                        <div className="mb-8 text-center md:text-left">
-                            <h1 className="text-3xl md:text-4xl font-serif font-black text-slate-800 flex items-center justify-center md:justify-start gap-3">
-                                <Icon icon="fluent-emoji:star" className="w-10 h-10" />
-                                Get a Library Card
-                            </h1>
-                            <p className="text-stone-500 font-medium mt-2">
-                                Register below to instantly receive your digital QR code ID. Valid for all library services.
-                            </p>
-                        </div>
 
-                        <div className="bg-white p-6 md:p-8 rounded-[2rem] border-2 border-amber-100 shadow-xl shadow-amber-100/50">
-                            <form onSubmit={submit} className="space-y-5">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                    <div>
-                                        <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-2 ml-1">First Name</label>
-                                        <input
-                                            type="text"
-                                            value={data.first_name}
-                                            onChange={(e) => setData("first_name", e.target.value)}
-                                            className="w-full bg-stone-50 border-2 border-stone-200 rounded-xl px-4 py-3.5 focus:border-amber-400 focus:ring-0 transition-colors"
-                                            required
-                                        />
-                                        {errors.first_name && <span className="text-rose-500 text-xs mt-1 ml-1 block">{errors.first_name}</span>}
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-2 ml-1">Last Name</label>
-                                        <input
-                                            type="text"
-                                            value={data.last_name}
-                                            onChange={(e) => setData("last_name", e.target.value)}
-                                            className="w-full bg-stone-50 border-2 border-stone-200 rounded-xl px-4 py-3.5 focus:border-amber-400 focus:ring-0 transition-colors"
-                                            required
-                                        />
-                                        {errors.last_name && <span className="text-rose-500 text-xs mt-1 ml-1 block">{errors.last_name}</span>}
-                                    </div>
-                                </div>
+                    /* FORM CARD */
+
+                    <div className="bg-white border border-amber-100 rounded-2xl p-6 md:p-8 shadow-sm">
+
+                        <form onSubmit={submit} className="space-y-5">
+
+                            {/* NAME */}
+
+                            <div className="grid md:grid-cols-2 gap-4">
 
                                 <div>
-                                    <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-2 ml-1">Patron Type</label>
-                                    <select
-                                        value={data.type}
-                                        onChange={(e) => setData("type", e.target.value)}
-                                        className="w-full bg-stone-50 border-2 border-stone-200 rounded-xl px-4 py-3.5 focus:border-amber-400 focus:ring-0 transition-colors appearance-none"
-                                    >
-                                        <option value="General Public">General Public</option>
-                                        <option value="Student">Student</option>
-                                        <option value="Teacher">Teacher / LGU Staff</option>
-                                    </select>
-                                    {errors.type && <span className="text-rose-500 text-xs mt-1 ml-1 block">{errors.type}</span>}
-                                </div>
+                                    <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">
+                                        First Name
+                                    </label>
 
-                                <div>
-                                    <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-2 ml-1">School / Barangay</label>
                                     <input
                                         type="text"
-                                        value={data.school_or_barangay}
-                                        onChange={(e) => setData("school_or_barangay", e.target.value)}
-                                        placeholder="e.g. Brgy. Poblacion"
-                                        className="w-full bg-stone-50 border-2 border-stone-200 rounded-xl px-4 py-3.5 focus:border-amber-400 focus:ring-0 transition-colors"
+                                        value={data.first_name}
+                                        onChange={(e) => setData("first_name", e.target.value)}
+                                        className="w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2.5 text-sm focus:border-amber-400"
                                         required
                                     />
-                                    {errors.school_or_barangay && <span className="text-rose-500 text-xs mt-1 ml-1 block">{errors.school_or_barangay}</span>}
+
+                                    {errors.first_name && (
+                                        <span className="text-rose-500 text-xs">{errors.first_name}</span>
+                                    )}
                                 </div>
+
 
                                 <div>
-                                    <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-2 ml-1">Contact Number (Optional)</label>
+                                    <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">
+                                        Last Name
+                                    </label>
+
                                     <input
                                         type="text"
-                                        value={data.contact_number}
-                                        onChange={(e) => setData("contact_number", e.target.value)}
-                                        placeholder="09123456789"
-                                        className="w-full bg-stone-50 border-2 border-stone-200 rounded-xl px-4 py-3.5 focus:border-amber-400 focus:ring-0 transition-colors"
+                                        value={data.last_name}
+                                        onChange={(e) => setData("last_name", e.target.value)}
+                                        className="w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2.5 text-sm focus:border-amber-400"
+                                        required
                                     />
-                                    {errors.contact_number && <span className="text-rose-500 text-xs mt-1 ml-1 block">{errors.contact_number}</span>}
+
+                                    {errors.last_name && (
+                                        <span className="text-rose-500 text-xs">{errors.last_name}</span>
+                                    )}
                                 </div>
 
-                                <div className="pt-6">
-                                    <button
-                                        type="submit"
-                                        disabled={processing}
-                                        className="w-full bg-amber-400 text-amber-950 font-black tracking-widest uppercase text-base py-5 rounded-2xl hover:bg-amber-300 hover:-translate-y-1 transition-all shadow-lg shadow-amber-200/50 disabled:opacity-50 disabled:hover:translate-y-0 flex justify-center items-center gap-2"
-                                    >
-                                        {processing ? <Icon icon="solar:spinner-bold-duotone" className="w-6 h-6 animate-spin" /> : "Generate My QR Card"}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </>
+                            </div>
+
+
+                            {/* TYPE */}
+
+                            <div>
+                                <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">
+                                    Patron Type
+                                </label>
+
+                                <select
+                                    value={data.type}
+                                    onChange={(e) => setData("type", e.target.value)}
+                                    className="w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2.5 text-sm focus:border-amber-400"
+                                >
+                                    <option value="General Public">General Public</option>
+                                    <option value="Student">Student</option>
+                                    <option value="Teacher">Teacher / LGU Staff</option>
+                                </select>
+
+                                {errors.type && (
+                                    <span className="text-rose-500 text-xs">{errors.type}</span>
+                                )}
+                            </div>
+
+
+                            {/* LOCATION */}
+
+                            <div>
+                                <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">
+                                    School / Barangay
+                                </label>
+
+                                <input
+                                    type="text"
+                                    value={data.school_or_barangay}
+                                    onChange={(e) => setData("school_or_barangay", e.target.value)}
+                                    placeholder="e.g. Brgy. Poblacion"
+                                    className="w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2.5 text-sm focus:border-amber-400"
+                                    required
+                                />
+
+                                {errors.school_or_barangay && (
+                                    <span className="text-rose-500 text-xs">
+                                        {errors.school_or_barangay}
+                                    </span>
+                                )}
+                            </div>
+
+
+                            {/* CONTACT */}
+
+                            <div>
+                                <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">
+                                    Contact Number
+                                </label>
+
+                                <input
+                                    type="text"
+                                    value={data.contact_number}
+                                    onChange={(e) => setData("contact_number", e.target.value)}
+                                    placeholder="Optional"
+                                    className="w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2.5 text-sm focus:border-amber-400"
+                                />
+
+                                {errors.contact_number && (
+                                    <span className="text-rose-500 text-xs">
+                                        {errors.contact_number}
+                                    </span>
+                                )}
+                            </div>
+
+
+                            {/* SUBMIT */}
+
+                            <button
+                                type="submit"
+                                disabled={processing}
+                                className="w-full bg-amber-400 text-amber-950 font-bold text-sm py-3 rounded-xl hover:bg-amber-300 transition flex items-center justify-center gap-2"
+                            >
+                                {processing ? (
+                                    <Icon
+                                        icon="solar:spinner-bold-duotone"
+                                        className="w-5 h-5 animate-spin"
+                                    />
+                                ) : (
+                                    "Generate My QR Card"
+                                )}
+                            </button>
+
+                        </form>
+
+                    </div>
+
                 )}
+
             </div>
+
         </PublicLayout>
     );
 }

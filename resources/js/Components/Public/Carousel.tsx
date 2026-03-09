@@ -1,8 +1,9 @@
+// resources/js/Components/Public/Carousel.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
-import { createPortal } from "react-dom"; // <-- We added this!
+import { createPortal } from "react-dom";
 
-// Loads your images just like before
+// Loads your images
 const modules = import.meta.glob(
     "/public/images/carousel/*.{png,jpg,jpeg,webp}",
     {
@@ -77,12 +78,13 @@ export default function Carousel() {
     return (
         <>
             {/* 3D Stack Container */}
-            <div className="relative w-[14rem] h-[18rem] sm:w-[16rem] sm:h-[21rem] lg:w-[30rem] lg:h-[32rem] perspective-[1000px] flex items-center justify-center">
+            <div className="relative w-full h-full flex items-center justify-center perspective-[1000px]">
+                
                 {/* Left Arrow */}
                 {active > 0 && (
                     <button
                         onClick={() => setActive((i) => i - 1)}
-                        className="absolute -left-6 md:-left-10 top-1/2 -translate-y-1/2 z-40 p-2 rounded-full bg-white/90 hover:bg-white backdrop-blur-md text-rose-500 shadow-lg shadow-pink-200/50 border-2 border-pink-100 transition-transform hover:scale-110"
+                        className="absolute left-0 md:left-4 z-40 p-2 rounded-full bg-white/90 hover:bg-white backdrop-blur-md text-rose-500 shadow-lg shadow-pink-200/50 border-2 border-pink-100 transition-transform hover:scale-110"
                     >
                         <Icon
                             icon="solar:alt-arrow-left-bold-duotone"
@@ -91,15 +93,15 @@ export default function Carousel() {
                     </button>
                 )}
 
-                {/* Pure CSS Animated Cards */}
-                <div className="relative w-full h-full z-50">
+                {/* Pure CSS Animated Cards Container - REVERTED TO PORTRAIT */}
+                <div className="relative w-[14rem] h-[18rem] sm:w-[16rem] sm:h-[21rem] lg:w-[22rem] lg:h-[28rem] z-30">
                     {IMAGES.map((src, i) => {
                         const isActiveSlide = i === active;
                         const offset = (active - i) / 3;
                         const absOffset = Math.abs(offset);
                         const direction = Math.sign(active - i);
 
-                        // Math for the CSS transforms
+                        // Reverted Math for the CSS transforms (Portrait spread)
                         const scale = isActiveSlide ? 1 : 1 - absOffset * 0.2;
                         const x = isActiveSlide ? 0 : -(direction * 60);
                         const opacity = absOffset >= MAX_VISIBILITY ? 0 : 1;
@@ -123,11 +125,11 @@ export default function Carousel() {
                             >
                                 <img
                                     src={src}
-                                    alt="Carousel item"
+                                    alt={`Carousel item ${i + 1}`}
                                     className={`w-full h-full object-cover rounded-[1.5rem] cursor-pointer select-none transition-shadow duration-300 ${
                                         isActiveSlide
-                                            ? "shadow-[0_10px_30px_rgba(244,114,182,0.4)] border-4 border-white"
-                                            : "shadow-lg border-2 border-white/50"
+                                            ? "shadow-[0_15px_40px_rgba(244,114,182,0.5)] border-4 border-white"
+                                            : "shadow-lg border-2 border-white/60"
                                     }`}
                                     draggable={false}
                                     onClick={() => openViewer(i)}
@@ -141,7 +143,7 @@ export default function Carousel() {
                 {active < IMAGES.length - 1 && (
                     <button
                         onClick={() => setActive((i) => i + 1)}
-                        className="absolute -right-6 md:-right-10 top-1/2 -translate-y-1/2 z-40 p-2 rounded-full bg-white/90 hover:bg-white backdrop-blur-md text-rose-500 shadow-lg shadow-pink-200/50 border-2 border-pink-100 transition-transform hover:scale-110"
+                        className="absolute right-0 md:right-4 z-40 p-2 rounded-full bg-white/90 hover:bg-white backdrop-blur-md text-rose-500 shadow-lg shadow-pink-200/50 border-2 border-pink-100 transition-transform hover:scale-110"
                     >
                         <Icon
                             icon="solar:alt-arrow-right-bold-duotone"
@@ -155,10 +157,10 @@ export default function Carousel() {
             {viewerIndex !== null &&
                 typeof document !== "undefined" &&
                 createPortal(
-                    <div className="fixed inset-0 z-[9999] flex items-center justify-center ">
+                    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
                         {/* Backdrop */}
                         <div
-                            className="absolute inset-0 bg-rose-950/80 backdrop-blur-md"
+                            className="absolute inset-0 bg-slate-950/90 backdrop-blur-md"
                             onClick={closeViewer}
                         />
 
@@ -206,12 +208,12 @@ export default function Carousel() {
                         <div className="relative z-40 animate-in zoom-in-95 duration-300">
                             <img
                                 src={IMAGES[viewerIndex]}
-                                className="max-h-[85svh] max-w-[90vw] rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border-4 border-white/20 select-none"
-                                alt="Fullscreen view"
+                                className="max-h-[85svh] max-w-[90vw] rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border-4 border-white/20 select-none object-contain"
+                                alt={`Fullscreen view ${viewerIndex + 1}`}
                             />
                         </div>
                     </div>,
-                    document.body, // <-- This forces the viewer out to the top layer of the DOM!
+                    document.body,
                 )}
         </>
     );
