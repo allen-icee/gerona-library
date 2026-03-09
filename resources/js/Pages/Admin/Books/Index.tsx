@@ -40,7 +40,7 @@ export default function BookIndex({
         <AdminLayout>
             <Head title="Master Catalog" />
 
-            <div className="max-w-7xl mx-auto space-y-6">
+            <div className="max-w-full space-y-6">
                 {/* Header Area */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>

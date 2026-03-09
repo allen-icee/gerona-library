@@ -53,7 +53,7 @@ export default function PatronIndex({
         <AdminLayout>
             <Head title="Patron Registry" />
 
-            <div className="max-w-7xl mx-auto space-y-6">
+            <div className="max-w-full space-y-6">
                 {/* Header Area */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>

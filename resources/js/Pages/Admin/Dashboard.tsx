@@ -39,7 +39,7 @@ export default function Dashboard({
         <AdminLayout>
             <Head title="Dashboard" />
 
-            <div className="max-w-7xl mx-auto space-y-8">
+            <div className="max-w-full space-y-8">
                 {/* Header & Live Clock Area */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-stone-200 shadow-sm">
                     <div>
