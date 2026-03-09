@@ -10,6 +10,10 @@ import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
 
+// 1. IMPORT LOTTIE AND YOUR ANIMATION JSON
+import Lottie from "lottie-react";
+import printAnimation from "@/assets/lottie/public-print.json";
+
 export default function Print() {
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -43,7 +47,7 @@ export default function Print() {
         axios
             .get("/api/print-station/active-visitors")
             .then((res) => setActiveVisitors(res.data))
-            .catch(() => {});
+            .catch(() => { });
     }, []);
 
     /* Submit */
@@ -109,12 +113,10 @@ export default function Print() {
 
             <div className="flex flex-col gap-8">
 
-                {/* HEADER (same style as catalog) */}
-
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-pink-100">
+                {/* HEADER */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-fuchsia-100">
 
                     <div>
-
                         <div className="inline-flex items-center gap-2 text-fuchsia-500 font-potta text-[10px] uppercase tracking-widest mb-1">
                             <Icon
                                 icon="solar:printer-minimalistic-bold-duotone"
@@ -130,19 +132,18 @@ export default function Print() {
                         <p className="text-sm text-stone-400 mt-1">
                             Upload your documents directly to the librarian's desk.
                         </p>
-
                     </div>
 
                 </div>
 
-                {/* MAIN GRID (same structure as catalog) */}
-
+                {/* MAIN GRID */}
                 <div className="grid grid-cols-12 gap-8">
 
-                    {/* LEFT COLUMN — INFO */}
+                    {/* LEFT COLUMN — INFO & LOTTIE */}
+                    {/* Changed to flex-col to stack the How it works and the Lottie properly */}
+                    <aside className="col-span-12 lg:col-span-4 flex flex-col gap-6">
 
-                    <aside className="col-span-12 lg:col-span-4">
-
+                        {/* HOW IT WORKS CARD */}
                         <div className="bg-white rounded-2xl border border-fuchsia-100 p-6 shadow-sm space-y-5">
 
                             <h3 className="font-black text-sm uppercase tracking-wider text-fuchsia-500">
@@ -150,27 +151,22 @@ export default function Print() {
                             </h3>
 
                             <ul className="text-sm text-stone-500 space-y-3">
-
                                 <li className="flex gap-2">
-                                    <Icon icon="solar:user-bold-duotone" className="w-4 h-4 text-fuchsia-400 mt-0.5"/>
+                                    <Icon icon="solar:user-bold-duotone" className="w-4 h-4 text-fuchsia-400 mt-0.5" />
                                     Search your name from the visitor kiosk.
                                 </li>
-
                                 <li className="flex gap-2">
-                                    <Icon icon="solar:upload-bold-duotone" className="w-4 h-4 text-fuchsia-400 mt-0.5"/>
+                                    <Icon icon="solar:upload-bold-duotone" className="w-4 h-4 text-fuchsia-400 mt-0.5" />
                                     Upload your document here.
                                 </li>
-
                                 <li className="flex gap-2">
-                                    <Icon icon="solar:printer-bold-duotone" className="w-4 h-4 text-fuchsia-400 mt-0.5"/>
+                                    <Icon icon="solar:printer-bold-duotone" className="w-4 h-4 text-fuchsia-400 mt-0.5" />
                                     The librarian will print it for you.
                                 </li>
-
                                 <li className="flex gap-2">
-                                    <Icon icon="solar:wallet-money-bold-duotone" className="w-4 h-4 text-fuchsia-400 mt-0.5"/>
+                                    <Icon icon="solar:wallet-money-bold-duotone" className="w-4 h-4 text-fuchsia-400 mt-0.5" />
                                     Pay and collect your printout.
                                 </li>
-
                             </ul>
 
                             <div className="pt-3 border-t text-xs text-stone-400">
@@ -179,11 +175,23 @@ export default function Print() {
 
                         </div>
 
+                        {/* 2. LOTTIE ANIMATION CARD */}
+                        {/* 2. LOTTIE ANIMATION CARD */}
+                        <div className="bg-fuchsia-50/50 rounded-2xl border border-fuchsia-100 p-2 flex justify-center items-center shadow-sm">
+                            {/* Add -scale-x-100 right here to mirror it */}
+                            <div className="w-38 h-38 md:w-43 md:h-43 -scale-x-100">
+                                <Lottie
+                                    animationData={printAnimation}
+                                    loop={true}
+                                    className="w-full h-full object-contain hover:scale-105 transition-transform duration-500"
+                                />
+                            </div>
+                        </div>
+
                     </aside>
 
 
                     {/* RIGHT COLUMN — FORM */}
-
                     <section className="col-span-12 lg:col-span-8">
 
                         <div className="bg-white rounded-2xl border border-fuchsia-100 p-6 shadow-sm">
@@ -219,13 +227,10 @@ export default function Print() {
                                 <form onSubmit={submitPrintJob} className="space-y-6">
 
                                     {/* Visitor Search */}
-
                                     <div className="relative">
-
                                         <Label className="font-bold text-sm mb-2 block">
                                             Find Your Name
                                         </Label>
-
                                         <Input
                                             value={searchTerm}
                                             required
@@ -239,13 +244,9 @@ export default function Print() {
                                             }}
                                             className="h-12"
                                         />
-
                                         {showDropdown && filteredVisitors.length > 0 && (
-
                                             <div className="absolute z-20 w-full bg-white border rounded-xl mt-2 shadow-lg max-h-56 overflow-y-auto">
-
                                                 {filteredVisitors.map((v) => (
-
                                                     <div
                                                         key={v.id}
                                                         onClick={() => {
@@ -259,34 +260,24 @@ export default function Print() {
                                                         }}
                                                         className="px-4 py-3 hover:bg-fuchsia-50 cursor-pointer border-b last:border-0"
                                                     >
-
                                                         <p className="font-bold text-slate-800">
                                                             {v.visitor_name}
                                                         </p>
-
                                                         <p className="text-xs text-stone-500">
                                                             {v.school || v.address}
                                                         </p>
-
                                                     </div>
-
                                                 ))}
-
                                             </div>
-
                                         )}
-
                                     </div>
 
                                     {/* Documents */}
-
                                     {data.documents.map((doc) => (
-
                                         <div
                                             key={doc.id}
                                             className="border rounded-xl p-4 bg-fuchsia-50/30 relative"
                                         >
-
                                             <button
                                                 type="button"
                                                 onClick={() => removeDoc(doc.id)}
@@ -294,16 +285,13 @@ export default function Print() {
                                             >
                                                 <Icon icon="solar:trash-bin-trash-bold" />
                                             </button>
-
                                             <div className="grid md:grid-cols-3 gap-4">
-
                                                 <Input
                                                     value={doc.custom_name}
                                                     onChange={(e) =>
                                                         updateDoc(doc.id, "custom_name", e.target.value)
                                                     }
                                                 />
-
                                                 <select
                                                     value={doc.paper_size}
                                                     onChange={(e) =>
@@ -315,7 +303,6 @@ export default function Print() {
                                                     <option>A4</option>
                                                     <option>Long (8.5 x 13)</option>
                                                 </select>
-
                                                 <Input
                                                     type="number"
                                                     min="1"
@@ -328,17 +315,12 @@ export default function Print() {
                                                         )
                                                     }
                                                 />
-
                                             </div>
-
                                         </div>
-
                                     ))}
 
                                     {/* Upload */}
-
                                     <div>
-
                                         <input
                                             ref={fileInputRef}
                                             type="file"
@@ -346,7 +328,6 @@ export default function Print() {
                                             className="hidden"
                                             onChange={handleFileChange}
                                         />
-
                                         <button
                                             type="button"
                                             onClick={() => fileInputRef.current?.click()}
@@ -354,7 +335,6 @@ export default function Print() {
                                         >
                                             Add Document
                                         </button>
-
                                     </div>
 
                                     <Button
@@ -362,11 +342,9 @@ export default function Print() {
                                         disabled={processing || data.documents.length === 0}
                                         className="w-full bg-fuchsia-500 hover:bg-fuchsia-600 text-white font-black h-12"
                                     >
-
                                         {processing
                                             ? "Sending..."
                                             : `Send ${data.documents.length} File(s)`}
-
                                     </Button>
 
                                 </form>

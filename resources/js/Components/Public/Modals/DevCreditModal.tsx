@@ -3,6 +3,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription, // 1. Import this
 } from "@/Components/ui/dialog";
 import { Icon } from "@iconify/react";
 
@@ -16,6 +17,11 @@ export default function DevCreditModal({
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="bg-slate-900 border-none rounded-[2rem] sm:max-w-[400px] text-center text-white">
+                {/* 2. Add this hidden description for accessibility */}
+                <DialogDescription className="sr-only">
+                    Information about the development team behind the system.
+                </DialogDescription>
+                
                 <div className="p-4">
                     <div className="w-20 h-20 bg-slate-800 text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-[0_0_20px_rgba(251,191,36,0.3)]">
                         <Icon

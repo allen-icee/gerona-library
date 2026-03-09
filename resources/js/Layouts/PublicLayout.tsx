@@ -86,18 +86,19 @@ export default function PublicLayout({
 
             {/* BOOKMARK LOGO */}
             <Link
-                href="/"
-                className="absolute top-0 left-4 md:left-6 bg-rose-500 text-white px-3 md:px-5 py-3 md:py-4 rounded-b-[1.2rem] md:rounded-b-[1.5rem] shadow-lg shadow-pink-300/50 border-2 border-t-0 border-pink-200 z-50 flex flex-col items-center group transition-all duration-300 hover:pt-6 hover:pb-5"
-                title="Library Home"
-            >
-                <Icon
-                    icon="fluent-emoji:books"
-                    className="w-6 h-6 md:w-8 md:h-8 mb-1 group-hover:-rotate-12 transition-transform"
-                />
-                <span className="font-potta text-[9px] md:text-[11px] uppercase tracking-wider leading-none mt-1">
-                    Library
-                </span>
-            </Link>
+  href="/"
+  className="absolute top-0 left-4 md:left-6 bg-rose-500 text-white px-3 md:px-5 py-3 md:py-4 rounded-b-[1.2rem] md:rounded-b-[1.5rem] shadow-lg shadow-pink-300/50 border-2 border-t-0 border-pink-200 z-50 flex flex-col items-center group transition-all duration-300 hover:pt-6 hover:pb-5"
+  title="Library Home"
+>
+  <img
+    src="/images/GeronaLibraryLogo.png"  // <-- path to your logo in public/images
+    alt="Library Logo"
+    className="w-16 h-16 md:w-18 md:h-18 mb-1 group-hover:scale-110 transition-transform"
+  />
+  <span className="font-potta text-[9px] md:text-[11px] uppercase tracking-wider leading-none mt-1">
+    Library
+  </span>
+</Link>
 
             {/* MAIN CONTENT AREA */}
             <div className="max-w-[100rem] mx-auto w-full flex flex-col flex-1 pt-16 md:pt-20 px-4 md:px-8 relative z-10">
