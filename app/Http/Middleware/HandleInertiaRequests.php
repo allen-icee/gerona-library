@@ -40,11 +40,10 @@ class HandleInertiaRequests extends Middleware
                     'roles' => $request->user()->getRoleNames(),
                 ] : null,
             ],
-            // Add this flash section so React can catch the success data!
+            // THIS IS THE CHANGED PART: Catching the full patron object
             'flash' => [
                 'success' => fn() => $request->session()->get('success'),
-                'library_card_number' => fn() => $request->session()->get('library_card_number'),
-                'patron_name' => fn() => $request->session()->get('patron_name'),
+                'patron' => fn() => $request->session()->get('patron'), // We added this!
                 'error' => fn() => $request->session()->get('error'),
             ],
             // 🌟 Global public data for the floating marquee

@@ -4,21 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Patron;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\LibraryCardGenerated;
 
 class PublicPatronController extends Controller
 {
-    // Show the public registration page
-    public function create()
-    {
-        return Inertia::render('Public/Register');
-    }
-
-    // Save the new patron and generate their ID
     public function store(Request $request)
     {
         $validated = $request->validate([
-            // Regex allows letters, spaces, dashes, commas, and ñ/Ñ
+            // Strict Regex validations
             'first_name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZñÑ\s\-\,]+$/'],
             'last_name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZñÑ\s\-\,]+$/'],
             'middle_initial' => ['nullable', 'string', 'max:2', 'regex:/^[a-zA-ZñÑ]+$/'],
@@ -26,11 +20,11 @@ class PublicPatronController extends Controller
 
             'type' => 'required|in:Citizen,Student,Teacher/LGU Staff',
 
-            // Strict Gmail validation
+            // Email must be gmail
             'email' => ['required', 'email', 'ends_with:@gmail.com', 'unique:patrons,email'],
             'gender' => 'required|in:Male,Female,Other',
 
-            // Strict 11 digit numbers
+            // Contact must be exactly 11 digits
             'contact_number' => ['nullable', 'string', 'regex:/^[0-9]{11}$/'],
 
             'province' => 'required|string',
@@ -63,14 +57,17 @@ class PublicPatronController extends Controller
         // 3. Assemble ID
         $validated['library_card_number'] = sprintf("GER-%s-%04d", $genderCode, $nextSequence);
 
-        // Save
+        // 4. Save Patron to Database
         $patron = Patron::create($validated);
 
-        // Return back with their new ID so the frontend can generate the QR Code
+        // 5. Send the Email
+        Mail::to($patron->email)->send(new LibraryCardGenerated($patron));
+
+        // 6. Return Success to the Frontend
+        // THIS IS THE CHANGED PART: Flashing the whole patron object
         return back()->with([
-            'success' => true,
-            'library_card_number' => $patron->library_card_number,
-            'patron_name' => $patron->first_name . ' ' . $patron->last_name
+            'patron' => $patron,
+            'success' => 'Registration successful!'
         ]);
     }
 }

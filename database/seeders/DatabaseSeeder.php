@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Head Librarian',
                 'email' => 'librarian@geronalibrary.gov.ph',
-                'password' => bcrypt('Librarian@2026!'),
+                'password' => bcrypt('Librarian_123'),
             ]
         );
         $librarian->assignRole($librarianRole);
@@ -34,7 +34,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Front Desk Kiosk',
                 'email' => 'kiosk@geronalibrary.gov.ph',
-                'password' => bcrypt('Kiosk@2026!'),
+                'password' => bcrypt('Kiosk_123'),
             ]
         );
         $kiosk->assignRole($kioskRole);

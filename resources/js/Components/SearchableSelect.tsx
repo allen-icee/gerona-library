@@ -83,8 +83,8 @@ export default function SearchableSelect({
                                     setIsOpen(false);
                                 }}
                                 className={`px-4 py-2.5 cursor-pointer text-slate-700 transition-colors ${value === opt
-                                        ? "bg-amber-50 text-amber-600 font-bold"
-                                        : "hover:bg-stone-50"
+                                    ? "bg-amber-50 text-amber-600 font-bold"
+                                    : "hover:bg-stone-50"
                                     }`}
                             >
                                 {opt}

@@ -67,7 +67,7 @@ export default function CustomSelect({
             }
             if (e.key === "Enter" && selectedIndex >= 0) {
                 e.preventDefault();
-                onChange(options[selectedIndex]);
+                onChange(options[selectedIndex]); // This fires back to Register.tsx
                 setIsOpen(false);
                 return;
             }
@@ -87,25 +87,26 @@ export default function CustomSelect({
                         }`}
                     value={value || ""}
                     placeholder={placeholder}
-                    onClick={() => setIsOpen(true)}
+                    onClick={() => setIsOpen(!isOpen)} // Toggle open/close on click
                     onFocus={() => setIsOpen(true)}
+                    // We must delay the blur slightly so the onClick on the <li> can register first!
                     onBlur={() => setTimeout(() => setIsOpen(false), 200)}
                     onKeyDown={handleKeyDown}
-                    onChange={() => { }} // Readonly basically, handled by clicks
+                    onChange={() => { }} // Controlled purely by state, do not allow typing
                     readOnly
                 />
 
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-stone-400">
                     <Icon
                         icon="solar:alt-arrow-down-bold"
-                        className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                        className={`transition-transform duration-200 ${isOpen ? "rotate-180 text-amber-500" : ""
                             }`}
                         width="18"
                     />
                 </div>
             </div>
 
-            {isOpen && (
+            {isOpen && options.length > 0 && (
                 <ul
                     ref={listRef}
                     className="absolute z-50 w-full bg-white border border-stone-100 mt-1 max-h-48 overflow-y-auto shadow-lg rounded-xl text-sm py-1"
@@ -113,11 +114,13 @@ export default function CustomSelect({
                     {options.map((opt, index) => (
                         <li
                             key={opt}
-                            className={`px-4 py-2.5 cursor-pointer text-slate-700 transition-colors ${index === selectedIndex
+                            className={`px-4 py-2.5 cursor-pointer text-slate-700 transition-colors ${index === selectedIndex || opt === value
                                 ? "bg-amber-50 text-amber-700 font-bold"
                                 : "hover:bg-stone-50"
                                 }`}
-                            onMouseDown={() => {
+                            onMouseDown={(e) => {
+                                // e.preventDefault() prevents the input from losing focus before the click fires
+                                e.preventDefault();
                                 onChange(opt);
                                 setIsOpen(false);
                             }}

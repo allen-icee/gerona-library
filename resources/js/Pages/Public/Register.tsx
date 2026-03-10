@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react";
 import { useForm, usePage, Head } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
-import { QRCodeSVG } from "qrcode.react";
 import PublicLayout from "@/Layouts/PublicLayout";
 import Lottie from "lottie-react";
 import registerAnimation from "@/assets/lottie/qr-scan.json";
 import SuffixSelect from "@/Components/SuffixSelect";
-import CustomSelect from "@/Components/CustomSelect"; // NEW IMPORT
+import CustomSelect from "@/Components/CustomSelect";
+import SearchableSelect from "@/Components/SearchableSelect";
+import SuccessCardModal from "@/Components/Public/Modals/SuccessCardModal"; // NEW MODAL IMPORT
 
 const PATRON_TYPES = ["Citizen", "Student", "Teacher/LGU Staff"];
 const GENDERS = ["Male", "Female", "Other"];
@@ -16,7 +17,7 @@ const GENDERS = ["Male", "Female", "Other"];
 export default function Register() {
     const { props } = usePage<any>();
     const flash = props.flash || {};
-    const isSuccess = !!flash.library_card_number;
+    const isSuccess = !!flash.patron;
 
     const { data, setData, post, processing, errors, reset } = useForm({
         first_name: "",
@@ -104,9 +105,39 @@ export default function Register() {
         });
     };
 
+    const handleFormKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+        if (e.key === "Enter") {
+            const target = e.target as HTMLElement;
+            if (target.tagName === "BUTTON") return;
+            if (e.defaultPrevented) return;
+            e.preventDefault();
+
+            const form = e.currentTarget;
+            const focusableElements = Array.from(
+                form.querySelectorAll(
+                    'input:not([disabled]), select:not([disabled]), button[type="submit"]'
+                )
+            ) as HTMLElement[];
+
+            const index = focusableElements.indexOf(target);
+            if (index > -1 && index < focusableElements.length - 1) {
+                focusableElements[index + 1].focus();
+            }
+        }
+    };
+
+    const inputClass = "w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all";
+
     return (
         <PublicLayout>
             <Head title="Library Card Registration - Gerona Library" />
+
+            {/* Success Modal Overlay */}
+            <SuccessCardModal
+                isOpen={isSuccess}
+                onClose={() => window.location.reload()}
+                patronData={flash.patron} // Pass the full object here!
+            />
 
             <div className="flex flex-col gap-8">
 
@@ -142,19 +173,19 @@ export default function Register() {
 
                             <ul className="text-sm text-stone-500 space-y-3">
                                 <li className="flex gap-2">
-                                    <Icon icon="solar:pen-bold-duotone" className="w-4 h-4 text-amber-400 mt-0.5" />
+                                    <Icon icon="solar:pen-bold-duotone" className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
                                     Fill out the registration form with your complete details.
                                 </li>
                                 <li className="flex gap-2">
-                                    <Icon icon="solar:letter-bold-duotone" className="w-4 h-4 text-amber-400 mt-0.5" />
+                                    <Icon icon="solar:letter-bold-duotone" className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
                                     Ensure your email address is active to receive notifications.
                                 </li>
                                 <li className="flex gap-2">
-                                    <Icon icon="solar:qr-code-bold-duotone" className="w-4 h-4 text-amber-400 mt-0.5" />
+                                    <Icon icon="solar:qr-code-bold-duotone" className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
                                     Submit to instantly generate your digital QR library card.
                                 </li>
                                 <li className="flex gap-2">
-                                    <Icon icon="solar:smartphone-bold-duotone" className="w-4 h-4 text-amber-400 mt-0.5" />
+                                    <Icon icon="solar:smartphone-bold-duotone" className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
                                     Save or screenshot your QR code for kiosk and borrowing access.
                                 </li>
                             </ul>
@@ -171,234 +202,190 @@ export default function Register() {
 
                     </aside>
 
-                    {/* RIGHT COLUMN — FORM / SUCCESS STATE */}
+                    {/* RIGHT COLUMN — FORM */}
                     <section className="col-span-12 lg:col-span-8">
-                        {isSuccess ? (
-                            /* SUCCESS STATE */
-                            <div className="bg-white border border-emerald-100 rounded-2xl p-8 shadow-sm flex flex-col items-center text-center">
-                                <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4">
-                                    <Icon icon="solar:check-circle-bold-duotone" className="w-10 h-10" />
-                                </div>
+                        <div className="bg-white border border-amber-100 rounded-2xl p-6 md:p-8 shadow-sm">
+                            <form onSubmit={submit} onKeyDown={handleFormKeyDown} className="space-y-5">
 
-                                <h2 className="text-2xl font-serif font-black text-slate-800 mb-2">
-                                    Registration Complete
-                                </h2>
-
-                                <p className="text-sm text-stone-500 mb-6">
-                                    Welcome <span className="font-bold">{flash.patron_name}</span>.
-                                    Save your digital library card below.
-                                </p>
-
-                                <div className="bg-amber-50 p-6 rounded-2xl border border-amber-200 flex flex-col items-center">
-                                    <div className="bg-white p-4 rounded-xl border mb-4">
-                                        <QRCodeSVG
-                                            value={flash.library_card_number}
-                                            size={150}
-                                            level="H"
-                                            includeMargin
-                                        />
-                                    </div>
-
-                                    <div className="px-4 py-1 rounded-full bg-white border text-amber-700 font-mono text-sm font-bold">
-                                        {flash.library_card_number}
-                                    </div>
-                                </div>
-
-                                <button
-                                    onClick={() => window.location.reload()}
-                                    className="mt-6 px-6 py-3 bg-stone-800 text-white text-sm font-bold rounded-xl hover:bg-stone-700 transition"
-                                >
-                                    Register Another Person
-                                </button>
-                            </div>
-                        ) : (
-                            /* FORM CARD */
-                            <div className="bg-white border border-amber-100 rounded-2xl p-6 md:p-8 shadow-sm">
-                                <form onSubmit={submit} className="space-y-5">
-
-                                    {/* NAMES (First, MI, Last, Suffix) */}
-                                    <div className="grid grid-cols-12 gap-4">
-                                        <div className="col-span-12 md:col-span-5">
-                                            <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">First Name *</label>
-                                            <input
-                                                type="text"
-                                                value={data.first_name}
-                                                placeholder="e.g. Maria Theresa"
-                                                onChange={(e) => setData("first_name", e.target.value.replace(/[^a-zA-ZñÑ\s\-,]/g, ""))}
-                                                className="w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2.5 text-sm focus:border-amber-400"
-                                                required
-                                            />
-                                            {errors.first_name && <span className="text-rose-500 text-xs">{errors.first_name}</span>}
-                                        </div>
-
-                                        <div className="col-span-6 md:col-span-2">
-                                            <label className="text-xs font-bold text-stone-600 uppercase mb-1 block text-center">M.I.</label>
-                                            <input
-                                                type="text"
-                                                maxLength={2}
-                                                value={data.middle_initial}
-                                                placeholder="e.g. C"
-                                                onChange={(e) => setData("middle_initial", e.target.value.replace(/[^a-zA-ZñÑ]/g, "").toUpperCase())}
-                                                className="w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2.5 text-sm focus:border-amber-400 text-center"
-                                            />
-                                        </div>
-
-                                        <div className="col-span-12 md:col-span-3">
-                                            <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">Last Name *</label>
-                                            <input
-                                                type="text"
-                                                value={data.last_name}
-                                                placeholder="e.g. Yu"
-                                                onChange={(e) => setData("last_name", e.target.value.replace(/[^a-zA-ZñÑ\s\-,]/g, ""))}
-                                                className="w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2.5 text-sm focus:border-amber-400"
-                                                required
-                                            />
-                                            {errors.last_name && <span className="text-rose-500 text-xs">{errors.last_name}</span>}
-                                        </div>
-
-                                        <div className="col-span-6 md:col-span-2">
-                                            {/* Original SuffixSelect works great */}
-                                            <SuffixSelect value={data.suffix} onChange={(val) => setData("suffix", val)} />
-                                        </div>
-                                    </div>
-
-                                    {/* TYPE & GENDER (USING NEW CUSTOM SELECT) */}
-                                    <div className="grid md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">Patron Type *</label>
-                                            <CustomSelect
-                                                value={data.type}
-                                                onChange={(val) => setData("type", val)}
-                                                options={PATRON_TYPES}
-                                                error={errors.type}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">Gender *</label>
-                                            <CustomSelect
-                                                value={data.gender}
-                                                onChange={(val) => setData("gender", val)}
-                                                options={GENDERS}
-                                                error={errors.gender}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* CONDITIONAL SCHOOL FIELD */}
-                                    {data.type === "Student" && (
-                                        <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                                            <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">School *</label>
-                                            <input
-                                                type="text"
-                                                value={data.school}
-                                                onChange={(e) => setData("school", e.target.value)}
-                                                placeholder="e.g. Gerona National High School"
-                                                className="w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2.5 text-sm focus:border-amber-400"
-                                                required={data.type === "Student"}
-                                            />
-                                            {errors.school && <span className="text-rose-500 text-xs">{errors.school}</span>}
-                                        </div>
-                                    )}
-
-                                    {/* CONTACT & EMAIL */}
-                                    <div className="grid md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">Email Address (@gmail.com) *</label>
-                                            <input
-                                                type="email"
-                                                value={data.email}
-                                                onChange={(e) => setData("email", e.target.value)}
-                                                pattern=".*@gmail\.com$"
-                                                title="Please provide a valid @gmail.com address"
-                                                className="w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2.5 text-sm focus:border-amber-400"
-                                                required
-                                                placeholder="user@gmail.com"
-                                            />
-                                            {errors.email && <span className="text-rose-500 text-xs">{errors.email}</span>}
-                                        </div>
-
-                                        <div>
-                                            <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">Contact Number (11 Digits)</label>
-                                            <input
-                                                type="text"
-                                                maxLength={11}
-                                                value={data.contact_number}
-                                                onChange={(e) => setData("contact_number", e.target.value.replace(/\D/g, ""))}
-                                                placeholder="09..."
-                                                className="w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2.5 text-sm focus:border-amber-400"
-                                            />
-                                            {errors.contact_number && <span className="text-rose-500 text-xs">{errors.contact_number}</span>}
-                                        </div>
-                                    </div>
-
-                                    {/* LOCATION CASCADING DROPDOWNS (USING NEW CUSTOM SELECT) */}
-                                    <div className="grid md:grid-cols-3 gap-4">
-                                        <div>
-                                            <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">Province *</label>
-                                            <CustomSelect
-                                                value={data.province}
-                                                onChange={(val) => handleProvinceChange(val)}
-                                                options={provinces}
-                                                placeholder="Select Province"
-                                                error={errors.province}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">Municipality *</label>
-                                            <div className={!data.province ? "opacity-50 pointer-events-none" : ""}>
-                                                <CustomSelect
-                                                    value={data.municipality}
-                                                    onChange={(val) => handleMunicipalityChange(val)}
-                                                    options={municipalities}
-                                                    placeholder="Select Municipality"
-                                                    error={errors.municipality}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">Barangay *</label>
-                                            <div className={!data.municipality ? "opacity-50 pointer-events-none" : ""}>
-                                                <CustomSelect
-                                                    value={data.barangay}
-                                                    onChange={(val) => setData("barangay", val)}
-                                                    options={barangays}
-                                                    placeholder="Select Barangay"
-                                                    error={errors.barangay}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* STREET */}
-                                    <div>
-                                        <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">Street / House No. (Optional)</label>
+                                {/* NAMES */}
+                                <div className="grid grid-cols-12 gap-4">
+                                    <div className="col-span-12 md:col-span-5">
+                                        <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">First Name *</label>
                                         <input
                                             type="text"
-                                            value={data.street}
-                                            onChange={(e) => setData("street", e.target.value)}
-                                            placeholder="House No. / Street Name"
-                                            className="w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2.5 text-sm focus:border-amber-400"
+                                            value={data.first_name}
+                                            onChange={(e) => setData("first_name", e.target.value.replace(/[^a-zA-ZñÑ\s\-,]/g, ""))}
+                                            className={inputClass}
+                                            placeholder="e.g. Maria Theresa"
+                                            required
+                                        />
+                                        {errors.first_name && <span className="text-rose-500 text-xs">{errors.first_name}</span>}
+                                    </div>
+
+                                    <div className="col-span-6 md:col-span-2">
+                                        <label className="text-xs font-bold text-stone-600 uppercase mb-1 block text-center">M.I.</label>
+                                        <input
+                                            type="text"
+                                            maxLength={2}
+                                            value={data.middle_initial}
+                                            onChange={(e) => setData("middle_initial", e.target.value.replace(/[^a-zA-ZñÑ]/g, "").toUpperCase())}
+                                            placeholder="e.g. C"
+                                            className={`${inputClass} text-center px-1`}
                                         />
                                     </div>
 
-                                    {/* SUBMIT */}
-                                    <button
-                                        type="submit"
-                                        disabled={processing}
-                                        className="w-full bg-amber-400 text-amber-950 font-bold text-sm py-3 rounded-xl hover:bg-amber-300 transition flex items-center justify-center gap-2 mt-4"
-                                    >
-                                        {processing ? (
-                                            <Icon icon="solar:spinner-bold-duotone" className="w-5 h-5 animate-spin" />
-                                        ) : (
-                                            "Generate My QR Card"
-                                        )}
-                                    </button>
-                                </form>
-                            </div>
-                        )}
+                                    <div className="col-span-12 md:col-span-3">
+                                        <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">Last Name *</label>
+                                        <input
+                                            type="text"
+                                            value={data.last_name}
+                                            onChange={(e) => setData("last_name", e.target.value.replace(/[^a-zA-ZñÑ\s\-,]/g, ""))}
+                                            placeholder="e.g. Yu"
+                                            className={inputClass}
+                                            required
+                                        />
+                                        {errors.last_name && <span className="text-rose-500 text-xs">{errors.last_name}</span>}
+                                    </div>
+
+                                    <div className="col-span-6 md:col-span-2 pt-0.5">
+                                        <SuffixSelect value={data.suffix} onChange={(val) => setData("suffix", val)} />
+                                    </div>
+                                </div>
+
+                                {/* TYPE & GENDER */}
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">Patron Type *</label>
+                                        <CustomSelect
+                                            value={data.type}
+                                            onChange={(val) => setData("type", val)}
+                                            options={PATRON_TYPES}
+                                            error={errors.type}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">Gender *</label>
+                                        <CustomSelect
+                                            value={data.gender}
+                                            onChange={(val) => setData("gender", val)}
+                                            options={GENDERS}
+                                            error={errors.gender}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* CONDITIONAL SCHOOL FIELD */}
+                                {data.type === "Student" && (
+                                    <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                                        <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">School *</label>
+                                        <input
+                                            type="text"
+                                            value={data.school}
+                                            onChange={(e) => setData("school", e.target.value)}
+                                            placeholder="e.g. Gerona National High School"
+                                            className={inputClass}
+                                            required={data.type === "Student"}
+                                        />
+                                        {errors.school && <span className="text-rose-500 text-xs">{errors.school}</span>}
+                                    </div>
+                                )}
+
+                                {/* CONTACT & EMAIL */}
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">Email Address (@gmail.com) *</label>
+                                        <input
+                                            type="email"
+                                            value={data.email}
+                                            onChange={(e) => setData("email", e.target.value)}
+                                            pattern=".*@gmail\.com$"
+                                            title="Please provide a valid @gmail.com address"
+                                            className={inputClass}
+                                            required
+                                            placeholder="user@gmail.com"
+                                        />
+                                        {errors.email && <span className="text-rose-500 text-xs">{errors.email}</span>}
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">Contact Number (11 Digits)</label>
+                                        <input
+                                            type="text"
+                                            maxLength={11}
+                                            value={data.contact_number}
+                                            onChange={(e) => setData("contact_number", e.target.value.replace(/\D/g, ""))}
+                                            placeholder="09..."
+                                            className={inputClass}
+                                        />
+                                        {errors.contact_number && <span className="text-rose-500 text-xs">{errors.contact_number}</span>}
+                                    </div>
+                                </div>
+
+                                {/* LOCATION CASCADING DROPDOWNS */}
+                                <div className="grid md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">Province *</label>
+                                        <SearchableSelect
+                                            value={data.province}
+                                            onChange={(val) => handleProvinceChange(val)}
+                                            options={provinces}
+                                            placeholder="Select Province"
+                                            error={errors.province}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">Municipality *</label>
+                                        <SearchableSelect
+                                            value={data.municipality}
+                                            onChange={(val) => handleMunicipalityChange(val)}
+                                            options={municipalities}
+                                            placeholder="Select Municipality"
+                                            disabled={!data.province}
+                                            error={errors.municipality}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">Barangay *</label>
+                                        <SearchableSelect
+                                            value={data.barangay}
+                                            onChange={(val) => setData("barangay", val)}
+                                            options={barangays}
+                                            placeholder="Select Barangay"
+                                            disabled={!data.municipality}
+                                            error={errors.barangay}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* STREET */}
+                                <div>
+                                    <label className="text-xs font-bold text-stone-600 uppercase mb-1 block">Street / House No. (Optional)</label>
+                                    <input
+                                        type="text"
+                                        value={data.street}
+                                        onChange={(e) => setData("street", e.target.value)}
+                                        placeholder="House No. / Street Name"
+                                        className={inputClass}
+                                    />
+                                </div>
+
+                                {/* SUBMIT */}
+                                <button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="w-full bg-amber-400 text-amber-950 font-bold text-sm py-3 rounded-xl hover:bg-amber-300 outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition flex items-center justify-center gap-2 mt-4 shadow-sm"
+                                >
+                                    {processing ? (
+                                        <Icon icon="solar:spinner-bold-duotone" className="w-5 h-5 animate-spin" />
+                                    ) : (
+                                        "Generate My QR Card"
+                                    )}
+                                </button>
+                            </form>
+                        </div>
                     </section>
                 </div>
             </div>
