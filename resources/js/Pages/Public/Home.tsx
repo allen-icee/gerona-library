@@ -21,22 +21,22 @@ export default function Home() {
                     <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-6 w-full px-4 lg:px-0">
 
                         {/* Welcome Header with Lottie on the Right */}
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-6 md:p-8 rounded-2xl border border-rose-100 shadow-sm overflow-hidden">
-                            <div className="flex flex-col items-center md:items-start space-y-4 flex-1 z-10">
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-6 md:p-8 overflow-hidden">
+                            <div className="flex flex-col items-center md:items-start space-y-2 flex-1 z-10">
                                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-rose-50 text-rose-600 rounded-full font-potta text-[10px] uppercase tracking-widest border border-rose-100 shadow-sm">
                                     <Icon icon="solar:stars-bold-duotone" className="w-3 h-3 text-rose-500" />
-                                    Municipal Portal
+                                    Gerona Municipal Library
                                 </div>
 
-                                <h1 className="text-4xl sm:text-5xl md:text-5xl lg:text-6xl font-serif font-black text-slate-800 tracking-tight leading-[1.1]">
-                                    Hello, <br className="hidden md:block" />
+                                <h1 className="text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-serif font-black text-slate-800 tracking-tight leading-[1.1]">
+                                    Welcome, <br className="hidden md:block" />
                                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-500">
-                                        Reader!
-                                    </span> ✨
+                                        Geronians Reader!
+                                    </span>
                                 </h1>
 
                                 <p className="max-w-md text-stone-500 font-medium text-sm leading-relaxed">
-                                    Explore the Gerona Municipal Library. Your next adventure in learning starts right here.
+                                    Explore the Gerona Municipal Library. A place for learning, discovery, and community.
                                 </p>
                             </div>
 

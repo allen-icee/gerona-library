@@ -5,6 +5,11 @@ import { Icon } from "@iconify/react";
 import { QRCodeSVG } from "qrcode.react";
 import PublicLayout from "@/Layouts/PublicLayout";
 
+// 1. IMPORT LOTTIE AND YOUR ANIMATION JSON
+import Lottie from "lottie-react";
+// Change this path to whatever Lottie animation you want to use here!
+import registerAnimation from "@/assets/lottie/qr-scan.json";
+
 export default function Register() {
     const { props } = usePage<any>();
     const flash = props.flash || {};
@@ -14,7 +19,7 @@ export default function Register() {
         first_name: "",
         last_name: "",
         email: "",
-        type: "Citizen", 
+        type: "Citizen",
         gender: "Male",
         province: "Tarlac",
         municipality: "Gerona",
@@ -63,8 +68,11 @@ export default function Register() {
                 {/* MAIN GRID */}
                 <div className="grid grid-cols-12 gap-8">
 
-                    {/* LEFT COLUMN — HOW IT WORKS */}
-                    <aside className="col-span-12 lg:col-span-4">
+                    {/* LEFT COLUMN — HOW IT WORKS & LOTTIE */}
+                    {/* Changed to flex-col to stack the How it works and the Lottie properly */}
+                    <aside className="col-span-12 lg:col-span-4 flex flex-col gap-6">
+
+                        {/* HOW IT WORKS CARD */}
                         <div className="bg-white rounded-2xl border border-amber-100 p-6 shadow-sm space-y-5">
                             <h3 className="font-black text-sm uppercase tracking-wider text-amber-500">
                                 How It Works
@@ -89,6 +97,19 @@ export default function Register() {
                                 </li>
                             </ul>
                         </div>
+
+                        {/* 2. LOTTIE ANIMATION CARD */}
+                        <div className="bg-amber-50/50 rounded-2xl border border-amber-100 shadow-sm overflow-hidden flex justify-center items-center w-full h-56 md:h-64">
+                            <Lottie
+                                animationData={registerAnimation}
+                                loop={true}
+                                /* scale-[1.8] acts like a magnifying glass! 
+                                  It zooms the animation in by 80% without making the div bigger.
+                                */
+                                className="w-full h-full object-contain scale-[1.8] hover:scale-[1.9] transition-transform duration-500"
+                            />
+                        </div>
+
                     </aside>
 
                     {/* RIGHT COLUMN — FORM / SUCCESS STATE */}

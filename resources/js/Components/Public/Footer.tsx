@@ -29,11 +29,11 @@ export default function Footer() {
                             />
 
                             <span className="font-serif font-black text-slate-800 text-sm">
-                                Gerona Library
+                                Dr. Jorge Cleofas Bocobo Library
                             </span>
 
                             <span className="text-xs text-stone-400 hidden sm:inline">
-                                • Read • Discover • Grow
+                                - Gerona Municipal Library
                             </span>
 
                         </div>
@@ -48,23 +48,23 @@ export default function Footer() {
                                 className="hover:text-pink-500 transition flex items-center gap-1"
                             >
                                 <Icon icon="solar:chat-round-dots-bold-duotone" className="w-4 h-4" />
-                                Ask Us
+                                Contacts
                             </button>
 
                             <button
                                 onClick={() => setLibraryCreditOpen(true)}
                                 className="hover:text-pink-500 transition flex items-center gap-1"
                             >
-                                <Icon icon="solar:buildings-2-bold-duotone" className="w-4 h-4" />
-                                LGU
+                                <Icon icon="solar:medal-ribbons-star-bold" className="w-4 h-4" />
+                                LGU Credits
                             </button>
 
                             <button
                                 onClick={() => setDevCreditOpen(true)}
                                 className="hover:text-pink-500 transition flex items-center gap-1"
                             >
-                                <Icon icon="solar:code-bold-duotone" className="w-4 h-4" />
-                                Devs
+                                <Icon icon="solar:people-nearby-bold" className="w-4 h-4" />
+                                Library Team
                             </button>
 
                         </div>
