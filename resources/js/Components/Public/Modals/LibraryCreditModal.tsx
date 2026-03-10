@@ -18,8 +18,8 @@ export default function LibraryCreditModal({
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             {/* Outer border is now Pink. Default font is Arial. */}
-            <DialogContent className="font-['Arial',sans-serif] bg-gradient-to-br from-[#d4af37] via-[#fdf5d3] to-[#c7a445] border-[6px] border-pink-300 rounded-xl sm:max-w-[750px] max-h-[90vh] p-0 shadow-2xl overflow-hidden flex justify-center [&>button]:z-[100] [&>button]:bg-white/90 [&>button]:text-slate-900 [&>button]:p-2 [&>button]:rounded-full [&>button]:shadow-md [&>button]:hover:bg-white">
-
+            {/* Outer border is now Pink. Default font is Arial. */}
+            <DialogContent className="font-['Arial',sans-serif] bg-gradient-to-br from-[#d4af37] via-[#fdf5d3] to-[#c7a445] border-[6px] border-pink-300 rounded-xl sm:max-w-[750px] max-h-[90vh] p-0 shadow-2xl overflow-hidden flex justify-center [&>button]:absolute [&>button]:right-4 [&>button]:top-4 [&>button]:bg-white [&>button]:text-rose-500 [&>button]:p-2 [&>button]:rounded-full [&>button]:shadow-lg hover:[&>button]:bg-rose-50 hover:[&>button]:scale-110 [&>button]:transition-all [&>button]:border [&>button]:border-rose-200 [&>button]:z-[100] [&>button>svg]:w-5 [&>button>svg]:h-5">
                 <DialogDescription className="sr-only">
                     Dedication and credits for the Dr. Jorge Cleofas Bocobo Library.
                 </DialogDescription>
@@ -147,7 +147,7 @@ export default function LibraryCreditModal({
                                         </div>
 
                                         {/* Column 2 */}
-                                    <div className="space-y-0 text-left uppercase">
+                                        <div className="space-y-0 text-left uppercase">
                                             <p>Hon. Eufrocino A. Bartolome, Jr.</p>
                                             <p>Hon. Jorge A. Mamba, Jr. CPA</p>
                                             <p>Hon. Ronjie L. Daquigan</p>
