@@ -10,7 +10,9 @@ class Patron extends Model
     protected $fillable = [
         'library_card_number',
         'first_name',
+        'middle_initial', // NEW
         'last_name',
+        'suffix', // NEW
         'type',
         'email',
         'gender',

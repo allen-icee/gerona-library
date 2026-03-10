@@ -21,7 +21,7 @@ class PatronController extends Controller
                 $query->where('first_name', 'like', "%{$search}%")
                     ->orWhere('last_name', 'like', "%{$search}%")
                     ->orWhere('library_card_number', 'like', "%{$search}%")
-                    ->orWhere('school_or_barangay', 'like', "%{$search}%");
+                    ->orWhere('barangay', 'like', "%{$search}%");
             })
             ->latest()
             ->paginate(15)
@@ -35,25 +35,50 @@ class PatronController extends Controller
 
     public function store(Request $request)
     {
+        // Notice we removed 'library_card_number' from the validation, 
+        // because the controller now generates it automatically!
         $validated = $request->validate([
-            'library_card_number' => 'required|string|unique:patrons,library_card_number',
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
+            'first_name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZñÑ\s\-\,]+$/'],
+            'last_name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZñÑ\s\-\,]+$/'],
+            'middle_initial' => ['nullable', 'string', 'max:2', 'regex:/^[a-zA-ZñÑ]+$/'],
+            'suffix' => ['nullable', 'string', 'in:Jr.,Sr.,II,III,IV,V'],
+
             'type' => 'required|in:Citizen,Student,Teacher/LGU Staff',
-            'email' => 'required|email|unique:patrons,email',
             'gender' => 'required|in:Male,Female,Other',
+            'email' => ['required', 'email', 'ends_with:@gmail.com', 'unique:patrons,email'],
+
             'province' => 'required|string|max:255',
             'municipality' => 'required|string|max:255',
             'barangay' => 'required|string|max:255',
             'street' => 'nullable|string|max:255',
             'school' => 'nullable|string|max:255',
-            'contact_number' => 'nullable|string|max:255',
+
+            'contact_number' => ['nullable', 'numeric', 'digits_between:7,11'],
             'status' => 'required|in:Active,Suspended',
         ]);
 
+        // Auto-generate the Library Card Number: GER-{GenderCode}-{Sequence}
+        $genderCode = match ($request->gender) {
+            'Male' => '01',
+            'Female' => '02',
+            default => '03',
+        };
+
+        // Find the last created patron to get the sequence number
+        $lastPatron = Patron::orderBy('id', 'desc')->first();
+        $nextSequence = 1;
+
+        if ($lastPatron && preg_match('/GER-\d{2}-(\d+)/', $lastPatron->library_card_number, $matches)) {
+            $nextSequence = intval($matches[1]) + 1;
+        }
+
+        $cardNumber = sprintf("GER-%s-%04d", $genderCode, $nextSequence);
+        $validated['library_card_number'] = $cardNumber;
+
         $patron = Patron::create($validated);
 
-        Mail::to($patron->email)->send(new LibraryCardGenerated($patron));
+        // Optional: Send the email with their new library card attached
+        // Mail::to($patron->email)->send(new LibraryCardGenerated($patron));
 
         return redirect()->back();
     }
@@ -61,14 +86,29 @@ class PatronController extends Controller
     public function update(Request $request, Patron $patron)
     {
         $validated = $request->validate([
-            'library_card_number' => 'required|string|unique:patrons,library_card_number,' . $patron->id,
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'type' => 'required|string|max:255',
-            'school_or_barangay' => 'required|string|max:255',
-            'contact_number' => 'nullable|string|max:255',
+            'first_name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZñÑ\s\-\,]+$/'],
+            'last_name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZñÑ\s\-\,]+$/'],
+            'middle_initial' => ['nullable', 'string', 'max:2', 'regex:/^[a-zA-ZñÑ]+$/'],
+            'suffix' => ['nullable', 'string', 'in:Jr.,Sr.,II,III,IV,V'],
+
+            'type' => 'required|in:Citizen,Student,Teacher/LGU Staff',
+            'gender' => 'required|in:Male,Female,Other',
+
+            // Allow them to keep their own email, but it must still be a gmail
+            'email' => ['required', 'email', 'ends_with:@gmail.com', 'unique:patrons,email,' . $patron->id],
+
+            'province' => 'required|string|max:255',
+            'municipality' => 'required|string|max:255',
+            'barangay' => 'required|string|max:255',
+            'street' => 'nullable|string|max:255',
+            'school' => 'nullable|string|max:255',
+
+            'contact_number' => ['nullable', 'numeric', 'digits_between:7,11'],
             'status' => 'required|in:Active,Suspended',
         ]);
+
+        // Note: We DO NOT update the library_card_number here. 
+        // IDs should be permanent once generated.
 
         $patron->update($validated);
 
@@ -81,6 +121,7 @@ class PatronController extends Controller
 
         return redirect()->back();
     }
+
     public function export()
     {
         // This will instantly download a file named "gerona_patrons.csv"

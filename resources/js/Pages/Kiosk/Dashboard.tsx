@@ -1,12 +1,13 @@
+// resources/js/Pages/Kiosk/Dashboard.tsx
+
 import { useState, FormEventHandler, useEffect, useRef } from "react";
 import { Head, useForm, router } from "@inertiajs/react";
 import { PageProps } from "@/types";
-import { Library, UserCheck, Clock, UserCircle, Users } from "lucide-react";
+import { Icon } from "@iconify/react";
 import SignatureCanvas from "react-signature-canvas";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 
 export default function KioskDashboard({
     activeVisitors = [],
@@ -39,7 +40,6 @@ export default function KioskDashboard({
         signature: "",
     });
 
-    // Capture signature data before sending to server
     transform((currentData) => ({
         ...currentData,
         signature: sigPad.current?.isEmpty()
@@ -54,7 +54,6 @@ export default function KioskDashboard({
 
     const submitLog: FormEventHandler = (e) => {
         e.preventDefault();
-
         post(route("visitor-logs.store"), {
             preserveScroll: true,
             onSuccess: () => {
@@ -73,31 +72,41 @@ export default function KioskDashboard({
     };
 
     return (
-        <div className="min-h-screen bg-stone-100 flex flex-col md:flex-row">
+        <div className="min-h-screen bg-[#FDFBF7] flex flex-col md:flex-row relative overflow-hidden font-sans">
             <Head title="Library Kiosk" />
 
-            {/* Left Side: The Check-in Form */}
-            <div className="w-full md:w-5/12 lg:w-1/3 bg-slate-900 text-white flex flex-col shadow-2xl z-10 overflow-y-auto">
-                <div className="p-8 pb-4 flex items-center space-x-3">
-                    <Library className="w-8 h-8 text-amber-500" />
-                    <div>
-                        <h1 className="text-xl font-serif font-bold tracking-tight">
-                            Gerona Municipal Library
-                        </h1>
-                        <p className="text-slate-400 text-xs uppercase tracking-widest">
-                            Self-Service Kiosk
-                        </p>
-                    </div>
+            {/* Subtle Aesthetic Pink Blobs */}
+            <div className="absolute top-[-10%] right-[-5%] w-[45rem] h-[45rem] bg-pink-200/30 rounded-full blur-[100px] pointer-events-none z-0"></div>
+            <div className="absolute bottom-[-10%] right-[25%] w-[35rem] h-[35rem] bg-rose-200/20 rounded-full blur-[100px] pointer-events-none z-0"></div>
+
+            {/* LEFT SIDE: Sidebar Form */}
+            <div className="w-full md:w-5/12 lg:w-[32%] bg-white/90 backdrop-blur-2xl text-stone-800 flex flex-col shadow-[15px_0_40px_rgba(236,72,153,0.04)] z-10 border-r border-white relative">
+
+                {/* Clean Floating Header */}
+                <div className="pt-10 pb-6 px-8 flex flex-col items-center text-center relative z-20">
+                    <img
+                        src="/images/GeronaLibraryLogo.png"
+                        alt="Logo"
+                        className="w-16 h-16 object-contain drop-shadow-sm mb-4 hover:scale-105 transition-transform"
+                        onError={(e) => { (e.target as HTMLImageElement).src = "/images/3DMunicipalLogo.png"; }}
+                    />
+                    <h1 className="text-2xl font-serif font-black tracking-tight text-slate-800 leading-tight">
+                        Gerona Municipal <span className="text-pink-500">Library</span>
+                    </h1>
+                    <p className="text-stone-400 text-[10px] uppercase tracking-[0.25em] font-bold mt-1.5">
+                        Self-Service Kiosk
+                    </p>
                 </div>
 
-                <div className="px-8 py-4 bg-slate-950/50 text-center">
-                    <div className="text-4xl font-mono font-light tracking-tight text-amber-500">
+                {/* Elegant Clock Widget */}
+                <div className="px-8 pb-8 flex flex-col items-center justify-center border-b border-stone-100">
+                    <div className="text-5xl font-mono font-black tracking-tighter text-pink-500 drop-shadow-sm">
                         {currentTime.toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
                         })}
                     </div>
-                    <div className="text-sm text-slate-400 mt-1">
+                    <div className="text-xs font-bold text-stone-400 mt-1 tracking-widest uppercase">
                         {currentTime.toLocaleDateString([], {
                             weekday: "long",
                             year: "numeric",
@@ -107,140 +116,100 @@ export default function KioskDashboard({
                     </div>
                 </div>
 
-                <div className="p-8 flex-1">
-                    <h2 className="text-2xl font-bold mb-6">
-                        Welcome! Please sign in.
-                    </h2>
+                {/* Scrollable Form Area */}
+                <div className="p-8 flex-1 overflow-y-auto hide-scrollbar">
+                    <form onSubmit={submitLog} className="space-y-6">
 
-                    <form onSubmit={submitLog} className="space-y-5">
-                        {/* Mode Toggle Switch */}
-                        <div className="flex p-1 bg-slate-800 rounded-lg border border-slate-700">
+                        {/* iOS-Style Segmented Toggle */}
+                        <div className="flex p-1.5 bg-stone-100/80 rounded-2xl border border-stone-200/50">
                             <button
                                 type="button"
                                 onClick={() => handleToggle(false)}
-                                className={`flex-1 flex items-center justify-center py-2.5 text-sm font-semibold rounded-md transition-all ${!isGuest ? "bg-amber-600 text-white shadow-sm" : "text-slate-400 hover:text-white"}`}
+                                className={`flex-1 flex items-center justify-center py-2.5 text-sm font-bold rounded-xl transition-all duration-300 ${!isGuest ? "bg-white text-pink-600 shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-stone-200/50" : "text-stone-500 hover:text-stone-800"}`}
                             >
-                                <UserCircle className="w-4 h-4 mr-2" /> Library
-                                Card
+                                <Icon icon="solar:card-bold-duotone" className="w-5 h-5 mr-2" />
+                                Library Card
                             </button>
                             <button
                                 type="button"
                                 onClick={() => handleToggle(true)}
-                                className={`flex-1 flex items-center justify-center py-2.5 text-sm font-semibold rounded-md transition-all ${isGuest ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-white"}`}
+                                className={`flex-1 flex items-center justify-center py-2.5 text-sm font-bold rounded-xl transition-all duration-300 ${isGuest ? "bg-white text-pink-600 shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-stone-200/50" : "text-stone-500 hover:text-stone-800"}`}
                             >
-                                <Users className="w-4 h-4 mr-2" /> Walk-in Guest
+                                <Icon icon="solar:users-group-two-rounded-bold-duotone" className="w-5 h-5 mr-2" />
+                                Guest
                             </button>
                         </div>
 
-                        <div className="min-h-[140px]">
+                        {/* Dynamic Input Fields */}
+                        <div className="min-h-[130px]">
                             {!isGuest ? (
-                                <div className="space-y-3 animate-in fade-in slide-in-from-left-4 duration-300">
-                                    <Label
-                                        htmlFor="patron_id"
-                                        className="text-slate-300"
-                                    >
-                                        Library Card Number *
+                                <div className="space-y-2 animate-in fade-in slide-in-from-left-4 duration-300">
+                                    <Label htmlFor="patron_id" className="text-stone-500 text-xs font-bold uppercase tracking-widest pl-1">
+                                        Library Card Number <span className="text-pink-500">*</span>
                                     </Label>
-                                    <Input
-                                        id="patron_id"
-                                        value={data.patron_id}
-                                        onChange={(e) =>
-                                            setData("patron_id", e.target.value)
-                                        }
-                                        required={!isGuest}
-                                        placeholder="e.g., PAT-00001"
-                                        className="uppercase h-14 text-xl text-center tracking-widest font-mono font-bold bg-slate-800 border-slate-700 text-white focus-visible:ring-amber-500 placeholder:text-slate-600"
-                                        autoFocus
-                                    />
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <Icon icon="solar:qr-code-bold-duotone" className="h-6 w-6 text-pink-400" />
+                                        </div>
+                                        <Input
+                                            id="patron_id"
+                                            value={data.patron_id}
+                                            onChange={(e) => setData("patron_id", e.target.value)}
+                                            required={!isGuest}
+                                            placeholder="SCAN OR TYPE ID..."
+                                            className="uppercase h-14 pl-12 text-xl tracking-widest font-mono font-black bg-white border-stone-200 text-slate-800 focus:bg-white focus:ring-4 focus:ring-pink-500/10 focus:border-pink-300 placeholder:text-stone-300 rounded-xl shadow-sm transition-all"
+                                            autoFocus
+                                        />
+                                    </div>
                                     {errors.patron_id && (
-                                        <p className="text-sm text-red-400 text-center font-medium">
-                                            {errors.patron_id}
+                                        <p className="text-xs text-rose-500 pl-1 font-bold flex items-center gap-1 mt-1.5">
+                                            <Icon icon="solar:danger-triangle-bold-duotone" className="w-4 h-4" /> {errors.patron_id}
                                         </p>
                                     )}
                                 </div>
                             ) : (
                                 <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-                                    <div className="space-y-1">
-                                        <Label
-                                            htmlFor="visitor_name"
-                                            className="text-slate-300 text-xs uppercase tracking-wider"
-                                        >
-                                            Full Name *
-                                        </Label>
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="visitor_name" className="text-stone-500 text-xs font-bold uppercase tracking-widest pl-1">Full Name <span className="text-pink-500">*</span></Label>
                                         <Input
                                             id="visitor_name"
                                             value={data.visitor_name}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "visitor_name",
-                                                    e.target.value,
-                                                )
-                                            }
+                                            onChange={(e) => setData("visitor_name", e.target.value)}
                                             required={isGuest}
                                             placeholder="Juan Dela Cruz"
-                                            className="bg-slate-800 border-slate-700 text-white focus-visible:ring-amber-500 placeholder:text-slate-600"
+                                            className="bg-white/50 border-stone-200 text-slate-800 focus:bg-white focus:ring-4 focus:ring-pink-500/10 focus:border-pink-300 rounded-xl h-12 text-base font-medium shadow-sm transition-all"
                                         />
                                     </div>
-                                    <div className="space-y-1">
-                                        <Label
-                                            htmlFor="address"
-                                            className="text-slate-300 text-xs uppercase tracking-wider"
-                                        >
-                                            Address (Barangay/Municipality) *
-                                        </Label>
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="address" className="text-stone-500 text-xs font-bold uppercase tracking-widest pl-1">Address <span className="text-pink-500">*</span></Label>
                                         <Input
                                             id="address"
                                             value={data.address}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "address",
-                                                    e.target.value,
-                                                )
-                                            }
+                                            onChange={(e) => setData("address", e.target.value)}
                                             required={isGuest}
                                             placeholder="Brgy. Poblacion"
-                                            className="bg-slate-800 border-slate-700 text-white focus-visible:ring-amber-500 placeholder:text-slate-600"
+                                            className="bg-white/50 border-stone-200 text-slate-800 focus:bg-white focus:ring-4 focus:ring-pink-500/10 focus:border-pink-300 rounded-xl h-12 text-base font-medium shadow-sm transition-all"
                                         />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1">
-                                            <Label
-                                                htmlFor="school"
-                                                className="text-slate-300 text-xs uppercase tracking-wider"
-                                            >
-                                                School
-                                            </Label>
+                                        <div className="space-y-1.5">
+                                            <Label htmlFor="school" className="text-stone-500 text-xs font-bold uppercase tracking-widest pl-1">School</Label>
                                             <Input
                                                 id="school"
                                                 value={data.school}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "school",
-                                                        e.target.value,
-                                                    )
-                                                }
+                                                onChange={(e) => setData("school", e.target.value)}
                                                 placeholder="e.g., GNHS"
-                                                className="bg-slate-800 border-slate-700 text-white focus-visible:ring-amber-500 placeholder:text-slate-600"
+                                                className="bg-white/50 border-stone-200 text-slate-800 focus:bg-white focus:ring-4 focus:ring-pink-500/10 focus:border-pink-300 rounded-xl h-12 text-base font-medium shadow-sm transition-all"
                                             />
                                         </div>
-                                        <div className="space-y-1">
-                                            <Label
-                                                htmlFor="contact_number"
-                                                className="text-slate-300 text-xs uppercase tracking-wider"
-                                            >
-                                                Contact #
-                                            </Label>
+                                        <div className="space-y-1.5">
+                                            <Label htmlFor="contact_number" className="text-stone-500 text-xs font-bold uppercase tracking-widest pl-1">Contact #</Label>
                                             <Input
                                                 id="contact_number"
                                                 value={data.contact_number}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "contact_number",
-                                                        e.target.value,
-                                                    )
-                                                }
+                                                onChange={(e) => setData("contact_number", e.target.value)}
                                                 placeholder="0912..."
-                                                className="bg-slate-800 border-slate-700 text-white focus-visible:ring-amber-500 placeholder:text-slate-600"
+                                                className="bg-white/50 border-stone-200 text-slate-800 focus:bg-white focus:ring-4 focus:ring-pink-500/10 focus:border-pink-300 rounded-xl h-12 text-base font-medium shadow-sm transition-all"
                                             />
                                         </div>
                                     </div>
@@ -248,131 +217,127 @@ export default function KioskDashboard({
                             )}
                         </div>
 
-                        <div className="space-y-1 pt-2">
-                            <Label
-                                htmlFor="purpose"
-                                className="text-slate-300 text-xs uppercase tracking-wider"
-                            >
-                                Purpose of Visit *
-                            </Label>
+                        {/* Purpose Dropdown */}
+                        <div className="space-y-1.5">
+                            <Label htmlFor="purpose" className="text-stone-500 text-xs font-bold uppercase tracking-widest pl-1">Purpose of Visit <span className="text-pink-500">*</span></Label>
                             <select
                                 id="purpose"
                                 value={data.purpose}
-                                onChange={(e) =>
-                                    setData("purpose", e.target.value)
-                                }
-                                className="flex h-10 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                onChange={(e) => setData("purpose", e.target.value)}
+                                className="flex h-12 w-full rounded-xl border border-stone-200 bg-white/50 px-4 py-2 text-base text-slate-800 focus:bg-white focus:outline-none focus:ring-4 focus:ring-pink-500/10 focus:border-pink-300 font-medium shadow-sm transition-all"
                             >
-                                <option value="Research">
-                                    Research / Study
-                                </option>
-                                <option value="Borrow Books">
-                                    Borrow / Return Books
-                                </option>
-                                <option value="Computer Use">
-                                    Computer / Internet Use
-                                </option>
-                                <option value="Printing">
-                                    Printing Services
-                                </option>
+                                <option value="Research">Research / Study</option>
+                                <option value="Borrow Books">Borrow / Return Books</option>
+                                <option value="Computer Use">Computer / Internet Use</option>
+                                <option value="Printing">Printing Services</option>
                                 <option value="Reading">Leisure Reading</option>
                                 <option value="Other">Other</option>
                             </select>
                         </div>
 
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                                <Label className="text-slate-300 text-xs uppercase tracking-wider">
-                                    Signature (Optional)
-                                </Label>
+                        {/* Signature Pad */}
+                        <div className="space-y-2 pt-2">
+                            <div className="flex justify-between items-center pl-1">
+                                <Label className="text-stone-500 text-xs font-bold uppercase tracking-widest">Signature (Optional)</Label>
                                 <button
                                     type="button"
                                     onClick={() => sigPad.current?.clear()}
-                                    className="text-[10px] text-amber-500 hover:underline"
+                                    className="text-[10px] font-bold text-pink-500 hover:text-pink-700 uppercase tracking-widest bg-pink-50 px-3 py-1 rounded-md transition-colors"
                                 >
                                     Clear
                                 </button>
                             </div>
-                            <div className="bg-white rounded-md overflow-hidden">
+                            <div className="bg-white rounded-xl overflow-hidden border border-stone-200 shadow-sm focus-within:ring-4 focus-within:ring-pink-500/10 focus-within:border-pink-300 transition-all">
                                 <SignatureCanvas
                                     ref={sigPad}
-                                    canvasProps={{ className: "w-full h-24" }}
+                                    canvasProps={{ className: "w-full h-24 cursor-crosshair" }}
                                 />
                             </div>
                         </div>
 
+                        {/* Submit Button */}
                         <Button
                             type="submit"
                             disabled={processing}
-                            className="w-full h-14 text-lg bg-amber-600 hover:bg-amber-500 text-white shadow-md"
+                            className="w-full h-14 rounded-xl text-base font-black tracking-widest uppercase bg-pink-500 hover:bg-pink-600 text-white shadow-[0_8px_20px_rgba(236,72,153,0.25)] hover:shadow-[0_10px_25px_rgba(236,72,153,0.35)] hover:-translate-y-0.5 transition-all disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-none mt-6"
                         >
-                            {processing ? "Logging..." : "Log Time In"}
+                            {processing ? (
+                                <Icon icon="solar:spinner-bold-duotone" className="w-6 h-6 animate-spin" />
+                            ) : (
+                                <>
+                                    <Icon icon="solar:login-3-bold-duotone" className="w-6 h-6 mr-2" />
+                                    Log Time In
+                                </>
+                            )}
                         </Button>
                     </form>
                 </div>
             </div>
 
-            {/* Right Side: Active Visitors Grid */}
-            <div className="w-full md:w-7/12 lg:w-2/3 p-8 md:p-12 overflow-y-auto">
-                <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-2xl font-bold text-stone-800 flex items-center">
-                        <Users className="w-6 h-6 mr-3 text-stone-500" />{" "}
-                        Currently Inside
-                    </h2>
-                    <div className="bg-emerald-100 text-emerald-800 px-4 py-1.5 rounded-full text-sm font-bold flex items-center shadow-sm border border-emerald-200">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2"></span>
-                        {activeVisitors.length} Active
+            {/* RIGHT SIDE: Active Visitors Grid */}
+            <div className="w-full md:w-7/12 lg:w-[68%] p-8 md:p-12 overflow-y-auto relative z-10 flex flex-col">
+
+                {/* Clean Header */}
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4 border-b border-stone-200 pb-4">
+                    <div>
+                        <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
+                            Currently Inside
+                        </h2>
+                        <p className="text-stone-500 text-sm mt-1 font-medium">Real-time view of patrons currently in the library.</p>
+                    </div>
+                    <div className="bg-white text-pink-600 px-5 py-2.5 rounded-xl text-sm font-black tracking-wide flex items-center shadow-sm border border-pink-100">
+                        <span className="w-2.5 h-2.5 rounded-full bg-pink-500 animate-pulse mr-2.5 shadow-[0_0_10px_rgba(236,72,153,0.5)]"></span>
+                        {activeVisitors.length} Active {activeVisitors.length === 1 ? 'Visitor' : 'Visitors'}
                     </div>
                 </div>
 
+                {/* Empty State vs Grid */}
                 {activeVisitors.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-64 text-stone-400">
-                        <UserCheck className="w-16 h-16 mb-4 opacity-50" />
-                        <p className="text-lg">
-                            No active visitors at the moment.
-                        </p>
+                    <div className="flex-1 flex flex-col items-center justify-center text-stone-400 bg-white/40 backdrop-blur-sm rounded-[2rem] border-2 border-dashed border-pink-200/50 min-h-[50vh]">
+                        <Icon icon="solar:ghost-smile-bold-duotone" className="w-24 h-24 mb-4 text-pink-200" />
+                        <p className="text-2xl font-black text-stone-600 tracking-tight">The library is quiet right now.</p>
+                        <p className="text-base mt-2 font-medium">No active visitors logged in.</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                         {activeVisitors.map((visitor) => (
-                            <Card
+                            <div
                                 key={visitor.id}
-                                className="border-stone-200 shadow-sm hover:shadow-md transition-shadow bg-white"
+                                className="bg-white backdrop-blur-md border border-stone-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(236,72,153,0.12)] hover:-translate-y-1 transition-all duration-300 rounded-2xl overflow-hidden flex flex-col"
                             >
-                                <CardHeader className="p-4 pb-2 flex flex-row items-start justify-between">
-                                    <div className="truncate pr-2">
-                                        <CardTitle className="text-base font-bold text-stone-800 truncate">
-                                            {visitor.visitor_name}
-                                        </CardTitle>
-                                        <p className="text-xs text-stone-500 mt-0.5 truncate">
-                                            {visitor.address}
-                                        </p>
+                                <div className="p-5 flex-1 flex flex-col">
+                                    <div className="flex items-start gap-4 mb-4">
+                                        <div className="w-12 h-12 rounded-2xl bg-pink-50 flex items-center justify-center text-pink-500 shrink-0 border border-pink-100">
+                                            <Icon icon="solar:user-bold-duotone" className="w-6 h-6" />
+                                        </div>
+                                        <div className="overflow-hidden pt-0.5">
+                                            <h3 className="text-lg font-black text-slate-800 truncate" title={visitor.visitor_name}>
+                                                {visitor.visitor_name}
+                                            </h3>
+                                            <p className="text-[11px] font-bold text-stone-400 uppercase tracking-widest truncate mt-0.5" title={visitor.address}>
+                                                {visitor.address}
+                                            </p>
+                                        </div>
                                     </div>
-                                </CardHeader>
-                                <CardContent className="p-4 pt-0">
-                                    <div className="flex items-center justify-between mt-4">
-                                        <div className="flex items-center text-[10px] text-stone-500 bg-stone-100 px-2 py-1 rounded">
-                                            <Clock className="w-3 h-3 mr-1" />
-                                            In at{" "}
-                                            {new Date(
-                                                visitor.time_in,
-                                            ).toLocaleTimeString([], {
+
+                                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-stone-50">
+                                        <div className="flex items-center text-xs font-bold text-stone-500 bg-stone-50 px-3 py-1.5 rounded-lg border border-stone-100">
+                                            <Icon icon="solar:clock-circle-bold-duotone" className="w-4 h-4 mr-2 text-stone-400" />
+                                            {new Date(visitor.time_in).toLocaleTimeString([], {
                                                 hour: "2-digit",
                                                 minute: "2-digit",
                                             })}
                                         </div>
                                         <Button
                                             size="sm"
-                                            onClick={() =>
-                                                handleTimeOut(visitor.id)
-                                            }
-                                            className="bg-slate-900 hover:bg-slate-800 text-white text-[10px] h-7 px-3"
+                                            onClick={() => handleTimeOut(visitor.id)}
+                                            className="bg-white hover:bg-pink-500 text-pink-600 hover:text-white text-xs font-bold h-8 px-4 rounded-lg shadow-none border border-pink-200 hover:border-pink-500 transition-colors"
                                         >
                                             Time Out
                                         </Button>
                                     </div>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 )}
@@ -381,21 +346,10 @@ export default function KioskDashboard({
             {/* SECRET STAFF LOGOUT BUTTON */}
             <button
                 onClick={() => router.post(route("logout"))}
-                className="absolute bottom-4 right-6 text-stone-300 hover:text-stone-500 transition-colors focus:outline-none"
+                className="absolute bottom-6 right-6 text-stone-300 hover:text-pink-500 transition-colors focus:outline-none z-50 p-2"
                 title="Staff Access"
             >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                >
-                    <path
-                        fillRule="evenodd"
-                        d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                        clipRule="evenodd"
-                    />
-                </svg>
+                <Icon icon="solar:lock-keyhole-minimalistic-bold-duotone" className="w-6 h-6" />
             </button>
         </div>
     );
