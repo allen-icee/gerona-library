@@ -158,4 +158,5 @@ class PrintStationController extends Controller
     {
         return Excel::download(new PrintLogsExport, 'gerona_print_logs.csv');
     }
+
 }

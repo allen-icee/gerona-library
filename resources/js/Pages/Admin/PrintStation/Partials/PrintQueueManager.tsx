@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useForm, router } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
+import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/Components/ui/dialog";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
@@ -98,15 +99,19 @@ export default function PrintQueueManager({ queue }: { queue: PrintJob[] }) {
     };
 
     // Submit Handlers
-    const submitPrintLog = (e: React.FormEvent) => {
-        e.preventDefault();
+    const submitPrintLog = (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
         post(route("print-queue.log"), {
             preserveScroll: true,
             onSuccess: () => {
+                toast.success("Log saved and queue cleared!");
                 setLogModalOpen(false);
                 setSelectedFiles(prev => prev.filter(f => !activeJobs.find(j => j.filename === f)));
                 reset();
             },
+            onError: () => {
+                toast.error("Failed to save log. Please check your inputs.");
+            }
         });
     };
 
@@ -115,8 +120,12 @@ export default function PrintQueueManager({ queue }: { queue: PrintJob[] }) {
             data: { filenames: activeJobs.map(j => j.filename) },
             preserveScroll: true,
             onSuccess: () => {
+                toast.success("Files discarded successfully!");
                 setDiscardModalOpen(false);
                 setSelectedFiles(prev => prev.filter(f => !activeJobs.find(j => j.filename === f)));
+            },
+            onError: () => {
+                toast.error("Failed to discard files.");
             }
         });
     };
@@ -239,11 +248,23 @@ export default function PrintQueueManager({ queue }: { queue: PrintJob[] }) {
                     </DialogHeader>
                     <form onSubmit={submitPrintLog} className="space-y-4 py-2">
                         <div className="space-y-1.5">
-                            <Label className="text-xs font-bold uppercase text-slate-600 tracking-wider">Total Papers Used *</Label>
+                            <Label htmlFor="pages_printed" className="text-xs font-bold uppercase text-slate-600 tracking-wider">Total Papers Used *</Label>
                             <Input
+                                id="pages_printed"
                                 type="number" min="1" required autoFocus
                                 value={data.pages_printed}
-                                onChange={(e) => setData("pages_printed", parseInt(e.target.value) || 1)}
+                                onChange={(e) => {
+                                    // Strip out everything except numbers
+                                    const val = e.target.value.replace(/[^0-9]/g, "");
+                                    setData("pages_printed", parseInt(val) || 1);
+                                }}
+                                onKeyDown={(e) => {
+                                    // Final field acts as submit
+                                    if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        submitPrintLog();
+                                    }
+                                }}
                                 className="h-10 border-pink-200 focus-visible:ring-pink-500"
                             />
                         </div>
