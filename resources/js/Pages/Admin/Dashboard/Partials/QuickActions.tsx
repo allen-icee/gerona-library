@@ -17,7 +17,7 @@ export default function QuickActions() {
                     className="flex flex-col items-center justify-center p-5 bg-white border border-stone-200 rounded-2xl hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-100/50 transition-all group"
                 >
                     <div className="bg-emerald-50 p-3.5 rounded-xl group-hover:bg-gradient-to-br group-hover:from-emerald-400 group-hover:to-emerald-600 group-hover:text-white transition-all mb-3 text-emerald-500 shadow-sm">
-                        <Icon icon="solar:monitor-play-bold-duotone" className="w-7 h-7" />
+                        <Icon icon="lucide:monitor-play" className="w-7 h-7" />
                     </div>
                     <span className="font-bold text-xs text-stone-600 group-hover:text-emerald-700 uppercase tracking-wider">
                         Active Kiosk
