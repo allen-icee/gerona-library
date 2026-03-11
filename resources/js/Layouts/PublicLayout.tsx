@@ -3,19 +3,12 @@ import { Link, usePage } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
 import Footer from "@/Components/Public/Footer";
 
-interface Donation {
-    id: number;
-    donor_name: string;
-    items_donated: string;
-}
-
 export default function PublicLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    const { url, props } = usePage();
-    const recentDonations = props.recentDonations as Donation[] | undefined;
+    const { url } = usePage();
 
     const isHome = url === "/";
     const isCatalog = url.startsWith("/catalog");
@@ -24,65 +17,10 @@ export default function PublicLayout({
 
     return (
         <div className="min-h-screen bg-[#FFF0F5] font-sans text-stone-800 relative flex flex-col overflow-x-hidden selection:bg-pink-200">
-            <style>
-                {`
-                    @import url('https://fonts.googleapis.com/css2?family=Potta+One&display=swap');
-                    .font-potta { font-family: 'Potta One', system-ui, sans-serif; }
-
-                    @keyframes marquee-scroll {
-                        0% { transform: translateX(0); }
-                        100% { transform: translateX(-50%); }
-                    }
-
-                    .animate-marquee {
-                        display: flex;
-                        width: max-content;
-                        animation: marquee-scroll 40s linear infinite;
-                    }
-
-                    .animate-marquee:hover {
-                        animation-play-state: paused;
-                    }
-                `}
-            </style>
 
             {/* Background blobs */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-pink-200/40 rounded-full blur-3xl pointer-events-none z-0"></div>
             <div className="absolute bottom-[10%] right-[-5%] w-[30%] h-[50%] bg-rose-200/30 rounded-full blur-3xl pointer-events-none z-0"></div>
-
-            {/* FLOATING DONATION MARQUEE */}
-            {recentDonations && recentDonations.length > 0 && (
-                <div className="absolute top-0 left-0 w-full bg-pink-100/80 backdrop-blur-sm border-b border-pink-200 text-rose-800 overflow-hidden py-1.5 shadow-sm z-40 flex items-center">
-                    <div className="animate-marquee cursor-default pl-32 md:pl-48">
-                        {[1, 2].map((set) => (
-                            <div key={set} className="flex items-center gap-12 px-6">
-                                {recentDonations.map((donation) => (
-                                    <div
-                                        key={`${set}-${donation.id}`}
-                                        className="flex items-center gap-2 whitespace-nowrap"
-                                    >
-                                        <Icon
-                                            icon="fluent-emoji:sparkling-heart"
-                                            className="w-4 h-4"
-                                        />
-                                        <span className="font-semibold text-[11px] tracking-wider uppercase">
-                                            Thank you{" "}
-                                            <span className="text-rose-600 font-black">
-                                                {donation.donor_name}
-                                            </span>{" "}
-                                            for donating{" "}
-                                            <span className="underline decoration-1 underline-offset-2">
-                                                {donation.items_donated}
-                                            </span>
-                                            !
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
 
             {/* BOOKMARK LOGO */}
             <Link
@@ -91,7 +29,7 @@ export default function PublicLayout({
                 title="Library Home"
             >
                 <img
-                    src="/images/GeronaLibraryLogo.png"  // <-- path to your logo in public/images
+                    src="/images/GeronaLibraryLogo.png"
                     alt="Library Logo"
                     className="w-16 h-16 md:w-18 md:h-18 mb-1 group-hover:scale-110 transition-transform"
                 />
