@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { router, Link } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
+import { toast } from "sonner";
 import {
     Table,
     TableBody,
@@ -39,7 +40,11 @@ export default function DonationsTable({ donations }: { donations: any }) {
                 onSuccess: () => {
                     setIsDeleteModalOpen(false);
                     setItemToDelete(null);
+                    toast.success("Donation record deleted.");
                 },
+                onError: () => {
+                    toast.error("Failed to delete the donation record.");
+                }
             });
         }
     };
@@ -47,7 +52,6 @@ export default function DonationsTable({ donations }: { donations: any }) {
     return (
         <>
             <div className="bg-white border border-fuchsia-100 rounded-xl shadow-sm overflow-hidden flex flex-col">
-
                 <div className="bg-fuchsia-50/50 border-b border-fuchsia-100 px-4 py-3 flex items-center gap-2">
                     <Icon icon="solar:clipboard-list-bold-duotone" className="w-5 h-5 text-fuchsia-400" />
                     <h2 className="text-sm font-bold text-slate-800">Donation Records</h2>

@@ -33,20 +33,21 @@ class DonationController extends Controller
 
     public function store(Request $request)
     {
+        // In production, move this to a DonationStoreRequest class
         $validated = $request->validate([
             'donator_name' => 'required|string|max:255',
-            'donator_type' => 'required|string',
-            'donation_category' => 'required|string',
-            'description' => 'required|string',
+            'donator_type' => 'required|in:Individual,LGU Official,NGO / Foundation,Private Company',
+            'donation_category' => 'required|in:Books,Equipment,Furniture,Cash Grant,Other',
+            'description' => 'required|string|max:1000',
             'estimated_value' => 'nullable|numeric|min:0',
-            'date_received' => 'required|date',
+            'date_received' => 'required|date|before_or_equal:today',
         ]);
 
-        $validated['received_by'] = Auth::id();
+        $validated['received_by'] = Auth::id(); // Securely attribute to the logged-in staff
 
         Donation::create($validated);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Donation recorded successfully.');
     }
 
     public function destroy(Donation $donation)

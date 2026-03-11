@@ -4,15 +4,19 @@ import { useState, useEffect, useRef } from "react";
 import { Icon } from "@iconify/react";
 
 interface Props {
+    id?: string;               // <-- Added ID
+    nextElementId?: string;    // <-- Added this for Enter logic
     value: string;
     onChange: (value: string) => void;
     options: string[];
     error?: string;
     placeholder?: string;
-    theme?: "amber" | "fuchsia" | "rose" | "pink"; // <--- Add 'pink' here
+    theme?: "amber" | "fuchsia" | "rose" | "pink";
 }
 
 export default function CustomSelect({
+    id,
+    nextElementId,
     value,
     onChange,
     options,
@@ -25,27 +29,10 @@ export default function CustomSelect({
     const listRef = useRef<HTMLUListElement>(null);
 
     const themeStyles = {
-        amber: {
-            focus: "focus:border-amber-400 focus:ring-amber-400",
-            icon: "text-amber-500",
-            activeBg: "bg-amber-50 text-amber-700 font-bold",
-        },
-        fuchsia: {
-            focus: "focus:border-fuchsia-500 focus:ring-fuchsia-500",
-            icon: "text-fuchsia-500",
-            activeBg: "bg-fuchsia-50 text-fuchsia-700 font-bold",
-        },
-        rose: {
-            focus: "focus:border-rose-400 focus:ring-rose-400",
-            icon: "text-rose-500",
-            activeBg: "bg-rose-50 text-rose-700 font-bold",
-        },
-        // 👇 ADD THIS PINK BLOCK
-        pink: {
-            focus: "focus:border-pink-400 focus:ring-pink-400",
-            icon: "text-pink-500",
-            activeBg: "bg-pink-50 text-pink-700 font-bold",
-        },
+        amber: { focus: "focus:border-amber-400 focus:ring-amber-400", icon: "text-amber-500", activeBg: "bg-amber-50 text-amber-700 font-bold" },
+        fuchsia: { focus: "focus:border-fuchsia-500 focus:ring-fuchsia-500", icon: "text-fuchsia-500", activeBg: "bg-fuchsia-50 text-fuchsia-700 font-bold" },
+        rose: { focus: "focus:border-rose-400 focus:ring-rose-400", icon: "text-rose-500", activeBg: "bg-rose-50 text-rose-700 font-bold" },
+        pink: { focus: "focus:border-pink-400 focus:ring-pink-400", icon: "text-pink-500", activeBg: "bg-pink-50 text-pink-700 font-bold" },
     };
 
     const activeTheme = themeStyles[theme];
@@ -64,17 +51,21 @@ export default function CustomSelect({
                 const elStart = element.offsetTop;
                 const elEnd = element.offsetTop + element.clientHeight;
 
-                if (elStart < blockStart) {
-                    list.scrollTop = elStart;
-                } else if (elEnd > blockEnd) {
-                    list.scrollTop = elEnd - list.clientHeight;
-                }
+                if (elStart < blockStart) list.scrollTop = elStart;
+                else if (elEnd > blockEnd) list.scrollTop = elEnd - list.clientHeight;
             }
         }
     }, [selectedIndex, isOpen]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (!isOpen && (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter" || e.key === " ")) {
+        // If closed and user presses Enter, jump to next field instead of opening
+        if (!isOpen && e.key === "Enter") {
+            e.preventDefault();
+            if (nextElementId) document.getElementById(nextElementId)?.focus();
+            return;
+        }
+
+        if (!isOpen && (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === " ")) {
             e.preventDefault();
             setIsOpen(true);
             return;
@@ -83,9 +74,7 @@ export default function CustomSelect({
         if (isOpen) {
             if (e.key === "ArrowDown") {
                 e.preventDefault();
-                setSelectedIndex((prev) =>
-                    prev < options.length - 1 ? prev + 1 : prev
-                );
+                setSelectedIndex((prev) => prev < options.length - 1 ? prev + 1 : prev);
                 return;
             }
             if (e.key === "ArrowUp") {
@@ -97,6 +86,10 @@ export default function CustomSelect({
                 e.preventDefault();
                 onChange(options[selectedIndex]);
                 setIsOpen(false);
+                // Jump to next field after making a selection
+                if (nextElementId) {
+                    setTimeout(() => document.getElementById(nextElementId)?.focus(), 50);
+                }
                 return;
             }
             if (e.key === "Escape") {
@@ -110,6 +103,7 @@ export default function CustomSelect({
         <div className="relative w-full">
             <div className="relative">
                 <input
+                    id={id} // <-- Applied ID here
                     type="text"
                     className={`w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2.5 text-sm cursor-pointer caret-transparent outline-none transition-all focus:ring-1 ${activeTheme.focus} ${error ? "border-rose-500 focus:border-rose-500 focus:ring-rose-500" : ""}`}
                     value={value || ""}
@@ -146,6 +140,8 @@ export default function CustomSelect({
                                 e.preventDefault();
                                 onChange(opt);
                                 setIsOpen(false);
+                                // Jump to next field on mouse click selection too
+                                if (nextElementId) document.getElementById(nextElementId)?.focus();
                             }}
                             onMouseEnter={() => setSelectedIndex(index)}
                         >

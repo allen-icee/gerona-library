@@ -13,6 +13,7 @@ import {
     Settings,
     MonitorPlay,
 } from "lucide-react";
+import { Toaster } from "sonner"; // <-- Added sonner Toaster import
 
 import {
     DropdownMenu,
@@ -94,6 +95,9 @@ export default function AdminLayout({ children }: PropsWithChildren) {
 
     return (
         <div className="min-h-screen bg-[#FFF0F5] font-sans text-stone-800 relative flex flex-col overflow-x-hidden">
+            {/* Global Toaster Component Added Here */}
+            <Toaster position="top-right" richColors closeButton />
+
             {/* Background Blobs */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-pink-200/40 rounded-full blur-3xl pointer-events-none z-0"></div>
             <div className="absolute bottom-[10%] right-[-5%] w-[30%] h-[50%] bg-rose-200/30 rounded-full blur-3xl pointer-events-none z-0"></div>
@@ -149,7 +153,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
 
             {/* MAIN CONTENT AREA */}
             <div className="max-w-[100rem] mx-auto w-full flex-1 flex flex-row pt-10 md:pt-14 px-2 md:px-6 relative z-10 pb-4 md:pb-6">
-                
+
                 {/* 1. LEFT TABS (First 4 items) */}
                 <div className="flex flex-col space-y-1 md:space-y-1.5 pt-6 md:pt-8 items-end z-20 flex-shrink-0">
                     {leftNavItems.map((item, index) => {
@@ -197,11 +201,9 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                             <Link
                                 key={`right-${index}`}
                                 href={item.href}
-                                // Notice the flipped classes: rounded-r-xl, border-l-0, -translate-x-[2px]
                                 className={`flex flex-col items-center justify-center gap-1.5 bg-gradient-to-r text-white py-4 md:py-5 rounded-r-xl md:rounded-r-2xl shadow-lg border-2 border-l-0 relative z-20 -translate-x-[2px] w-[2.5rem] md:w-[3.2rem] hover:w-[2.8rem] md:hover:w-[3.8rem] transition-all duration-300 ${item.active}`}
                             >
                                 <IconComponent className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
-                                {/* Removed rotate-180 so it reads top-to-bottom nicely on the right edge */}
                                 <span className="[writing-mode:vertical-rl] font-bold text-[9px] md:text-xs tracking-widest uppercase leading-none">
                                     {item.name}
                                 </span>
@@ -210,11 +212,9 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                             <Link
                                 key={`right-${index}`}
                                 href={item.href}
-                                // Notice the flipped classes and shadow hover direction
                                 className={`flex flex-col items-center justify-center gap-1.5 py-3 md:py-4 rounded-r-lg md:rounded-r-xl transition-all duration-300 border-2 border-transparent hover:border-l-0 relative z-10 -translate-x-[2px] w-[2rem] md:w-[2.4rem] hover:w-[2.6rem] md:hover:w-[3.2rem] opacity-80 hover:opacity-100 hover:bg-white hover:shadow-[4px_0px_10px_rgba(251,207,232,0.6)] ${item.inactive}`}
                             >
                                 <IconComponent className="w-3.5 h-3.5 md:w-4 md:h-4 flex-shrink-0" />
-                                {/* Removed rotate-180 here too */}
                                 <span className="[writing-mode:vertical-rl] font-semibold text-[8px] md:text-[10px] tracking-widest uppercase leading-none">
                                     {item.name}
                                 </span>

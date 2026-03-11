@@ -1,12 +1,13 @@
 // resources/js/Pages/Admin/Donations/Partials/AddDonationModal.tsx
 
-import { useState, FormEventHandler } from "react";
+import { useState, FormEventHandler, KeyboardEvent } from "react";
 import { useForm } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
 import CustomSelect from "@/Components/CustomSelect";
+import { toast } from "sonner";
 import {
     Dialog,
     DialogContent,
@@ -37,8 +38,21 @@ export default function AddDonationModal() {
             onSuccess: () => {
                 setIsOpen(false);
                 reset();
+                toast.success("Donation logged successfully!");
             },
+            onError: () => {
+                toast.error("Failed to log donation. Please check the form.");
+            }
         });
+    };
+
+    // Handler to move focus to the next field on Enter key press
+    const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, nextElementId: string) => {
+        if (e.key === "Enter") {
+            e.preventDefault(); // Prevent accidental form submission
+            const nextEl = document.getElementById(nextElementId);
+            if (nextEl) nextEl.focus();
+        }
     };
 
     return (
@@ -59,7 +73,6 @@ export default function AddDonationModal() {
                 </Button>
             </DialogTrigger>
 
-            {/* Reduced the shadow/glow on the modal */}
             <DialogContent className="sm:max-w-[500px] bg-white rounded-2xl border-fuchsia-100 shadow-xl shadow-stone-200/50">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-black text-slate-800 flex items-center gap-2">
@@ -79,7 +92,12 @@ export default function AddDonationModal() {
                         <Input
                             id="donator_name"
                             value={data.donator_name}
-                            onChange={(e) => setData("donator_name", e.target.value)}
+                            onChange={(e) => {
+                                // Restriction: Allow letters, numbers, spaces, and basic punctuation
+                                const val = e.target.value.replace(/[^a-zA-Z0-9\s\-\.,&']/g, "");
+                                setData("donator_name", val);
+                            }}
+                            onKeyDown={(e) => handleKeyDown(e, "donator_type")}
                             required
                             placeholder="e.g., Mayor Dela Cruz or Rotary Club"
                             autoFocus
@@ -90,21 +108,39 @@ export default function AddDonationModal() {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                            <Label className="text-xs font-bold uppercase tracking-wider text-slate-600 z-30 relative">
+                            <Label htmlFor="donator_type" className="text-xs font-bold uppercase tracking-wider text-slate-600 z-30 relative">
                                 Donator Type
                             </Label>
                             <CustomSelect
+                                id="donator_type"
+                                value={data.donator_type}
+                                onChange={(val) => {
+                                    setData("donator_type", val);
+                                    document.getElementById("donation_category")?.focus();
+                                }}
+                                options={["Individual", "LGU Official", "NGO / Foundation", "Private Company"]}
+                                theme="fuchsia"
+                            />
+                            {/* Donator Type Field */}
+                            <CustomSelect
+                                id="donator_type"
+                                nextElementId="donation_category" // <-- Tells it where to jump next!
                                 value={data.donator_type}
                                 onChange={(val) => setData("donator_type", val)}
                                 options={["Individual", "LGU Official", "NGO / Foundation", "Private Company"]}
                                 theme="fuchsia"
                             />
+
                         </div>
                         <div className="space-y-1.5">
-                            <Label className="text-xs font-bold uppercase tracking-wider text-slate-600 z-30 relative">
+                            <Label htmlFor="donation_category" className="text-xs font-bold uppercase tracking-wider text-slate-600 z-30 relative">
                                 Category
                             </Label>
+
+                            {/* Category Field */}
                             <CustomSelect
+                                id="donation_category"
+                                nextElementId="description" // <-- Tells it where to jump next!
                                 value={data.donation_category}
                                 onChange={(val) => setData("donation_category", val)}
                                 options={["Books", "Equipment", "Furniture", "Cash Grant", "Other"]}
@@ -121,10 +157,12 @@ export default function AddDonationModal() {
                             id="description"
                             value={data.description}
                             onChange={(e) => setData("description", e.target.value)}
+                            onKeyDown={(e) => handleKeyDown(e, "estimated_value")}
                             required
                             placeholder="e.g., 50 Assorted Filipiniana Books"
                             className="h-10 border-fuchsia-200 focus-visible:ring-fuchsia-500"
                         />
+                        {errors.description && <p className="text-xs text-red-600 font-medium">{errors.description}</p>}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -134,14 +172,21 @@ export default function AddDonationModal() {
                             </Label>
                             <Input
                                 id="estimated_value"
-                                type="number"
-                                step="0.01"
-                                min="0"
+                                type="text"
                                 value={data.estimated_value}
-                                onChange={(e) => setData("estimated_value", e.target.value)}
+                                onChange={(e) => {
+                                    // Restriction: Allow only numbers and one decimal point
+                                    let val = e.target.value.replace(/[^0-9.]/g, "");
+                                    if (val.split('.').length > 2) {
+                                        val = val.replace(/\.+$/, "");
+                                    }
+                                    setData("estimated_value", val);
+                                }}
+                                onKeyDown={(e) => handleKeyDown(e, "date_received")}
                                 placeholder="0.00"
                                 className="h-10 border-fuchsia-200 focus-visible:ring-fuchsia-500"
                             />
+                            {errors.estimated_value && <p className="text-xs text-red-600 font-medium">{errors.estimated_value}</p>}
                         </div>
                         <div className="space-y-1.5">
                             <Label htmlFor="date_received" className="text-xs font-bold uppercase tracking-wider text-slate-600">
@@ -152,9 +197,15 @@ export default function AddDonationModal() {
                                 type="date"
                                 value={data.date_received}
                                 onChange={(e) => setData("date_received", e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                        submitDonation(e);
+                                    }
+                                }}
                                 required
                                 className="h-10 border-fuchsia-200 focus-visible:ring-fuchsia-500"
                             />
+                            {errors.date_received && <p className="text-xs text-red-600 font-medium">{errors.date_received}</p>}
                         </div>
                     </div>
 
