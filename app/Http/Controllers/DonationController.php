@@ -49,7 +49,23 @@ class DonationController extends Controller
 
         return redirect()->back()->with('success', 'Donation recorded successfully.');
     }
+    // app/Http/Controllers/DonationController.php
 
+    public function update(Request $request, Donation $donation)
+    {
+        $validated = $request->validate([
+            'donator_name' => 'required|string|max:255',
+            'donator_type' => 'required|in:Individual,LGU Official,NGO / Foundation,Private Company',
+            'donation_category' => 'required|in:Books,Equipment,Furniture,Cash Grant,Other',
+            'description' => 'required|string|max:1000',
+            'estimated_value' => 'nullable|numeric|min:0',
+            'date_received' => 'required|date|before_or_equal:today',
+        ]);
+
+        $donation->update($validated);
+
+        return redirect()->back()->with('success', 'Donation updated successfully.');
+    }
     public function destroy(Donation $donation)
     {
         $donation->delete();

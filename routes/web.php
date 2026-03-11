@@ -96,9 +96,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/admin/print-station/queue', [PrintStationController::class, 'destroyQueue'])->name('print-queue.destroy');
 
     // Global LGU Donations Tracker
+    // Global LGU Donations Tracker
     Route::get('/donations/export', [DonationController::class, 'export'])->name('donations.export');
     Route::get('/donations', [DonationController::class, 'index'])->name('donations.index');
     Route::post('/donations', [DonationController::class, 'store'])->name('donations.store');
+
+    // --> ADD THIS MISSING LINE <--
+    Route::put('/donations/{donation}', [DonationController::class, 'update'])->name('donations.update');
+
     Route::delete('/donations/{donation}', [DonationController::class, 'destroy'])->name('donations.destroy');
 });
 

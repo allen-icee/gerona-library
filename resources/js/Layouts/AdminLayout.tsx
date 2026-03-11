@@ -12,8 +12,12 @@ import {
     Gift,
     Settings,
     MonitorPlay,
+    CheckCircle2,
+    AlertCircle,
+    AlertTriangle,
+    Info
 } from "lucide-react";
-import { Toaster } from "sonner"; // <-- Added sonner Toaster import
+import { Toaster } from "sonner";
 
 import {
     DropdownMenu,
@@ -89,14 +93,38 @@ export default function AdminLayout({ children }: PropsWithChildren) {
         },
     ];
 
-    // Split the tabs: 4 on the left, 3 on the right
     const leftNavItems = navItems.slice(0, 4);
     const rightNavItems = navItems.slice(4);
 
     return (
         <div className="min-h-screen bg-[#FFF0F5] font-sans text-stone-800 relative flex flex-col overflow-x-hidden">
-            {/* Global Toaster Component Added Here */}
-            <Toaster position="top-right" richColors closeButton />
+
+            {/* AESTHETIC TOASTER - NO CLOSE BUTTON */}
+            <Toaster
+                position="bottom-center"
+                icons={{
+                    success: <CheckCircle2 className="w-5 h-5 !text-emerald-500 flex-shrink-0" />,
+                    error: <AlertCircle className="w-5 h-5 !text-rose-500 flex-shrink-0" />,
+                    warning: <AlertTriangle className="w-5 h-5 !text-amber-500 flex-shrink-0" />,
+                    info: <Info className="w-5 h-5 !text-fuchsia-500 flex-shrink-0" />,
+                }}
+                toastOptions={{
+                    classNames: {
+                        // Base aesthetic: Crisp white card, soft shadow, clean padding
+                        toast: 'group flex items-center gap-3 w-full sm:min-w-[320px] !bg-white !rounded-2xl !shadow-[0_8px_30px_rgb(0,0,0,0.08)] !p-4 font-sans !border !border-stone-100 transition-all duration-300',
+
+                        // Typography: Dark slate for title, soft grey for description
+                        title: 'text-sm font-black tracking-tight !text-slate-800 leading-none',
+                        description: 'text-xs font-medium !text-slate-500 mt-1',
+
+                        // Status Accents: Thick colored left border to beautifully highlight the status
+                        success: '!border-l-4 !border-l-emerald-500',
+                        error: '!border-l-4 !border-l-rose-500',
+                        warning: '!border-l-4 !border-l-amber-500',
+                        info: '!border-l-4 !border-l-fuchsia-500',
+                    },
+                }}
+            />
 
             {/* Background Blobs */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-pink-200/40 rounded-full blur-3xl pointer-events-none z-0"></div>

@@ -20,8 +20,8 @@ import {
     DialogTitle,
     DialogFooter,
 } from "@/Components/ui/dialog";
+import EditDonationModal from "./EditDonationModal";
 
-// We define formatPHP here directly to avoid circular imports!
 const formatPHP = (amount: number) => {
     return new Intl.NumberFormat("en-PH", {
         style: "currency",
@@ -32,6 +32,7 @@ const formatPHP = (amount: number) => {
 export default function DonationsTable({ donations }: { donations: any }) {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<number | null>(null);
+    const [itemToEdit, setItemToEdit] = useState<any | null>(null);
 
     const confirmDelete = () => {
         if (itemToDelete !== null) {
@@ -40,7 +41,8 @@ export default function DonationsTable({ donations }: { donations: any }) {
                 onSuccess: () => {
                     setIsDeleteModalOpen(false);
                     setItemToDelete(null);
-                    toast.success("Donation record deleted.");
+                    // Reverted back to success!
+                    toast.success("Donation record deleted successfully.");
                 },
                 onError: () => {
                     toast.error("Failed to delete the donation record.");
@@ -104,7 +106,14 @@ export default function DonationsTable({ donations }: { donations: any }) {
                                                 {donation.receiver?.name}
                                             </p>
                                         </TableCell>
-                                        <TableCell className="text-right pr-6 py-3">
+                                        <TableCell className="text-right pr-6 py-3 space-x-2">
+                                            <button
+                                                onClick={() => setItemToEdit(donation)}
+                                                className="p-2 text-stone-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                                                title="Edit Record"
+                                            >
+                                                <Icon icon="solar:pen-bold" className="w-4 h-4" />
+                                            </button>
                                             <button
                                                 onClick={() => {
                                                     setItemToDelete(donation.id);
@@ -141,7 +150,14 @@ export default function DonationsTable({ donations }: { donations: any }) {
                 )}
             </div>
 
-            {/* CUSTOM DISCARD MODAL - Reduced Glow */}
+            {/* EDIT MODAL */}
+            <EditDonationModal
+                donation={itemToEdit}
+                isOpen={!!itemToEdit}
+                onClose={() => setItemToEdit(null)}
+            />
+
+            {/* CUSTOM DISCARD MODAL */}
             <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
                 <DialogContent className="sm:max-w-sm bg-white rounded-2xl border-rose-100 shadow-xl shadow-stone-200/50">
                     <DialogHeader>

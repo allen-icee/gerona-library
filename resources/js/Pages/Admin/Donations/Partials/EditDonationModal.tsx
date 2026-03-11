@@ -1,6 +1,6 @@
-// resources/js/Pages/Admin/Donations/Partials/AddDonationModal.tsx
+// resources/js/Pages/Admin/Donations/Partials/EditDonationModal.tsx
 
-import { useState, FormEventHandler, KeyboardEvent } from "react";
+import { FormEventHandler, KeyboardEvent, useEffect } from "react";
 import { useForm } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
 import { Button } from "@/Components/ui/button";
@@ -14,39 +14,49 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
     DialogFooter,
 } from "@/Components/ui/dialog";
 
-export default function AddDonationModal() {
-    const [isOpen, setIsOpen] = useState(false);
-
-    const { data, setData, post, processing, errors, reset, clearErrors } =
+export default function EditDonationModal({ donation, isOpen, onClose }: { donation: any, isOpen: boolean, onClose: () => void }) {
+    const { data, setData, put, processing, errors, reset, clearErrors } =
         useForm({
             donator_name: "",
             donator_type: "Individual",
             donation_category: "Books",
             description: "",
             estimated_value: "",
-            date_received: new Date().toISOString().split("T")[0],
+            date_received: "",
         });
 
-    const submitDonation: FormEventHandler = (e) => {
+    // Populate data when a record is passed to the modal
+    useEffect(() => {
+        if (donation && isOpen) {
+            setData({
+                donator_name: donation.donator_name || "",
+                donator_type: donation.donator_type || "Individual",
+                donation_category: donation.donation_category || "Books",
+                description: donation.description || "",
+                estimated_value: donation.estimated_value || "",
+                date_received: donation.date_received ? donation.date_received.split("T")[0] : "",
+            });
+        }
+    }, [donation, isOpen]);
+
+    const submitUpdate: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route("donations.store"), {
+        put(route("donations.update", donation.id), {
             preserveScroll: true,
             onSuccess: () => {
-                setIsOpen(false);
+                onClose();
                 reset();
-                toast.success("Donation logged successfully!");
+                toast.success("Donation updated successfully!");
             },
             onError: () => {
-                toast.error("Failed to log donation. Please check the form.");
+                toast.error("Failed to update donation. Please check the form.");
             }
         });
     };
 
-    // Handler to move focus to the next field on Enter key press
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, nextElementId: string) => {
         if (e.key === "Enter") {
             e.preventDefault();
@@ -59,45 +69,37 @@ export default function AddDonationModal() {
         <Dialog
             open={isOpen}
             onOpenChange={(open) => {
-                setIsOpen(open);
                 if (!open) {
-                    reset();
+                    onClose();
                     clearErrors();
                 }
             }}
         >
-            <DialogTrigger className="inline-flex items-center justify-center bg-gradient-to-r from-fuchsia-400 to-fuchsia-500 hover:from-fuchsia-500 hover:to-fuchsia-600 text-white shadow-md shadow-fuchsia-200 border-none font-bold text-xs px-4 py-2 h-[34px] rounded-lg transition-all duration-200">
-                <Icon icon="solar:add-circle-bold-duotone" className="w-4 h-4 mr-2" />
-                Log Donation
-            </DialogTrigger>
-
             <DialogContent className="sm:max-w-[500px] bg-white rounded-2xl border-fuchsia-100 shadow-xl shadow-stone-200/50">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-black text-slate-800 flex items-center gap-2">
-                        <Icon icon="solar:gift-bold-duotone" className="w-6 h-6 text-fuchsia-500" />
-                        Log New Donation
+                        <Icon icon="solar:pen-bold-duotone" className="w-6 h-6 text-fuchsia-500" />
+                        Edit Donation Record
                     </DialogTitle>
                     <DialogDescription className="text-xs text-slate-500 font-medium">
-                        Record a new asset or grant given to the municipal library.
+                        Modify the details for this donation record.
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={submitDonation} className="space-y-4 py-2">
+                <form onSubmit={submitUpdate} className="space-y-4 py-2">
                     <div className="space-y-1.5">
-                        <Label htmlFor="donator_name" className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                        <Label htmlFor="edit_donator_name" className="text-xs font-bold uppercase tracking-wider text-slate-600">
                             Donator Name / Organization *
                         </Label>
                         <Input
-                            id="donator_name"
+                            id="edit_donator_name"
                             value={data.donator_name}
                             onChange={(e) => {
-                                // Letters, numbers, spaces, and basic punctuation
                                 const val = e.target.value.replace(/[^a-zA-Z0-9\s\-.,&']/g, "");
                                 setData("donator_name", val);
                             }}
-                            onKeyDown={(e) => handleKeyDown(e, "donator_type")}
+                            onKeyDown={(e) => handleKeyDown(e, "edit_donator_type")}
                             required
-                            placeholder="e.g., Mayor Dela Cruz or Rotary Club"
                             autoFocus
                             className="h-10 border-fuchsia-200 focus-visible:ring-fuchsia-500"
                         />
@@ -106,12 +108,12 @@ export default function AddDonationModal() {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                            <Label htmlFor="donator_type" className="text-xs font-bold uppercase tracking-wider text-slate-600 z-30 relative">
+                            <Label htmlFor="edit_donator_type" className="text-xs font-bold uppercase tracking-wider text-slate-600 z-30 relative">
                                 Donator Type
                             </Label>
                             <CustomSelect
-                                id="donator_type"
-                                nextElementId="donation_category"
+                                id="edit_donator_type"
+                                nextElementId="edit_donation_category"
                                 value={data.donator_type}
                                 onChange={(val) => setData("donator_type", val)}
                                 options={["Individual", "LGU Official", "NGO / Foundation", "Private Company"]}
@@ -119,12 +121,12 @@ export default function AddDonationModal() {
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <Label htmlFor="donation_category" className="text-xs font-bold uppercase tracking-wider text-slate-600 z-30 relative">
+                            <Label htmlFor="edit_donation_category" className="text-xs font-bold uppercase tracking-wider text-slate-600 z-30 relative">
                                 Category
                             </Label>
                             <CustomSelect
-                                id="donation_category"
-                                nextElementId="description"
+                                id="edit_donation_category"
+                                nextElementId="edit_description"
                                 value={data.donation_category}
                                 onChange={(val) => setData("donation_category", val)}
                                 options={["Books", "Equipment", "Furniture", "Cash Grant", "Other"]}
@@ -134,20 +136,18 @@ export default function AddDonationModal() {
                     </div>
 
                     <div className="space-y-1.5">
-                        <Label htmlFor="description" className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                        <Label htmlFor="edit_description" className="text-xs font-bold uppercase tracking-wider text-slate-600">
                             Item Description *
                         </Label>
                         <Input
-                            id="description"
+                            id="edit_description"
                             value={data.description}
                             onChange={(e) => {
-                                // Allow basic safe description characters
                                 const val = e.target.value.replace(/[^a-zA-Z0-9\s\-.,&'()]/g, "");
                                 setData("description", val);
                             }}
-                            onKeyDown={(e) => handleKeyDown(e, "estimated_value")}
+                            onKeyDown={(e) => handleKeyDown(e, "edit_estimated_value")}
                             required
-                            placeholder="e.g., 50 Assorted Filipiniana Books"
                             className="h-10 border-fuchsia-200 focus-visible:ring-fuchsia-500"
                         />
                         {errors.description && <p className="text-xs text-red-600 font-medium">{errors.description}</p>}
@@ -155,38 +155,36 @@ export default function AddDonationModal() {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                            <Label htmlFor="estimated_value" className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                            <Label htmlFor="edit_estimated_value" className="text-xs font-bold uppercase tracking-wider text-slate-600">
                                 Est. Value (₱) <span className="text-stone-400 normal-case tracking-normal">(Optional)</span>
                             </Label>
                             <Input
-                                id="estimated_value"
+                                id="edit_estimated_value"
                                 type="text"
                                 value={data.estimated_value}
                                 onChange={(e) => {
-                                    // Number and single decimal point only
                                     let val = e.target.value.replace(/[^0-9.]/g, "");
                                     val = val.replace(/(\..*?)\..*/g, '$1');
                                     setData("estimated_value", val);
                                 }}
-                                onKeyDown={(e) => handleKeyDown(e, "date_received")}
-                                placeholder="0.00"
+                                onKeyDown={(e) => handleKeyDown(e, "edit_date_received")}
                                 className="h-10 border-fuchsia-200 focus-visible:ring-fuchsia-500"
                             />
                             {errors.estimated_value && <p className="text-xs text-red-600 font-medium">{errors.estimated_value}</p>}
                         </div>
                         <div className="space-y-1.5">
-                            <Label htmlFor="date_received" className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                            <Label htmlFor="edit_date_received" className="text-xs font-bold uppercase tracking-wider text-slate-600">
                                 Date Received *
                             </Label>
                             <Input
-                                id="date_received"
+                                id="edit_date_received"
                                 type="date"
                                 value={data.date_received}
                                 onChange={(e) => setData("date_received", e.target.value)}
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter") {
                                         e.preventDefault();
-                                        submitDonation(e);
+                                        submitUpdate(e);
                                     }
                                 }}
                                 required
@@ -200,7 +198,7 @@ export default function AddDonationModal() {
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={() => setIsOpen(false)}
+                            onClick={onClose}
                             className="rounded-xl font-bold text-slate-500 hover:bg-slate-100 border-stone-200"
                         >
                             Cancel
@@ -210,7 +208,7 @@ export default function AddDonationModal() {
                             disabled={processing}
                             className="bg-gradient-to-r from-fuchsia-400 to-fuchsia-500 hover:from-fuchsia-500 hover:to-fuchsia-600 text-white shadow-md font-bold rounded-xl border-none"
                         >
-                            {processing ? "Saving..." : "Save Record"}
+                            {processing ? "Updating..." : "Update Record"}
                         </Button>
                     </DialogFooter>
                 </form>
