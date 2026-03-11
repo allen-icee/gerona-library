@@ -5,6 +5,7 @@ import PublicLayout from "@/Layouts/PublicLayout";
 import { Head, useForm, Link } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
 import { Input } from "@/Components/ui/input";
+import CustomSelect from "@/Components/CustomSelect"; // Import our new dropdown
 
 interface Book {
     id: number;
@@ -15,7 +16,7 @@ interface Book {
     available_copies: number;
 }
 
-export default function Catalog({ books, filters, categories }: any) {
+export default function Catalog({ books, filters = {}, categories = [] }: any) {
     const { data, setData, get } = useForm({
         search: filters.search || "",
         category: filters.category || "",
@@ -30,6 +31,20 @@ export default function Catalog({ books, filters, categories }: any) {
 
     const applyFilters = () => {
         get(route("catalog.index"), { preserveState: true });
+    };
+
+    // Helper dictionaries for the Sort Select to map labels <-> values
+    const sortValueMap: Record<string, string> = {
+        "Default": "",
+        "Title": "title",
+        "Author": "author",
+        "Newest": "newest",
+    };
+    const sortDisplayMap: Record<string, string> = {
+        "": "Default",
+        "title": "Title",
+        "author": "Author",
+        "newest": "Newest",
     };
 
     return (
@@ -68,7 +83,7 @@ export default function Catalog({ books, filters, categories }: any) {
                             value={data.search}
                             onChange={(e) => setData("search", e.target.value)}
                             placeholder="Search title, author, ISBN..."
-                            className="h-12 pl-12 pr-4 rounded-xl border-2 border-rose-100 focus:border-rose-400 text-sm bg-white shadow-sm"
+                            className="h-12 pl-12 pr-4 rounded-xl border-2 border-rose-100 focus-visible:border-rose-400 focus-visible:ring-rose-400 text-sm bg-white shadow-sm"
                         />
 
                         <Icon
@@ -93,62 +108,46 @@ export default function Catalog({ books, filters, categories }: any) {
 
                             {/* CATEGORY */}
                             <div>
-                                <label className="text-xs font-bold uppercase text-stone-600 mb-2 block">
+                                <label className="text-xs font-bold uppercase text-stone-600 mb-2 block relative z-30">
                                     Category
                                 </label>
-
-                               <select
-    value={data.category ?? ""} 
-    onChange={(e) => setData("category", e.target.value)}
-    className="w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2.5 text-sm focus:border-rose-400"
->
-                                    <option value="">All Categories</option>
-
-                                    {categories?.map((cat: string) => (
-                                        <option key={cat} value={cat}>
-                                            {cat}
-                                        </option>
-                                    ))}
-                                </select>
+                                <CustomSelect
+                                    value={data.category || "All Categories"}
+                                    onChange={(val) => setData("category", val === "All Categories" ? "" : val)}
+                                    options={["All Categories", ...(categories || [])]}
+                                    theme="rose"
+                                />
                             </div>
 
                             {/* AVAILABILITY */}
                             <div>
-                                <label className="text-xs font-bold uppercase text-stone-600 mb-2 block">
+                                <label className="text-xs font-bold uppercase text-stone-600 mb-2 block relative z-20">
                                     Availability
                                 </label>
-
-                               <select
-    value={data.available ?? ""}
-    onChange={(e) => setData("available", e.target.value)}
-    className="w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2.5 text-sm focus:border-rose-400"
->
-                                    <option value="">All</option>
-                                    <option value="1">Available Only</option>
-                                </select>
+                                <CustomSelect
+                                    value={data.available === "1" ? "Available Only" : "All"}
+                                    onChange={(val) => setData("available", val === "Available Only" ? "1" : "")}
+                                    options={["All", "Available Only"]}
+                                    theme="rose"
+                                />
                             </div>
 
                             {/* SORT */}
                             <div>
-                                <label className="text-xs font-bold uppercase text-stone-600 mb-2 block">
+                                <label className="text-xs font-bold uppercase text-stone-600 mb-2 block relative z-10">
                                     Sort By
                                 </label>
-
-                                <select
-    value={data.sort ?? ""}
-    onChange={(e) => setData("sort", e.target.value)}
-    className="w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2.5 text-sm focus:border-rose-400"
->
-                                    <option value="">Default</option>
-                                    <option value="title">Title</option>
-                                    <option value="author">Author</option>
-                                    <option value="newest">Newest</option>
-                                </select>
+                                <CustomSelect
+                                    value={sortDisplayMap[data.sort || ""]}
+                                    onChange={(val) => setData("sort", sortValueMap[val])}
+                                    options={["Default", "Title", "Author", "Newest"]}
+                                    theme="rose"
+                                />
                             </div>
 
                             <button
                                 onClick={applyFilters}
-                                className="w-full bg-rose-50 text-rose-600 font-bold text-sm py-3 rounded-xl hover:bg-rose-100 transition border border-rose-200 mt-2"
+                                className="w-full bg-rose-50 text-rose-600 font-bold text-sm py-3 rounded-xl hover:bg-rose-100 transition border border-rose-200 mt-2 shadow-sm"
                             >
                                 Apply Filters
                             </button>
@@ -218,11 +217,10 @@ export default function Catalog({ books, filters, categories }: any) {
                                             {/* AVAILABILITY BADGE */}
                                             <div className="absolute top-2 right-2">
                                                 <div
-                                                    className={`text-white text-[9px] px-2 py-1 rounded-md font-bold shadow-sm ${
-                                                        book.available_copies > 0
-                                                            ? "bg-emerald-500"
-                                                            : "bg-slate-700"
-                                                    }`}
+                                                    className={`text-white text-[9px] px-2 py-1 rounded-md font-bold shadow-sm ${book.available_copies > 0
+                                                        ? "bg-emerald-500"
+                                                        : "bg-slate-700"
+                                                        }`}
                                                 >
                                                     {book.available_copies > 0
                                                         ? "IN"
@@ -267,11 +265,10 @@ export default function Catalog({ books, filters, categories }: any) {
                                     <Link
                                         key={i}
                                         href={link.url || "#"}
-                                        className={`px-4 py-2 text-sm font-medium rounded-lg transition ${
-                                            link.active
-                                                ? "bg-rose-500 text-white shadow-sm"
-                                                : "bg-white text-stone-600 border border-stone-200 hover:border-rose-300 hover:text-rose-500"
-                                        } ${!link.url && "opacity-50 cursor-not-allowed"}`}
+                                        className={`px-4 py-2 text-sm font-medium rounded-lg transition ${link.active
+                                            ? "bg-rose-500 text-white shadow-sm"
+                                            : "bg-white text-stone-600 border border-stone-200 hover:border-rose-300 hover:text-rose-500"
+                                            } ${!link.url && "opacity-50 cursor-not-allowed"}`}
                                         dangerouslySetInnerHTML={{
                                             __html: link.label,
                                         }}

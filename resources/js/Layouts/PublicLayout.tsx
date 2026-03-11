@@ -20,7 +20,7 @@ export default function PublicLayout({
     const isHome = url === "/";
     const isCatalog = url.startsWith("/catalog");
     const isPrint = url.startsWith("/print-station");
-    const isRegister = url.startsWith("/register");
+    const isRegister = url.startsWith("/get-card");
 
     return (
         <div className="min-h-screen bg-[#FFF0F5] font-sans text-stone-800 relative flex flex-col overflow-x-hidden selection:bg-pink-200">
@@ -86,19 +86,19 @@ export default function PublicLayout({
 
             {/* BOOKMARK LOGO */}
             <Link
-  href="/"
-  className="absolute top-0 left-4 md:left-6 bg-rose-500 text-white px-3 md:px-5 py-3 md:py-4 rounded-b-[1.2rem] md:rounded-b-[1.5rem] shadow-lg shadow-pink-300/50 border-2 border-t-0 border-pink-200 z-50 flex flex-col items-center group transition-all duration-300 hover:pt-6 hover:pb-5"
-  title="Library Home"
->
-  <img
-    src="/images/GeronaLibraryLogo.png"  // <-- path to your logo in public/images
-    alt="Library Logo"
-    className="w-16 h-16 md:w-18 md:h-18 mb-1 group-hover:scale-110 transition-transform"
-  />
-  <span className="font-potta text-[9px] md:text-[11px] uppercase tracking-wider leading-none mt-1">
-    Library
-  </span>
-</Link>
+                href="/"
+                className="absolute top-0 left-4 md:left-6 bg-rose-500 text-white px-3 md:px-5 py-3 md:py-4 rounded-b-[1.2rem] md:rounded-b-[1.5rem] shadow-lg shadow-pink-300/50 border-2 border-t-0 border-pink-200 z-50 flex flex-col items-center group transition-all duration-300 hover:pt-6 hover:pb-5"
+                title="Library Home"
+            >
+                <img
+                    src="/images/GeronaLibraryLogo.png"  // <-- path to your logo in public/images
+                    alt="Library Logo"
+                    className="w-16 h-16 md:w-18 md:h-18 mb-1 group-hover:scale-110 transition-transform"
+                />
+                <span className="font-potta text-[9px] md:text-[11px] uppercase tracking-wider leading-none mt-1">
+                    Library
+                </span>
+            </Link>
 
             {/* MAIN CONTENT AREA */}
             <div className="max-w-[100rem] mx-auto w-full flex flex-col flex-1 pt-16 md:pt-20 px-4 md:px-8 relative z-10">
@@ -107,11 +107,10 @@ export default function PublicLayout({
                 <div className="flex flex-row space-x-1.5 md:space-x-2 items-end z-20 pl-20 md:pl-5 no-scrollbar overflow-x-auto pr-4">
                     <Link
                         href="/"
-                        className={`flex items-center gap-1.5 px-4 md:px-6 py-2.5 md:py-3.5 rounded-t-xl md:rounded-t-2xl border-2 border-b-0 relative translate-y-[2px] transition-all duration-300 min-w-max ${
-                            isHome
-                                ? "bg-gradient-to-b from-rose-400 to-rose-500 text-white border-rose-200 z-20 pb-4 md:pb-5 shadow-[0_-4px_12px_rgba(244,114,182,0.4)]"
-                                : "bg-rose-100/80 text-rose-500 hover:bg-white hover:text-rose-600 border-transparent hover:border-rose-200 z-10 hover:-translate-y-1 hover:pb-4 hover:shadow-[0_-4px_12px_rgba(251,207,232,0.6)]"
-                        }`}
+                        className={`flex items-center gap-1.5 px-4 md:px-6 py-2.5 md:py-3.5 rounded-t-xl md:rounded-t-2xl border-2 border-b-0 relative translate-y-[2px] transition-all duration-300 min-w-max ${isHome
+                            ? "bg-gradient-to-b from-rose-400 to-rose-500 text-white border-rose-200 z-20 pb-4 md:pb-5 shadow-[0_-4px_12px_rgba(244,114,182,0.4)]"
+                            : "bg-rose-100/80 text-rose-500 hover:bg-white hover:text-rose-600 border-transparent hover:border-rose-200 z-10 hover:-translate-y-1 hover:pb-4 hover:shadow-[0_-4px_12px_rgba(251,207,232,0.6)]"
+                            }`}
                     >
                         <Icon icon="solar:home-smile-bold-duotone" className="w-4 h-4 md:w-5 md:h-5" />
                         <span className="font-potta text-[10px] md:text-[12px] tracking-wider uppercase mt-0.5">
@@ -121,11 +120,10 @@ export default function PublicLayout({
 
                     <Link
                         href={route("catalog.index")}
-                        className={`flex items-center gap-1.5 px-4 md:px-6 py-2.5 md:py-3.5 rounded-t-xl md:rounded-t-2xl border-2 border-b-0 relative translate-y-[2px] transition-all duration-300 min-w-max ${
-                            isCatalog
-                                ? "bg-gradient-to-b from-pink-400 to-pink-500 text-white border-pink-200 z-20 pb-4 md:pb-5 shadow-[0_-4px_12px_rgba(244,114,182,0.4)]"
-                                : "bg-pink-100/80 text-pink-500 hover:bg-white hover:text-pink-600 border-transparent hover:border-pink-200 z-10 hover:-translate-y-1 hover:pb-4 hover:shadow-[0_-4px_12px_rgba(251,207,232,0.6)]"
-                        }`}
+                        className={`flex items-center gap-1.5 px-4 md:px-6 py-2.5 md:py-3.5 rounded-t-xl md:rounded-t-2xl border-2 border-b-0 relative translate-y-[2px] transition-all duration-300 min-w-max ${isCatalog
+                            ? "bg-gradient-to-b from-pink-400 to-pink-500 text-white border-pink-200 z-20 pb-4 md:pb-5 shadow-[0_-4px_12px_rgba(244,114,182,0.4)]"
+                            : "bg-pink-100/80 text-pink-500 hover:bg-white hover:text-pink-600 border-transparent hover:border-pink-200 z-10 hover:-translate-y-1 hover:pb-4 hover:shadow-[0_-4px_12px_rgba(251,207,232,0.6)]"
+                            }`}
                     >
                         <Icon icon="solar:magnifer-bold-duotone" className="w-4 h-4 md:w-5 md:h-5" />
                         <span className="font-potta text-[10px] md:text-[12px] tracking-wider uppercase mt-0.5">
@@ -135,11 +133,10 @@ export default function PublicLayout({
 
                     <Link
                         href={route("print.index")}
-                        className={`flex items-center gap-1.5 px-3 md:px-5 py-2 md:py-3 rounded-t-lg md:rounded-t-xl border-2 border-b-0 relative translate-y-[2px] transition-all duration-300 min-w-max ${
-                            isPrint
-                                ? "bg-gradient-to-b from-fuchsia-400 to-fuchsia-500 text-white border-fuchsia-200 z-20 pb-4 md:pb-5 shadow-[0_-4px_12px_rgba(217,70,239,0.4)]"
-                                : "bg-fuchsia-100/80 text-fuchsia-500 hover:bg-white hover:text-fuchsia-600 border-transparent hover:border-fuchsia-200 z-10 hover:-translate-y-1 hover:pb-3 md:hover:pb-4 hover:shadow-[0_-4px_12px_rgba(251,207,232,0.6)]"
-                        }`}
+                        className={`flex items-center gap-1.5 px-3 md:px-5 py-2 md:py-3 rounded-t-lg md:rounded-t-xl border-2 border-b-0 relative translate-y-[2px] transition-all duration-300 min-w-max ${isPrint
+                            ? "bg-gradient-to-b from-fuchsia-400 to-fuchsia-500 text-white border-fuchsia-200 z-20 pb-4 md:pb-5 shadow-[0_-4px_12px_rgba(217,70,239,0.4)]"
+                            : "bg-fuchsia-100/80 text-fuchsia-500 hover:bg-white hover:text-fuchsia-600 border-transparent hover:border-fuchsia-200 z-10 hover:-translate-y-1 hover:pb-3 md:hover:pb-4 hover:shadow-[0_-4px_12px_rgba(251,207,232,0.6)]"
+                            }`}
                     >
                         <Icon icon="solar:printer-minimalistic-bold-duotone" className="w-4 h-4" />
                         <span className="font-potta text-[9px] md:text-[11px] tracking-wider uppercase mt-0.5">
@@ -149,11 +146,10 @@ export default function PublicLayout({
 
                     <Link
                         href={route("register.index")}
-                        className={`flex items-center gap-1.5 px-3 md:px-5 py-2 md:py-3 rounded-t-lg md:rounded-t-xl border-2 border-b-0 relative translate-y-[2px] transition-all duration-300 min-w-max ${
-                            isRegister
-                                ? "bg-gradient-to-b from-amber-400 to-amber-500 text-amber-950 border-amber-200 z-20 pb-4 md:pb-5 shadow-[0_-4px_12px_rgba(251,191,36,0.4)]"
-                                : "bg-amber-100/80 text-amber-600 hover:bg-white hover:text-amber-600 border-transparent hover:border-amber-200 z-10 hover:-translate-y-1 hover:pb-3 md:hover:pb-4 hover:shadow-[0_-4px_12px_rgba(251,207,232,0.6)]"
-                        }`}
+                        className={`flex items-center gap-1.5 px-3 md:px-5 py-2 md:py-3 rounded-t-lg md:rounded-t-xl border-2 border-b-0 relative translate-y-[2px] transition-all duration-300 min-w-max ${isRegister
+                            ? "bg-gradient-to-b from-amber-400 to-amber-500 text-white border-amber-200 z-20 pb-4 md:pb-5 shadow-[0_-4px_12px_rgba(251,191,36,0.4)]"
+                            : "bg-amber-100/80 text-amber-600 hover:bg-white hover:text-amber-600 border-transparent hover:border-amber-200 z-10 hover:-translate-y-1 hover:pb-3 md:hover:pb-4 hover:shadow-[0_-4px_12px_rgba(251,207,232,0.6)]"
+                            }`}
                     >
                         <Icon icon="solar:star-fall-bold-duotone" className="w-4 h-4" />
                         <span className="font-potta text-[9px] md:text-[11px] tracking-wider uppercase mt-0.5">

@@ -9,6 +9,7 @@ interface Props {
     options: string[];
     error?: string;
     placeholder?: string;
+    theme?: "amber" | "fuchsia" | "rose"; // Added 'rose' theme
 }
 
 export default function CustomSelect({
@@ -17,10 +18,31 @@ export default function CustomSelect({
     options,
     error,
     placeholder = "Select...",
+    theme = "amber",
 }: Props) {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const listRef = useRef<HTMLUListElement>(null);
+
+    const themeStyles = {
+        amber: {
+            focus: "focus:border-amber-400 focus:ring-amber-400",
+            icon: "text-amber-500",
+            activeBg: "bg-amber-50 text-amber-700 font-bold",
+        },
+        fuchsia: {
+            focus: "focus:border-fuchsia-500 focus:ring-fuchsia-500",
+            icon: "text-fuchsia-500",
+            activeBg: "bg-fuchsia-50 text-fuchsia-700 font-bold",
+        },
+        rose: {
+            focus: "focus:border-rose-400 focus:ring-rose-400",
+            icon: "text-rose-500",
+            activeBg: "bg-rose-50 text-rose-700 font-bold",
+        },
+    };
+
+    const activeTheme = themeStyles[theme];
 
     useEffect(() => {
         setSelectedIndex(options.indexOf(value));
@@ -46,7 +68,7 @@ export default function CustomSelect({
     }, [selectedIndex, isOpen]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (!isOpen && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+        if (!isOpen && (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter" || e.key === " ")) {
             e.preventDefault();
             setIsOpen(true);
             return;
@@ -67,7 +89,7 @@ export default function CustomSelect({
             }
             if (e.key === "Enter" && selectedIndex >= 0) {
                 e.preventDefault();
-                onChange(options[selectedIndex]); // This fires back to Register.tsx
+                onChange(options[selectedIndex]);
                 setIsOpen(false);
                 return;
             }
@@ -83,24 +105,20 @@ export default function CustomSelect({
             <div className="relative">
                 <input
                     type="text"
-                    className={`w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2.5 text-sm focus:border-amber-400 focus:ring-1 focus:ring-amber-400 cursor-pointer caret-transparent outline-none transition-all ${error ? "border-rose-500 focus:border-rose-500 focus:ring-rose-500" : ""
-                        }`}
+                    className={`w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2.5 text-sm cursor-pointer caret-transparent outline-none transition-all focus:ring-1 ${activeTheme.focus} ${error ? "border-rose-500 focus:border-rose-500 focus:ring-rose-500" : ""}`}
                     value={value || ""}
                     placeholder={placeholder}
-                    onClick={() => setIsOpen(!isOpen)} // Toggle open/close on click
-                    onFocus={() => setIsOpen(true)}
-                    // We must delay the blur slightly so the onClick on the <li> can register first!
+                    onClick={() => setIsOpen(!isOpen)}
                     onBlur={() => setTimeout(() => setIsOpen(false), 200)}
                     onKeyDown={handleKeyDown}
-                    onChange={() => { }} // Controlled purely by state, do not allow typing
+                    onChange={() => { }}
                     readOnly
                 />
 
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-stone-400">
                     <Icon
                         icon="solar:alt-arrow-down-bold"
-                        className={`transition-transform duration-200 ${isOpen ? "rotate-180 text-amber-500" : ""
-                            }`}
+                        className={`transition-transform duration-200 ${isOpen ? `rotate-180 ${activeTheme.icon}` : ""}`}
                         width="18"
                     />
                 </div>
@@ -115,11 +133,10 @@ export default function CustomSelect({
                         <li
                             key={opt}
                             className={`px-4 py-2.5 cursor-pointer text-slate-700 transition-colors ${index === selectedIndex || opt === value
-                                ? "bg-amber-50 text-amber-700 font-bold"
+                                ? activeTheme.activeBg
                                 : "hover:bg-stone-50"
                                 }`}
                             onMouseDown={(e) => {
-                                // e.preventDefault() prevents the input from losing focus before the click fires
                                 e.preventDefault();
                                 onChange(opt);
                                 setIsOpen(false);
