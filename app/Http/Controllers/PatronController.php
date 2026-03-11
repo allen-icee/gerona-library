@@ -78,7 +78,7 @@ class PatronController extends Controller
         $patron = Patron::create($validated);
 
         // Optional: Send the email with their new library card attached
-        // Mail::to($patron->email)->send(new LibraryCardGenerated($patron));
+        Mail::to($patron->email)->send(new LibraryCardGenerated($patron));
 
         return redirect()->back();
     }

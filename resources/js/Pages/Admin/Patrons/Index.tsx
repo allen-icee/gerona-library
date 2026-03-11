@@ -1,11 +1,13 @@
 // resources/js/Pages/Admin/Patrons/Index.tsx
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, router } from "@inertiajs/react";
 import { PageProps } from "@/types";
 import { Input } from "@/Components/ui/input";
 import { Icon } from "@iconify/react";
+import { toast } from "sonner"; // For notifications
+import html2canvas from "html2canvas"; // Add this!
 
 import AddPatronModal from "./Partials/AddPatronModal";
 import PatronsTable from "./Partials/PatronTables";
@@ -17,6 +19,7 @@ export default function PatronIndex({
 }: PageProps<{ patrons: any; filters: { search?: string } }>) {
     const [search, setSearch] = useState(filters.search || "");
     const [patronToPrint, setPatronToPrint] = useState<any>(null);
+    const cardRef = useRef<HTMLDivElement>(null); // Ref to target the card
 
     useEffect(() => {
         const delayBounceFn = setTimeout(() => {
@@ -31,14 +34,36 @@ export default function PatronIndex({
         return () => clearTimeout(delayBounceFn);
     }, [search]);
 
-    // Triggers browser print dialog when patronToPrint is set
+    // NEW LOGIC: Captures the card and downloads it as a PNG
     useEffect(() => {
-        if (patronToPrint) {
-            const printTimeout = setTimeout(() => {
-                window.print();
-                setPatronToPrint(null);
-            }, 100);
-            return () => clearTimeout(printTimeout);
+        if (patronToPrint && cardRef.current) {
+            // Give React a tiny moment to render the patron data into the off-screen card
+            const captureTimeout = setTimeout(async () => {
+                try {
+                    toast.loading("Generating ID photo...", { id: "generate-id" });
+
+                    const canvas = await html2canvas(cardRef.current!, {
+                        scale: 3, // High resolution
+                        useCORS: true, // Allows external images/fonts to load
+                        backgroundColor: null, // Keeps rounded corners transparent
+                    });
+
+                    // Create a virtual link and trigger the download
+                    const image = canvas.toDataURL("image/png");
+                    const link = document.createElement("a");
+                    link.href = image;
+                    link.download = `${patronToPrint.library_card_number}_LibraryCard.png`;
+                    link.click();
+
+                    toast.success("ID photo saved successfully!", { id: "generate-id" });
+                } catch (error) {
+                    toast.error("Failed to generate ID photo.", { id: "generate-id" });
+                } finally {
+                    setPatronToPrint(null);
+                }
+            }, 300);
+
+            return () => clearTimeout(captureTimeout);
         }
     }, [patronToPrint]);
 
@@ -64,7 +89,6 @@ export default function PatronIndex({
                     </div>
 
                     <div className="flex flex-col sm:flex-row w-full lg:w-auto items-center gap-3">
-                        {/* Search Bar */}
                         <div className="relative w-full sm:w-72">
                             <Icon icon="solar:magnifer-linear" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
                             <Input
@@ -75,7 +99,6 @@ export default function PatronIndex({
                             />
                         </div>
 
-                        {/* Export Button */}
                         <a
                             href={route("patrons.export")}
                             className="inline-flex items-center justify-center h-10 px-4 w-full sm:w-auto text-xs font-bold transition-all bg-fuchsia-50 text-fuchsia-600 hover:bg-fuchsia-500 hover:text-white rounded-xl border border-fuchsia-200 shadow-sm group whitespace-nowrap"
@@ -84,7 +107,6 @@ export default function PatronIndex({
                             Export CSV
                         </a>
 
-                        {/* Add Patron Modal Trigger */}
                         <AddPatronModal />
                     </div>
                 </div>
@@ -93,10 +115,13 @@ export default function PatronIndex({
                 <PatronsTable patrons={patrons} onPrint={setPatronToPrint} />
             </div>
 
-            {/* HIDDEN PRINT COMPONENT */}
+            {/* OFF-SCREEN RENDER CONTAINER */}
+            {/* We position it way off-screen instead of "hidden" because html2canvas cannot read "display: none" elements */}
             {patronToPrint && (
-                <div className="hidden print:block absolute top-0 left-0 bg-white">
-                    <LibraryCard patron={patronToPrint} />
+                <div className="fixed top-[-10000px] left-[-10000px]">
+                    <div ref={cardRef}>
+                        <LibraryCard patron={patronToPrint} />
+                    </div>
                 </div>
             )}
         </AdminLayout>
