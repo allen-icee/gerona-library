@@ -1,15 +1,10 @@
+// resources/js/Pages/Admin/Donations/Index.tsx
+
 import { useState, FormEventHandler } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, useForm, router } from "@inertiajs/react";
 import { PageProps } from "@/types";
-import {
-    Gift,
-    BookHeart,
-    Monitor,
-    PhilippinePeso,
-    Plus,
-    Trash2,
-} from "lucide-react";
+import { Icon } from "@iconify/react"; // Switched to Iconify
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
@@ -37,6 +32,8 @@ export default function DonationsIndex({
     totals,
 }: PageProps<{ donations: any; totals: any }>) {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<number | null>(null);
 
     const { data, setData, post, processing, errors, reset, clearErrors } =
         useForm({
@@ -59,10 +56,14 @@ export default function DonationsIndex({
         });
     };
 
-    const handleDelete = (id: number) => {
-        if (confirm("Are you sure you want to delete this donation record?")) {
-            router.delete(route("donations.destroy", id), {
+    const confirmDelete = () => {
+        if (itemToDelete !== null) {
+            router.delete(route("donations.destroy", itemToDelete), {
                 preserveScroll: true,
+                onSuccess: () => {
+                    setIsDeleteModalOpen(false);
+                    setItemToDelete(null);
+                },
             });
         }
     };
@@ -77,45 +78,36 @@ export default function DonationsIndex({
 
     return (
         <AdminLayout>
-            <Head title="LGU Donations Tracker" />
+            <Head title="Donations Tracker" />
 
             <div className="max-w-full space-y-6">
-                {/* Header & Actions Button */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h1 className="text-2xl font-bold text-stone-800">
-                            LGU Donations Tracker
-                        </h1>
-                        <p className="text-stone-500 text-sm">
-                            Log and audit grants, books, and equipment gifted to
-                            the library.
-                        </p>
+
+                {/* COMPACT HEADER (Matches Print Station) */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-2xl border border-fuchsia-100 shadow-sm shadow-fuchsia-100/50">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-gradient-to-br from-fuchsia-300 to-fuchsia-500 w-12 h-12 rounded-xl flex items-center justify-center shadow-lg shadow-fuchsia-300/50 text-white">
+                            <Icon icon="solar:gift-bold-duotone" className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-black text-slate-800 tracking-tight leading-none">
+                                Donations Tracker
+                            </h1>
+                            <p className="text-slate-500 text-xs font-medium mt-1">
+                                Log and audit grants, books, and equipment gifted to the library.
+                            </p>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                         <a
                             href={route("donations.export")}
-                            className="inline-flex items-center justify-center h-10 px-4 py-2 text-sm font-bold transition-colors bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-lg shadow-sm whitespace-nowrap"
+                            className="inline-flex items-center justify-center px-4 py-2 text-xs font-bold transition-all bg-fuchsia-50 text-fuchsia-600 hover:bg-fuchsia-500 hover:text-white rounded-lg shadow-sm border border-fuchsia-200 group"
                         >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="18"
-                                height="18"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="mr-2"
-                            >
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                <polyline points="7 10 12 15 17 10" />
-                                <line x1="12" x2="12" y1="15" y2="3" />
-                            </svg>
-                            Export Donations
+                            <Icon icon="solar:download-square-bold-duotone" className="w-4 h-4 mr-2 group-hover:-translate-y-0.5 transition-transform" />
+                            Export
                         </a>
 
+                        {/* ADD MODAL */}
                         <Dialog
                             open={isAddModalOpen}
                             onOpenChange={(open) => {
@@ -127,152 +119,93 @@ export default function DonationsIndex({
                             }}
                         >
                             <DialogTrigger asChild>
-                                <Button className="bg-amber-600 hover:bg-amber-500 text-white shadow-sm h-10">
-                                    <Plus className="h-4 w-4 mr-2" />
-                                    Log New Donation
+                                <Button className="bg-gradient-to-r from-fuchsia-400 to-fuchsia-500 hover:from-fuchsia-500 hover:to-fuchsia-600 text-white shadow-md shadow-fuchsia-200 border-none font-bold text-xs h-[34px] rounded-lg">
+                                    <Icon icon="solar:add-circle-bold-duotone" className="w-4 h-4 mr-2" />
+                                    Log Donation
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent className="sm:max-w-[500px] bg-white">
+                            <DialogContent className="sm:max-w-[500px] bg-white rounded-2xl border-fuchsia-200 shadow-xl shadow-fuchsia-200/50">
                                 <DialogHeader>
-                                    <DialogTitle>Log LGU Donation</DialogTitle>
-                                    <DialogDescription>
-                                        Record a new asset or grant given to the
-                                        municipal library.
+                                    <DialogTitle className="text-xl font-black text-slate-800 flex items-center gap-2">
+                                        <Icon icon="solar:gift-bold-duotone" className="w-6 h-6 text-fuchsia-500" />
+                                        Log New Donation
+                                    </DialogTitle>
+                                    <DialogDescription className="text-xs text-slate-500 font-medium">
+                                        Record a new asset or grant given to the municipal library.
                                     </DialogDescription>
                                 </DialogHeader>
 
-                                <form
-                                    onSubmit={submitDonation}
-                                    className="space-y-4 py-4"
-                                >
-                                    <div className="space-y-2">
-                                        <Label
-                                            htmlFor="donator_name"
-                                            className="text-stone-700"
-                                        >
+                                <form onSubmit={submitDonation} className="space-y-4 py-2">
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="donator_name" className="text-xs font-bold uppercase tracking-wider text-slate-600">
                                             Donator Name / Organization *
                                         </Label>
                                         <Input
                                             id="donator_name"
                                             value={data.donator_name}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "donator_name",
-                                                    e.target.value,
-                                                )
-                                            }
+                                            onChange={(e) => setData("donator_name", e.target.value)}
                                             required
                                             placeholder="e.g., Mayor Dela Cruz or Rotary Club"
                                             autoFocus
+                                            className="h-10 border-fuchsia-200 focus-visible:ring-fuchsia-500"
                                         />
-                                        {errors.donator_name && (
-                                            <p className="text-sm text-red-600">
-                                                {errors.donator_name}
-                                            </p>
-                                        )}
+                                        {errors.donator_name && <p className="text-xs text-red-600 font-medium">{errors.donator_name}</p>}
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label
-                                                htmlFor="donator_type"
-                                                className="text-stone-700"
-                                            >
+                                        <div className="space-y-1.5">
+                                            <Label htmlFor="donator_type" className="text-xs font-bold uppercase tracking-wider text-slate-600">
                                                 Donator Type
                                             </Label>
                                             <select
                                                 id="donator_type"
                                                 value={data.donator_type}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "donator_type",
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className="flex h-9 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm shadow-sm"
+                                                onChange={(e) => setData("donator_type", e.target.value)}
+                                                className="flex h-10 w-full rounded-md border border-fuchsia-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-fuchsia-500 focus:ring-fuchsia-500"
                                             >
-                                                <option value="Individual">
-                                                    Individual
-                                                </option>
-                                                <option value="LGU Official">
-                                                    LGU Official
-                                                </option>
-                                                <option value="NGO / Foundation">
-                                                    NGO / Foundation
-                                                </option>
-                                                <option value="Private Company">
-                                                    Private Company
-                                                </option>
+                                                <option value="Individual">Individual</option>
+                                                <option value="LGU Official">LGU Official</option>
+                                                <option value="NGO / Foundation">NGO / Foundation</option>
+                                                <option value="Private Company">Private Company</option>
                                             </select>
                                         </div>
-                                        <div className="space-y-2">
-                                            <Label
-                                                htmlFor="donation_category"
-                                                className="text-stone-700"
-                                            >
+                                        <div className="space-y-1.5">
+                                            <Label htmlFor="donation_category" className="text-xs font-bold uppercase tracking-wider text-slate-600">
                                                 Category
                                             </Label>
                                             <select
                                                 id="donation_category"
                                                 value={data.donation_category}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "donation_category",
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className="flex h-9 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm shadow-sm"
+                                                onChange={(e) => setData("donation_category", e.target.value)}
+                                                className="flex h-10 w-full rounded-md border border-fuchsia-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-fuchsia-500 focus:ring-fuchsia-500"
                                             >
-                                                <option value="Books">
-                                                    Books / Literature
-                                                </option>
-                                                <option value="Equipment">
-                                                    Computers / Equipment
-                                                </option>
-                                                <option value="Furniture">
-                                                    Furniture
-                                                </option>
-                                                <option value="Cash Grant">
-                                                    Cash Grant
-                                                </option>
-                                                <option value="Other">
-                                                    Other
-                                                </option>
+                                                <option value="Books">Books / Literature</option>
+                                                <option value="Equipment">Computers / Equipment</option>
+                                                <option value="Furniture">Furniture</option>
+                                                <option value="Cash Grant">Cash Grant</option>
+                                                <option value="Other">Other</option>
                                             </select>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label
-                                            htmlFor="description"
-                                            className="text-stone-700"
-                                        >
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="description" className="text-xs font-bold uppercase tracking-wider text-slate-600">
                                             Item Description *
                                         </Label>
                                         <Input
                                             id="description"
                                             value={data.description}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "description",
-                                                    e.target.value,
-                                                )
-                                            }
+                                            onChange={(e) => setData("description", e.target.value)}
                                             required
                                             placeholder="e.g., 50 Assorted Filipiniana Books"
+                                            className="h-10 border-fuchsia-200 focus-visible:ring-fuchsia-500"
                                         />
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label
-                                                htmlFor="estimated_value"
-                                                className="text-stone-700"
-                                            >
-                                                Est. Value (₱){" "}
-                                                <span className="text-stone-400 font-normal text-xs">
-                                                    (Optional)
-                                                </span>
+                                        <div className="space-y-1.5">
+                                            <Label htmlFor="estimated_value" className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                                                Est. Value (₱) <span className="text-stone-400 normal-case tracking-normal">(Optional)</span>
                                             </Label>
                                             <Input
                                                 id="estimated_value"
@@ -280,33 +213,22 @@ export default function DonationsIndex({
                                                 step="0.01"
                                                 min="0"
                                                 value={data.estimated_value}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "estimated_value",
-                                                        e.target.value,
-                                                    )
-                                                }
+                                                onChange={(e) => setData("estimated_value", e.target.value)}
                                                 placeholder="0.00"
+                                                className="h-10 border-fuchsia-200 focus-visible:ring-fuchsia-500"
                                             />
                                         </div>
-                                        <div className="space-y-2">
-                                            <Label
-                                                htmlFor="date_received"
-                                                className="text-stone-700"
-                                            >
+                                        <div className="space-y-1.5">
+                                            <Label htmlFor="date_received" className="text-xs font-bold uppercase tracking-wider text-slate-600">
                                                 Date Received *
                                             </Label>
                                             <Input
                                                 id="date_received"
                                                 type="date"
                                                 value={data.date_received}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "date_received",
-                                                        e.target.value,
-                                                    )
-                                                }
+                                                onChange={(e) => setData("date_received", e.target.value)}
                                                 required
+                                                className="h-10 border-fuchsia-200 focus-visible:ring-fuchsia-500"
                                             />
                                         </div>
                                     </div>
@@ -315,20 +237,17 @@ export default function DonationsIndex({
                                         <Button
                                             type="button"
                                             variant="outline"
-                                            onClick={() =>
-                                                setIsAddModalOpen(false)
-                                            }
+                                            onClick={() => setIsAddModalOpen(false)}
+                                            className="rounded-xl font-bold text-slate-500 hover:bg-slate-100"
                                         >
                                             Cancel
                                         </Button>
                                         <Button
                                             type="submit"
                                             disabled={processing}
-                                            className="bg-amber-600 hover:bg-amber-500 text-white"
+                                            className="bg-gradient-to-r from-fuchsia-400 to-fuchsia-500 hover:from-fuchsia-500 hover:to-fuchsia-600 text-white shadow-md shadow-fuchsia-200 font-bold rounded-xl border-none"
                                         >
-                                            {processing
-                                                ? "Saving..."
-                                                : "Save Record"}
+                                            {processing ? "Saving..." : "Save Record"}
                                         </Button>
                                     </DialogFooter>
                                 </form>
@@ -337,151 +256,175 @@ export default function DonationsIndex({
                     </div>
                 </div>
 
-                {/* Metric Cards */}
+                {/* METRIC CARDS */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <Card className="shadow-sm border-stone-200">
+                    <Card className="shadow-sm border-fuchsia-100 bg-gradient-to-br from-white to-fuchsia-50/30">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-stone-500">
+                            <CardTitle className="text-xs font-bold uppercase tracking-wider text-stone-500">
                                 Total Est. Value
                             </CardTitle>
-                            <PhilippinePeso className="w-5 h-5 text-emerald-600" />
+                            <Icon icon="solar:wallet-money-bold-duotone" className="w-6 h-6 text-emerald-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-stone-800">
+                            <div className="text-2xl font-black text-slate-800 tracking-tight">
                                 {formatPHP(totals.total_value)}
                             </div>
                         </CardContent>
                     </Card>
-                    <Card className="shadow-sm border-stone-200">
+                    <Card className="shadow-sm border-fuchsia-100 bg-gradient-to-br from-white to-fuchsia-50/30">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-stone-500">
-                                Total Logged Items
+                            <CardTitle className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                                Total Logged
                             </CardTitle>
-                            <Gift className="w-5 h-5 text-amber-600" />
+                            <Icon icon="solar:box-minimalistic-bold-duotone" className="w-6 h-6 text-amber-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-stone-800">
+                            <div className="text-2xl font-black text-slate-800 tracking-tight">
                                 {totals.total_donations}
                             </div>
                         </CardContent>
                     </Card>
-                    <Card className="shadow-sm border-stone-200">
+                    <Card className="shadow-sm border-fuchsia-100 bg-gradient-to-br from-white to-fuchsia-50/30">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-stone-500">
+                            <CardTitle className="text-xs font-bold uppercase tracking-wider text-stone-500">
                                 Book Donors
                             </CardTitle>
-                            <BookHeart className="w-5 h-5 text-blue-600" />
+                            <Icon icon="solar:book-bookmark-bold-duotone" className="w-6 h-6 text-blue-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-stone-800">
+                            <div className="text-2xl font-black text-slate-800 tracking-tight">
                                 {totals.book_donations}
                             </div>
                         </CardContent>
                     </Card>
-                    <Card className="shadow-sm border-stone-200">
+                    <Card className="shadow-sm border-fuchsia-100 bg-gradient-to-br from-white to-fuchsia-50/30">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-stone-500">
+                            <CardTitle className="text-xs font-bold uppercase tracking-wider text-stone-500">
                                 Equipment Grants
                             </CardTitle>
-                            <Monitor className="w-5 h-5 text-purple-600" />
+                            <Icon icon="solar:monitor-bold-duotone" className="w-6 h-6 text-purple-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-stone-800">
+                            <div className="text-2xl font-black text-slate-800 tracking-tight">
                                 {totals.equipment_donations}
                             </div>
                         </CardContent>
                     </Card>
                 </div>
 
-                {/* Donations Data Table */}
-                <div className="bg-white border border-stone-200 rounded-lg shadow-sm overflow-hidden">
-                    <Table>
-                        <TableHeader className="bg-stone-50">
-                            <TableRow>
-                                <TableHead className="font-semibold text-stone-700">
-                                    Donator
-                                </TableHead>
-                                <TableHead className="font-semibold text-stone-700">
-                                    Category & Item
-                                </TableHead>
-                                <TableHead className="font-semibold text-stone-700">
-                                    Value
-                                </TableHead>
-                                <TableHead className="font-semibold text-stone-700">
-                                    Date Received
-                                </TableHead>
-                                <TableHead className="font-semibold text-stone-700 w-[80px]"></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {donations.data.length === 0 ? (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={5}
-                                        className="h-32 text-center text-stone-500"
-                                    >
-                                        No donations logged yet.
-                                    </TableCell>
+                {/* DONATIONS TABLE */}
+                <div className="bg-white border border-fuchsia-100 rounded-xl shadow-sm shadow-fuchsia-100/50 overflow-hidden flex flex-col">
+
+                    <div className="bg-fuchsia-50/50 border-b border-fuchsia-100 px-4 py-3 flex items-center gap-2">
+                        <Icon icon="solar:clipboard-list-bold-duotone" className="w-5 h-5 text-fuchsia-400" />
+                        <h2 className="text-sm font-bold text-slate-800">Donation Records</h2>
+                    </div>
+
+                    <div className="flex-1 overflow-x-auto">
+                        <Table>
+                            <TableHeader className="bg-white hover:bg-white border-b border-fuchsia-50">
+                                <TableRow className="hover:bg-transparent">
+                                    <TableHead className="text-[10px] uppercase text-stone-400 font-bold tracking-wider pl-6">Donator</TableHead>
+                                    <TableHead className="text-[10px] uppercase text-stone-400 font-bold tracking-wider">Category & Item</TableHead>
+                                    <TableHead className="text-[10px] uppercase text-stone-400 font-bold tracking-wider">Value</TableHead>
+                                    <TableHead className="text-[10px] uppercase text-stone-400 font-bold tracking-wider">Date Received</TableHead>
+                                    <TableHead className="text-[10px] uppercase text-stone-400 font-bold tracking-wider text-right pr-6">Action</TableHead>
                                 </TableRow>
-                            ) : (
-                                donations.data.map((donation: any) => (
-                                    <TableRow
-                                        key={donation.id}
-                                        className="hover:bg-stone-50 transition-colors"
-                                    >
-                                        <TableCell>
-                                            <p className="font-medium text-slate-900">
-                                                {donation.donator_name}
-                                            </p>
-                                            <p className="text-xs text-stone-500">
-                                                {donation.donator_type}
-                                            </p>
-                                        </TableCell>
-                                        <TableCell>
-                                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-stone-100 text-stone-700 mb-1">
-                                                {donation.donation_category}
-                                            </span>
-                                            <p className="text-sm text-stone-600">
-                                                {donation.description}
-                                            </p>
-                                        </TableCell>
-                                        <TableCell className="font-medium text-emerald-700">
-                                            {donation.estimated_value
-                                                ? formatPHP(
-                                                      donation.estimated_value,
-                                                  )
-                                                : "-"}
-                                        </TableCell>
-                                        <TableCell>
-                                            <p className="text-sm text-stone-800">
-                                                {new Date(
-                                                    donation.date_received,
-                                                ).toLocaleDateString()}
-                                            </p>
-                                            <p className="text-xs text-stone-400">
-                                                Logged by{" "}
-                                                {donation.receiver?.name}
-                                            </p>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() =>
-                                                    handleDelete(donation.id)
-                                                }
-                                                className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
+                            </TableHeader>
+                            <TableBody>
+                                {donations.data.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="h-32 text-center text-xs text-stone-400 font-medium">
+                                            No donations logged yet.
                                         </TableCell>
                                     </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
+                                ) : (
+                                    donations.data.map((donation: any) => (
+                                        <TableRow key={donation.id} className="hover:bg-fuchsia-50/30 transition-colors border-fuchsia-50">
+                                            <TableCell className="pl-6 py-3">
+                                                <p className="font-bold text-slate-800 text-sm">{donation.donator_name}</p>
+                                                <p className="text-[10px] text-stone-500 font-medium mt-0.5">{donation.donator_type}</p>
+                                            </TableCell>
+                                            <TableCell className="py-3">
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-black bg-fuchsia-100 text-fuchsia-700 mb-1 border border-fuchsia-200">
+                                                    {donation.donation_category}
+                                                </span>
+                                                <p className="text-sm text-slate-600 font-medium truncate max-w-[250px]" title={donation.description}>
+                                                    {donation.description}
+                                                </p>
+                                            </TableCell>
+                                            <TableCell className="py-3 font-bold text-emerald-600 text-sm">
+                                                {donation.estimated_value ? formatPHP(donation.estimated_value) : <span className="text-stone-300">-</span>}
+                                            </TableCell>
+                                            <TableCell className="py-3">
+                                                <p className="text-sm font-medium text-slate-800">
+                                                    {new Date(donation.date_received).toLocaleDateString([], {
+                                                        month: "short", day: "numeric", year: "numeric"
+                                                    })}
+                                                </p>
+                                                <p className="text-[10px] text-fuchsia-400 mt-0.5 flex items-center gap-1 font-medium">
+                                                    <Icon icon="solar:shield-user-bold-duotone" className="w-3 h-3" />
+                                                    {donation.receiver?.name}
+                                                </p>
+                                            </TableCell>
+                                            <TableCell className="text-right pr-6 py-3">
+                                                <button
+                                                    onClick={() => {
+                                                        setItemToDelete(donation.id);
+                                                        setIsDeleteModalOpen(true);
+                                                    }}
+                                                    className="p-1.5 text-stone-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                                                    title="Delete Record"
+                                                >
+                                                    <Icon icon="solar:trash-bin-trash-bold" className="w-4 h-4" />
+                                                </button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
+
+                    {/* Pagination (Optional if passed via links) */}
+                    {donations.links && donations.links.length > 3 && (
+                        <div className="bg-slate-50 border-t border-stone-100 px-4 py-3 flex items-center justify-center gap-1 flex-wrap">
+                            {/* Assuming standard Inertia Link pagination rendering here if needed */}
+                        </div>
+                    )}
                 </div>
             </div>
+
+            {/* CUSTOM DISCARD MODAL */}
+            <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+                <DialogContent className="sm:max-w-sm bg-white rounded-2xl border-rose-200 shadow-xl shadow-rose-200/50">
+                    <DialogHeader>
+                        <DialogTitle className="text-rose-600 font-black text-lg flex items-center gap-2">
+                            <Icon icon="solar:danger-triangle-bold-duotone" className="w-6 h-6" /> Delete Record
+                        </DialogTitle>
+                        <DialogDescription className="text-xs text-slate-500 font-medium mt-2">
+                            Are you sure you want to delete this donation record? This action will permanently remove it from the database and adjust the totals.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="pt-4">
+                        <button
+                            type="button"
+                            onClick={() => setIsDeleteModalOpen(false)}
+                            className="px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            onClick={confirmDelete}
+                            className="px-4 py-2 text-sm font-bold bg-rose-500 hover:bg-rose-600 text-white rounded-xl shadow-md shadow-rose-200 transition-all border-none"
+                        >
+                            Delete Record
+                        </button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
         </AdminLayout>
     );
 }

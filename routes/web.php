@@ -93,6 +93,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/print-services/export', [PrintStationController::class, 'export'])->name('print-services.export');
     Route::get('/print-queue/{filename}/download', [PrintStationController::class, 'download'])->name('print-queue.download');
     Route::post('/print-queue/log', [PrintStationController::class, 'logAndClear'])->name('print-queue.log');
+    Route::delete('/admin/print-station/queue', [PrintStationController::class, 'destroyQueue'])->name('print-queue.destroy');
 
     // Global LGU Donations Tracker
     Route::get('/donations/export', [DonationController::class, 'export'])->name('donations.export');

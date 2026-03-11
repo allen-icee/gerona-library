@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
-import { Head, router } from "@inertiajs/react";
+import { Head, router, Link } from "@inertiajs/react";
 import { PageProps } from "@/types";
+import { Icon } from "@iconify/react";
 import { Input } from "@/Components/ui/input";
-import { Search } from "lucide-react";
 import {
     Table,
     TableBody,
@@ -13,7 +13,6 @@ import {
     TableRow,
 } from "@/Components/ui/table";
 
-// Import our new cleanly separated components
 import AddBookModal from "./Partials/AddBookModal";
 import BookActions from "./Partials/BookActions";
 
@@ -41,157 +40,120 @@ export default function BookIndex({
             <Head title="Master Catalog" />
 
             <div className="max-w-full space-y-6">
-                {/* Header Area */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h1 className="text-2xl font-bold text-stone-800">
-                            Master Catalog
-                        </h1>
-                        <p className="text-stone-500 text-sm">
-                            Manage master book records and inventory.
-                        </p>
+
+                {/* COMPACT HEADER */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-2xl border border-pink-100 shadow-sm shadow-pink-100/50">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-gradient-to-br from-pink-400 to-pink-600 w-12 h-12 rounded-xl flex items-center justify-center shadow-md shadow-pink-300 text-white">
+                            <Icon icon="solar:book-bookmark-bold-duotone" className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-black text-slate-800 tracking-tight leading-none">
+                                Master Catalog
+                            </h1>
+                            <p className="text-slate-500 text-xs font-medium mt-1">
+                                Manage master book records and inventory.
+                            </p>
+                        </div>
                     </div>
 
-                    <div className="flex w-full sm:w-auto items-center gap-3">
+                    <div className="flex flex-col sm:flex-row w-full sm:w-auto items-center gap-3">
+                        {/* Search Bar */}
                         <div className="relative w-full sm:w-72">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
+                            <Icon icon="solar:magnifer-bold-duotone" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-pink-400" />
                             <Input
                                 placeholder="Search title, author, or ISBN..."
-                                className="pl-9 bg-white border-stone-300"
+                                className="pl-9 bg-stone-50 border-pink-100 focus-visible:ring-pink-500 focus-visible:border-pink-500 h-10 rounded-xl shadow-sm text-sm"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
                         </div>
-                        {/* NEW EXPORT BUTTON */}
-                        <a
-                            href={route("books.export")}
-                            className="inline-flex items-center justify-center h-10 px-4 py-2 text-sm font-medium transition-colors bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-md shadow-sm whitespace-nowrap"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="mr-2"
+
+                        <div className="flex w-full sm:w-auto gap-2">
+                            <a
+                                href={route("books.export")}
+                                className="inline-flex items-center justify-center flex-1 sm:flex-none px-4 h-10 text-xs font-bold transition-all bg-pink-50 text-pink-600 hover:bg-pink-500 hover:text-white rounded-xl border border-pink-200 shadow-sm group"
                             >
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                <polyline points="7 10 12 15 17 10" />
-                                <line x1="12" x2="12" y1="15" y2="3" />
-                            </svg>
-                            Export CSV
-                        </a>
+                                <Icon icon="solar:download-square-bold-duotone" className="w-4 h-4 mr-2 group-hover:-translate-y-0.5 transition-transform" />
+                                Export
+                            </a>
 
-                        {/* Our isolated Add Book Component */}
-                        <AddBookModal />
-                    </div>
-                </div>
-
-                {/* Data Table */}
-                <div className="bg-white border border-stone-200 rounded-lg shadow-sm overflow-hidden">
-                    <Table>
-                        <TableHeader className="bg-stone-50">
-                            <TableRow>
-                                <TableHead className="font-semibold text-stone-700">
-                                    Title
-                                </TableHead>
-                                <TableHead className="font-semibold text-stone-700">
-                                    Author
-                                </TableHead>
-                                <TableHead className="font-semibold text-stone-700">
-                                    Category
-                                </TableHead>
-                                <TableHead className="font-semibold text-stone-700 text-center">
-                                    Physical Copies
-                                </TableHead>
-                                <TableHead className="font-semibold text-stone-700 w-[80px]"></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {books.data.length === 0 ? (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={5}
-                                        className="h-32 text-center text-stone-500"
-                                    >
-                                        No books found in the catalog.
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                books.data.map((book: any) => (
-                                    <TableRow
-                                        key={book.id}
-                                        className="hover:bg-stone-50 transition-colors"
-                                    >
-                                        <TableCell className="font-medium text-slate-900">
-                                            {book.title}
-                                        </TableCell>
-                                        <TableCell className="text-stone-600">
-                                            {book.author}
-                                        </TableCell>
-                                        <TableCell className="text-stone-500 text-sm">
-                                            {book.category || "-"}
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            <span
-                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${book.copies_count > 0 ? "bg-emerald-100 text-emerald-800" : "bg-stone-100 text-stone-600"}`}
-                                            >
-                                                {book.copies_count} copies
-                                            </span>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            {/* Our isolated Row Actions Component */}
-                                            <BookActions book={book} />
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
-
-                {/* Pagination Controls */}
-                {books.total > 15 && (
-                    <div className="flex items-center justify-between">
-                        <p className="text-sm text-stone-500">
-                            Showing{" "}
-                            <span className="font-medium">{books.from}</span> to{" "}
-                            <span className="font-medium">{books.to}</span> of{" "}
-                            <span className="font-medium">{books.total}</span>{" "}
-                            books
-                        </p>
-                        <div className="flex gap-1">
-                            {books.links.map((link: any, index: number) => (
-                                <button
-                                    key={index}
-                                    onClick={() =>
-                                        link.url &&
-                                        router.get(
-                                            link.url,
-                                            { search },
-                                            { preserveState: true },
-                                        )
-                                    }
-                                    disabled={!link.url || link.active}
-                                    className={`px-3 py-1 text-sm border rounded-md transition-colors ${
-                                        link.active
-                                            ? "bg-amber-600 text-white border-amber-600"
-                                            : !link.url
-                                              ? "bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed"
-                                              : "bg-white text-stone-700 border-stone-300 hover:bg-stone-50"
-                                    }`}
-                                    dangerouslySetInnerHTML={{
-                                        __html: link.label,
-                                    }}
-                                />
-                            ))}
+                            <AddBookModal />
                         </div>
                     </div>
-                )}
+                </div>
+
+                {/* DATA TABLE */}
+                <div className="bg-white border border-pink-100 rounded-xl shadow-sm overflow-hidden flex flex-col">
+                    <div className="flex-1 overflow-x-auto">
+                        <Table>
+                            <TableHeader className="bg-white hover:bg-white border-b border-pink-50">
+                                <TableRow className="hover:bg-transparent">
+                                    <TableHead className="text-[10px] uppercase text-stone-400 font-bold tracking-wider pl-6">Title</TableHead>
+                                    <TableHead className="text-[10px] uppercase text-stone-400 font-bold tracking-wider">Author</TableHead>
+                                    <TableHead className="text-[10px] uppercase text-stone-400 font-bold tracking-wider">Category</TableHead>
+                                    <TableHead className="text-[10px] uppercase text-stone-400 font-bold tracking-wider text-center">Physical Copies</TableHead>
+                                    <TableHead className="text-[10px] uppercase text-stone-400 font-bold tracking-wider text-right pr-6">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {books.data.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="h-32 text-center text-xs text-stone-400 font-medium">
+                                            No books found in the catalog.
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    books.data.map((book: any) => (
+                                        <TableRow key={book.id} className="hover:bg-pink-50/30 transition-colors border-pink-50">
+                                            <TableCell className="font-bold text-slate-800 pl-6 py-3">
+                                                {book.title}
+                                            </TableCell>
+                                            <TableCell className="text-stone-600 font-medium text-sm py-3">
+                                                {book.author}
+                                            </TableCell>
+                                            <TableCell className="py-3">
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-black bg-stone-100 text-stone-600 border border-stone-200">
+                                                    {book.category || "Uncategorized"}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell className="text-center py-3">
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-black border ${book.copies_count > 0 ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-red-50 text-red-600 border-red-200"}`}>
+                                                    {book.copies_count} copies
+                                                </span>
+                                            </TableCell>
+                                            <TableCell className="text-right pr-6 py-3">
+                                                <BookActions book={book} />
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
+
+                    {/* PAGINATION */}
+                    {books.links && books.links.length > 3 && (
+                        <div className="bg-slate-50 border-t border-stone-100 px-6 py-3 flex items-center justify-between gap-4 flex-wrap">
+                            <p className="text-[11px] text-stone-500 font-medium">
+                                Showing <span className="font-bold text-slate-700">{books.from}</span> to <span className="font-bold text-slate-700">{books.to}</span> of <span className="font-bold text-slate-700">{books.total}</span> books
+                            </p>
+                            <div className="flex items-center gap-1">
+                                {books.links.map((link: any, i: number) => (
+                                    <Link
+                                        key={i}
+                                        href={link.url || "#"}
+                                        className={`px-2.5 py-1 text-[10px] font-bold rounded-md transition-colors ${link.active
+                                            ? "bg-pink-500 text-white shadow-sm shadow-pink-200"
+                                            : "bg-white text-slate-500 border border-slate-200 hover:border-pink-300 hover:text-pink-500"
+                                            } ${!link.url && "opacity-50 cursor-not-allowed"}`}
+                                        dangerouslySetInnerHTML={{ __html: link.label }}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
         </AdminLayout>
     );

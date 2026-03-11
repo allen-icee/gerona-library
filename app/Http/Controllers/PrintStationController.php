@@ -29,7 +29,7 @@ class PrintStationController extends Controller
     // --- PUBLIC STUDENT ROUTE ---
     public function index()
     {
-        return Inertia::render('Public/PrintStation');
+        return Inertia::render('Public/Print');
     }
 
     public function upload(Request $request)
@@ -42,6 +42,7 @@ class PrintStationController extends Controller
             'documents.*.custom_name' => 'required|string|max:255',
             'documents.*.copies' => 'required|integer|min:1',
             'documents.*.paper_size' => 'required|string',
+            'documents.*.pages' => 'required|string', // Added validation for pages
         ]);
 
         $safeName = Str::slug($request->visitor_name);
@@ -52,12 +53,17 @@ class PrintStationController extends Controller
             $customName = Str::slug($doc['custom_name']);
             $copies = $doc['copies'];
             $safePaper = Str::slug($doc['paper_size']);
+            // Convert pages like "1-3, 5" to a safe string. 
+            // Using a simple replace to avoid losing the numbers.
+            $safePages = preg_replace('/[^a-zA-Z0-9,-]/', '_', $doc['pages']);
+            if (empty($safePages))
+                $safePages = 'All';
 
             $extension = $file->getClientOriginalExtension();
             $uniqueId = uniqid();
 
-            // Format: timestamp_uniqid---Name---School---Paper---Copies---CustomName.ext
-            $filename = time() . "_{$uniqueId}---{$safeName}---{$safeSchool}---{$safePaper}---{$copies}---{$customName}.{$extension}";
+            // Format: timestamp_uniqid---Name---School---Paper---Copies---Pages---CustomName.ext
+            $filename = time() . "_{$uniqueId}---{$safeName}---{$safeSchool}---{$safePaper}---{$copies}---{$safePages}---{$customName}.{$extension}";
 
             $file->storeAs('print_queue', $filename, 'local');
         }
@@ -75,7 +81,8 @@ class PrintStationController extends Controller
             $filename = basename($filepath);
             $parts = explode('---', $filename);
 
-            if (count($parts) >= 6) {
+            // We now check for 7 parts because we added 'Pages'
+            if (count($parts) >= 7) {
                 $timestamp = explode('_', $parts[0])[0];
                 $printQueue[] = [
                     'filename' => $filename,
@@ -84,7 +91,8 @@ class PrintStationController extends Controller
                     'school_or_barangay' => ucwords(str_replace('-', ' ', $parts[2])),
                     'paper_size' => ucwords(str_replace('-', ' ', $parts[3])),
                     'copies' => $parts[4],
-                    'original_name' => $parts[5], // This now represents the user's custom name
+                    'pages' => str_replace('_', ' ', $parts[5]), // Reverse our safe formatting
+                    'original_name' => $parts[6],
                 ];
             }
         }
@@ -106,7 +114,7 @@ class PrintStationController extends Controller
     public function logAndClear(Request $request)
     {
         $request->validate([
-            'filename' => 'required|string',
+            'filenames' => 'required|array', // Changed to array for bulk operations
             'visitor_name' => 'required|string',
             'school_or_barangay' => 'required|string',
             'pages_printed' => 'required|integer|min:1',
@@ -120,12 +128,32 @@ class PrintStationController extends Controller
             'printed_at' => now(),
         ]);
 
-        if (Storage::disk('local')->exists('print_queue/' . $request->filename)) {
-            Storage::disk('local')->delete('print_queue/' . $request->filename);
+        // Loop through all selected files and delete them
+        foreach ($request->filenames as $filename) {
+            if (Storage::disk('local')->exists('print_queue/' . $filename)) {
+                Storage::disk('local')->delete('print_queue/' . $filename);
+            }
         }
 
-        return back();
+        return back()->with('success', 'Logged and cleared successfully.');
     }
+
+    // NEW: Function to purely discard files without logging them to the history
+    public function destroyQueue(Request $request)
+    {
+        $request->validate([
+            'filenames' => 'required|array'
+        ]);
+
+        foreach ($request->filenames as $filename) {
+            if (Storage::disk('local')->exists('print_queue/' . $filename)) {
+                Storage::disk('local')->delete('print_queue/' . $filename);
+            }
+        }
+
+        return back()->with('success', 'Files discarded successfully.');
+    }
+
     public function export()
     {
         return Excel::download(new PrintLogsExport, 'gerona_print_logs.csv');

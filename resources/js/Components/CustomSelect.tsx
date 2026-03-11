@@ -9,7 +9,7 @@ interface Props {
     options: string[];
     error?: string;
     placeholder?: string;
-    theme?: "amber" | "fuchsia" | "rose"; // Added 'rose' theme
+    theme?: "amber" | "fuchsia" | "rose" | "pink"; // <--- Add 'pink' here
 }
 
 export default function CustomSelect({
@@ -39,6 +39,12 @@ export default function CustomSelect({
             focus: "focus:border-rose-400 focus:ring-rose-400",
             icon: "text-rose-500",
             activeBg: "bg-rose-50 text-rose-700 font-bold",
+        },
+        // 👇 ADD THIS PINK BLOCK
+        pink: {
+            focus: "focus:border-pink-400 focus:ring-pink-400",
+            icon: "text-pink-500",
+            activeBg: "bg-pink-50 text-pink-700 font-bold",
         },
     };
 

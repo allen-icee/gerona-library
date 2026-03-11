@@ -1,0 +1,38 @@
+// resources/js/Pages/Admin/Dashboard/Index.tsx
+
+import AdminLayout from "@/Layouts/AdminLayout";
+import { Head } from "@inertiajs/react";
+import { PageProps } from "@/types";
+
+import DashboardHeader from "./Partials/DashboardHeader";
+import QuickActions from "./Partials/QuickActions";
+import MetricCards from "./Partials/MetricCards";
+
+export interface DashboardMetrics {
+    totalCopies: number;
+    activePatrons: number;
+    todaysVisitors: number;
+    overdueBooks: number;
+}
+
+export default function Dashboard({
+    auth,
+    metrics,
+}: PageProps<{ metrics: DashboardMetrics }>) {
+    return (
+        <AdminLayout>
+            <Head title="Dashboard" />
+
+            <div className="max-w-full space-y-8">
+                {/* Header & Live Clock */}
+                <DashboardHeader user={auth.user} />
+
+                {/* Quick Navigation Links */}
+                <QuickActions />
+
+                {/* Live Statistics Cards */}
+                <MetricCards metrics={metrics} />
+            </div>
+        </AdminLayout>
+    );
+}

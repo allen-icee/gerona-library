@@ -146,7 +146,7 @@ export default function Print() {
                             className="w-full h-full object-contain scale-150"
                         />
                     </div>
-                    <div className="absolute flex flex-col items-center mt-32">
+                    <div className="absolute flex flex-col items-center mt-115">
                         <h2 className="text-4xl md:text-5xl font-black text-fuchsia-500 drop-shadow-sm font-potta">
                             Files Sent!
                         </h2>
