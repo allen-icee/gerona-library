@@ -1,13 +1,14 @@
 // resources/js/Pages/Admin/Patrons/Index.tsx
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom"; // <-- Imported React Portal!
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, router } from "@inertiajs/react";
 import { PageProps } from "@/types";
 import { Input } from "@/Components/ui/input";
 import { Icon } from "@iconify/react";
 import { toast } from "sonner";
-import html2canvas from "html2canvas";
+import * as htmlToImage from "html-to-image";
 
 import AddPatronModal from "./Partials/AddPatronModal";
 import PatronsTable from "./Partials/PatronTables";
@@ -19,7 +20,7 @@ export default function PatronIndex({
 }: PageProps<{ patrons: any; filters: { search?: string } }>) {
     const [search, setSearch] = useState(filters.search || "");
     const [patronToPrint, setPatronToPrint] = useState<any>(null);
-    const cardRef = useRef<HTMLDivElement>(null); // Ref to target the card
+    const cardRef = useRef<HTMLDivElement>(null);
 
     // Debounced Search
     useEffect(() => {
@@ -35,38 +36,30 @@ export default function PatronIndex({
         return () => clearTimeout(delayBounceFn);
     }, [search]);
 
-    // NEW LOGIC: Captures the card and downloads it as a PNG
-    useEffect(() => {
-        if (patronToPrint && cardRef.current) {
-            // Give React a tiny moment to render the patron data into the off-screen card
-            const captureTimeout = setTimeout(async () => {
-                try {
-                    toast.loading("Generating ID photo...", { id: "generate-id" });
+    // Generate Photo Logic
+    const downloadPhoto = async () => {
+        if (!cardRef.current) return;
 
-                    const canvas = await html2canvas(cardRef.current!, {
-                        scale: 3, // High resolution
-                        useCORS: true, // Allows external images/fonts to load
-                        backgroundColor: null, // Keeps rounded corners transparent
-                    });
+        try {
+            toast.loading("Capturing high-res photo...", { id: "generate-id" });
 
-                    // Create a virtual link and trigger the download
-                    const image = canvas.toDataURL("image/png");
-                    const link = document.createElement("a");
-                    link.href = image;
-                    link.download = `${patronToPrint.library_card_number}_LibraryCard.png`;
-                    link.click();
+            const dataUrl = await htmlToImage.toPng(cardRef.current, {
+                pixelRatio: 4, // Max sharpness
+                backgroundColor: 'transparent',
+                skipFonts: false,
+            });
 
-                    toast.success("ID photo saved successfully!", { id: "generate-id" });
-                } catch (error) {
-                    toast.error("Failed to generate ID photo.", { id: "generate-id" });
-                } finally {
-                    setPatronToPrint(null);
-                }
-            }, 300);
+            const link = document.createElement("a");
+            link.download = `${patronToPrint.library_card_number}_LibraryCard.png`;
+            link.href = dataUrl;
+            link.click();
 
-            return () => clearTimeout(captureTimeout);
+            toast.success("ID photo saved perfectly!", { id: "generate-id" });
+        } catch (error) {
+            console.error("Image generation failed:", error);
+            toast.error("Failed to generate photo. Check console.", { id: "generate-id" });
         }
-    }, [patronToPrint]);
+    };
 
     return (
         <AdminLayout>
@@ -116,14 +109,53 @@ export default function PatronIndex({
                 <PatronsTable patrons={patrons} onPrint={setPatronToPrint} />
             </div>
 
-            {/* OFF-SCREEN RENDER CONTAINER */}
-            {/* Fixed positioning guarantees html2canvas won't cut it off due to window scrolling */}
-            {patronToPrint && (
-                <div className="fixed top-0 left-0 opacity-0 -z-50 pointer-events-none">
-                    <div ref={cardRef}>
-                        <LibraryCard patron={patronToPrint} />
+            {/* PORTALED PHOTO PREVIEW MODAL */}
+            {/* This completely bypasses the AdminLayout stacking issues */}
+            {patronToPrint && typeof document !== 'undefined' && createPortal(
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-stone-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+
+                    <div className="bg-stone-50 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="p-6 md:p-8 flex flex-col items-center">
+
+                            {/* Header */}
+                            <div className="text-center mb-8">
+                                <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                                    <Icon icon="solar:gallery-bold-duotone" className="w-8 h-8" />
+                                </div>
+                                <h2 className="text-2xl font-black text-slate-800 tracking-tight">Save ID Photo</h2>
+                                <p className="text-slate-500 text-xs mt-2 leading-relaxed max-w-[250px] mx-auto">
+                                    Download a perfectly cropped, high-resolution PNG image ready for ID badge software.
+                                </p>
+                            </div>
+
+                            {/* The Card */}
+                            <div className="shadow-2xl shadow-rose-900/15 rounded-md mb-8 ring-1 ring-slate-900/5">
+                                <div ref={cardRef} className="bg-white overflow-hidden rounded-md">
+                                    <LibraryCard patron={patronToPrint} />
+                                </div>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex gap-3 w-full">
+                                <button
+                                    onClick={() => setPatronToPrint(null)}
+                                    className="flex-1 py-3 bg-white border border-stone-200 text-stone-600 text-sm font-bold rounded-xl hover:bg-stone-100 hover:text-stone-800 transition-colors shadow-sm"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={downloadPhoto}
+                                    className="flex-1 py-3 bg-rose-500 text-white text-sm font-bold rounded-xl shadow-md shadow-rose-500/30 hover:bg-rose-600 hover:shadow-rose-600/40 transition-all flex items-center justify-center gap-2"
+                                >
+                                    <Icon icon="solar:download-square-bold-duotone" className="w-5 h-5" />
+                                    Save as PNG
+                                </button>
+                            </div>
+
+                        </div>
                     </div>
-                </div>
+                </div>,
+                document.body // <-- Attaches it directly to the HTML body!
             )}
         </AdminLayout>
     );

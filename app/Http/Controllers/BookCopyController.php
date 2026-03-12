@@ -38,7 +38,20 @@ class BookCopyController extends Controller
 
         return redirect()->back();
     }
+    public function update(Request $request, BookCopy $copy)
+    {
+        $validated = $request->validate([
+            'accession_number' => 'required|string|unique:book_copies,accession_number,' . $copy->id,
+            'shelf_location' => 'nullable|string',
+            'status' => 'required|string',
+            'source' => 'required|string',
+            'donator_name' => 'nullable|string',
+            'date_acquired' => 'required|date',
+        ]);
 
+        $copy->update($validated);
+        return back();
+    }
     // Permanently delete a physical copy (e.g., if it was destroyed)
     public function destroy(BookCopy $copy)
     {

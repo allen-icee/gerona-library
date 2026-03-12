@@ -97,43 +97,40 @@ export default function AdminLayout({ children }: PropsWithChildren) {
     const rightNavItems = navItems.slice(4);
 
     return (
-        <div className="min-h-screen bg-[#FFF0F5] font-sans text-stone-800 relative flex flex-col overflow-x-hidden">
+        // Added print:bg-white to remove the pinkish background on paper
+        <div className="min-h-screen bg-[#FFF0F5] print:bg-white font-sans text-stone-800 relative flex flex-col overflow-x-hidden">
 
-            {/* AESTHETIC TOASTER - NO CLOSE BUTTON */}
-            <Toaster
-                position="bottom-center"
-                icons={{
-                    success: <CheckCircle2 className="w-5 h-5 !text-emerald-500 flex-shrink-0" />,
-                    error: <AlertCircle className="w-5 h-5 !text-rose-500 flex-shrink-0" />,
-                    warning: <AlertTriangle className="w-5 h-5 !text-amber-500 flex-shrink-0" />,
-                    info: <Info className="w-5 h-5 !text-fuchsia-500 flex-shrink-0" />,
-                }}
-                toastOptions={{
-                    classNames: {
-                        // Base aesthetic: Crisp white card, soft shadow, clean padding
-                        toast: 'group flex items-center gap-3 w-full sm:min-w-[320px] !bg-white !rounded-2xl !shadow-[0_8px_30px_rgb(0,0,0,0.08)] !p-4 font-sans !border !border-stone-100 transition-all duration-300',
+            <div className="print:hidden">
+                <Toaster
+                    position="bottom-center"
+                    icons={{
+                        success: <CheckCircle2 className="w-5 h-5 !text-emerald-500 flex-shrink-0" />,
+                        error: <AlertCircle className="w-5 h-5 !text-rose-500 flex-shrink-0" />,
+                        warning: <AlertTriangle className="w-5 h-5 !text-amber-500 flex-shrink-0" />,
+                        info: <Info className="w-5 h-5 !text-fuchsia-500 flex-shrink-0" />,
+                    }}
+                    toastOptions={{
+                        classNames: {
+                            toast: 'group flex items-center gap-3 w-full sm:min-w-[320px] !bg-white !rounded-2xl !shadow-[0_8px_30px_rgb(0,0,0,0.08)] !p-4 font-sans !border !border-stone-100 transition-all duration-300',
+                            title: 'text-sm font-black tracking-tight !text-slate-800 leading-none',
+                            description: 'text-xs font-medium !text-slate-500 mt-1',
+                            success: '!border-l-4 !border-l-emerald-500',
+                            error: '!border-l-4 !border-l-rose-500',
+                            warning: '!border-l-4 !border-l-amber-500',
+                            info: '!border-l-4 !border-l-fuchsia-500',
+                        },
+                    }}
+                />
+            </div>
 
-                        // Typography: Dark slate for title, soft grey for description
-                        title: 'text-sm font-black tracking-tight !text-slate-800 leading-none',
-                        description: 'text-xs font-medium !text-slate-500 mt-1',
+            {/* Background Blobs (Hidden on Print) */}
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-pink-200/40 rounded-full blur-3xl pointer-events-none z-0 print:hidden"></div>
+            <div className="absolute bottom-[10%] right-[-5%] w-[30%] h-[50%] bg-rose-200/30 rounded-full blur-3xl pointer-events-none z-0 print:hidden"></div>
 
-                        // Status Accents: Thick colored left border to beautifully highlight the status
-                        success: '!border-l-4 !border-l-emerald-500',
-                        error: '!border-l-4 !border-l-rose-500',
-                        warning: '!border-l-4 !border-l-amber-500',
-                        info: '!border-l-4 !border-l-fuchsia-500',
-                    },
-                }}
-            />
-
-            {/* Background Blobs */}
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-pink-200/40 rounded-full blur-3xl pointer-events-none z-0"></div>
-            <div className="absolute bottom-[10%] right-[-5%] w-[30%] h-[50%] bg-rose-200/30 rounded-full blur-3xl pointer-events-none z-0"></div>
-
-            {/* THE BOOKMARK LOGO */}
+            {/* THE BOOKMARK LOGO (Hidden on Print) */}
             <Link
                 href="/dashboard"
-                className="absolute top-0 left-4 md:left-8 bg-rose-500 text-white px-3 md:px-4 py-3 md:py-4 rounded-b-[1.2rem] shadow-md shadow-pink-200 z-50 flex flex-col items-center group transition-all duration-300 hover:pt-6 hover:pb-5"
+                className="absolute top-0 left-4 md:left-8 bg-rose-500 text-white px-3 md:px-4 py-3 md:py-4 rounded-b-[1.2rem] shadow-md shadow-pink-200 z-50 flex flex-col items-center group transition-all duration-300 hover:pt-6 hover:pb-5 print:hidden"
                 title="Go to Dashboard"
             >
                 <Library className="w-5 h-5 md:w-6 md:h-6 mb-1 group-hover:-rotate-12 transition-transform" />
@@ -142,8 +139,8 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                 </span>
             </Link>
 
-            {/* COMPACT PROFILE DROPDOWN */}
-            <div className="absolute top-3 right-4 md:top-4 md:right-8 z-50">
+            {/* COMPACT PROFILE DROPDOWN (Hidden on Print) */}
+            <div className="absolute top-3 right-4 md:top-4 md:right-8 z-50 print:hidden">
                 <DropdownMenu>
                     <DropdownMenuTrigger className="focus:outline-none outline-none flex items-center gap-2 group">
                         <div className="text-right hidden sm:block">
@@ -180,72 +177,46 @@ export default function AdminLayout({ children }: PropsWithChildren) {
             </div>
 
             {/* MAIN CONTENT AREA */}
-            <div className="max-w-[100rem] mx-auto w-full flex-1 flex flex-row pt-10 md:pt-14 px-2 md:px-6 relative z-10 pb-4 md:pb-6">
+            <div className="max-w-[100rem] mx-auto w-full flex-1 flex flex-row pt-10 md:pt-14 px-2 md:px-6 relative z-10 pb-4 md:pb-6 print:p-0 print:m-0">
 
-                {/* 1. LEFT TABS (First 4 items) */}
-                <div className="flex flex-col space-y-1 md:space-y-1.5 pt-6 md:pt-8 items-end z-20 flex-shrink-0">
+                {/* 1. LEFT TABS (Hidden on Print) */}
+                <div className="flex flex-col space-y-1 md:space-y-1.5 pt-6 md:pt-8 items-end z-20 flex-shrink-0 print:hidden">
                     {leftNavItems.map((item, index) => {
                         const active = isActive(item.path);
                         const IconComponent = item.icon;
-
                         return active ? (
-                            <Link
-                                key={`left-${index}`}
-                                href={item.href}
-                                className={`flex flex-col items-center justify-center gap-1.5 bg-gradient-to-r text-white py-4 md:py-5 rounded-l-xl md:rounded-l-2xl shadow-lg border-2 border-r-0 relative z-20 translate-x-[2px] w-[2.5rem] md:w-[3.2rem] hover:w-[2.8rem] md:hover:w-[3.8rem] transition-all duration-300 ${item.active}`}
-                            >
+                            <Link key={`left-${index}`} href={item.href} className={`flex flex-col items-center justify-center gap-1.5 bg-gradient-to-r text-white py-4 md:py-5 rounded-l-xl md:rounded-l-2xl shadow-lg border-2 border-r-0 relative z-20 translate-x-[2px] w-[2.5rem] md:w-[3.2rem] hover:w-[2.8rem] md:hover:w-[3.8rem] transition-all duration-300 ${item.active}`}>
                                 <IconComponent className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
-                                <span className="[writing-mode:vertical-rl] rotate-180 font-bold text-[9px] md:text-xs tracking-widest uppercase leading-none">
-                                    {item.name}
-                                </span>
+                                <span className="[writing-mode:vertical-rl] rotate-180 font-bold text-[9px] md:text-xs tracking-widest uppercase leading-none">{item.name}</span>
                             </Link>
                         ) : (
-                            <Link
-                                key={`left-${index}`}
-                                href={item.href}
-                                className={`flex flex-col items-center justify-center gap-1.5 py-3 md:py-4 rounded-l-lg md:rounded-l-xl transition-all duration-300 border-2 border-transparent hover:border-r-0 relative z-10 translate-x-[2px] w-[2rem] md:w-[2.4rem] hover:w-[2.6rem] md:hover:w-[3.2rem] opacity-80 hover:opacity-100 hover:bg-white hover:shadow-[-4px_0px_10px_rgba(251,207,232,0.6)] ${item.inactive}`}
-                            >
+                            <Link key={`left-${index}`} href={item.href} className={`flex flex-col items-center justify-center gap-1.5 py-3 md:py-4 rounded-l-lg md:rounded-l-xl transition-all duration-300 border-2 border-transparent hover:border-r-0 relative z-10 translate-x-[2px] w-[2rem] md:w-[2.4rem] hover:w-[2.6rem] md:hover:w-[3.2rem] opacity-80 hover:opacity-100 hover:bg-white hover:shadow-[-4px_0px_10px_rgba(251,207,232,0.6)] ${item.inactive}`}>
                                 <IconComponent className="w-3.5 h-3.5 md:w-4 md:h-4 flex-shrink-0" />
-                                <span className="[writing-mode:vertical-rl] rotate-180 font-semibold text-[8px] md:text-[10px] tracking-widest uppercase leading-none">
-                                    {item.name}
-                                </span>
+                                <span className="[writing-mode:vertical-rl] rotate-180 font-semibold text-[8px] md:text-[10px] tracking-widest uppercase leading-none">{item.name}</span>
                             </Link>
                         );
                     })}
                 </div>
 
-                {/* 2. FOLDER BODY (Main Content) */}
-                <main className="bg-white rounded-2xl md:rounded-3xl shadow-lg shadow-pink-200/30 border-2 border-pink-200 p-4 md:p-8 flex-1 relative z-10 flex flex-col min-w-0">
+                {/* 2. FOLDER BODY (Main Content) - Removed shadows/borders on print */}
+                <main className="bg-white rounded-2xl md:rounded-3xl shadow-lg shadow-pink-200/30 border-2 border-pink-200 p-4 md:p-8 flex-1 relative z-10 flex flex-col min-w-0 print:border-none print:shadow-none print:p-0 print:m-0 print:bg-transparent">
                     {children}
                 </main>
 
-                {/* 3. RIGHT TABS (Remaining 3 items) */}
-                <div className="flex flex-col space-y-1 md:space-y-1.5 pt-6 md:pt-8 items-start z-20 flex-shrink-0">
+                {/* 3. RIGHT TABS (Hidden on Print) */}
+                <div className="flex flex-col space-y-1 md:space-y-1.5 pt-6 md:pt-8 items-start z-20 flex-shrink-0 print:hidden">
                     {rightNavItems.map((item, index) => {
                         const active = isActive(item.path);
                         const IconComponent = item.icon;
-
                         return active ? (
-                            <Link
-                                key={`right-${index}`}
-                                href={item.href}
-                                className={`flex flex-col items-center justify-center gap-1.5 bg-gradient-to-r text-white py-4 md:py-5 rounded-r-xl md:rounded-r-2xl shadow-lg border-2 border-l-0 relative z-20 -translate-x-[2px] w-[2.5rem] md:w-[3.2rem] hover:w-[2.8rem] md:hover:w-[3.8rem] transition-all duration-300 ${item.active}`}
-                            >
+                            <Link key={`right-${index}`} href={item.href} className={`flex flex-col items-center justify-center gap-1.5 bg-gradient-to-r text-white py-4 md:py-5 rounded-r-xl md:rounded-r-2xl shadow-lg border-2 border-l-0 relative z-20 -translate-x-[2px] w-[2.5rem] md:w-[3.2rem] hover:w-[2.8rem] md:hover:w-[3.8rem] transition-all duration-300 ${item.active}`}>
                                 <IconComponent className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
-                                <span className="[writing-mode:vertical-rl] font-bold text-[9px] md:text-xs tracking-widest uppercase leading-none">
-                                    {item.name}
-                                </span>
+                                <span className="[writing-mode:vertical-rl] font-bold text-[9px] md:text-xs tracking-widest uppercase leading-none">{item.name}</span>
                             </Link>
                         ) : (
-                            <Link
-                                key={`right-${index}`}
-                                href={item.href}
-                                className={`flex flex-col items-center justify-center gap-1.5 py-3 md:py-4 rounded-r-lg md:rounded-r-xl transition-all duration-300 border-2 border-transparent hover:border-l-0 relative z-10 -translate-x-[2px] w-[2rem] md:w-[2.4rem] hover:w-[2.6rem] md:hover:w-[3.2rem] opacity-80 hover:opacity-100 hover:bg-white hover:shadow-[4px_0px_10px_rgba(251,207,232,0.6)] ${item.inactive}`}
-                            >
+                            <Link key={`right-${index}`} href={item.href} className={`flex flex-col items-center justify-center gap-1.5 py-3 md:py-4 rounded-r-lg md:rounded-r-xl transition-all duration-300 border-2 border-transparent hover:border-l-0 relative z-10 -translate-x-[2px] w-[2rem] md:w-[2.4rem] hover:w-[2.6rem] md:hover:w-[3.2rem] opacity-80 hover:opacity-100 hover:bg-white hover:shadow-[4px_0px_10px_rgba(251,207,232,0.6)] ${item.inactive}`}>
                                 <IconComponent className="w-3.5 h-3.5 md:w-4 md:h-4 flex-shrink-0" />
-                                <span className="[writing-mode:vertical-rl] font-semibold text-[8px] md:text-[10px] tracking-widest uppercase leading-none">
-                                    {item.name}
-                                </span>
+                                <span className="[writing-mode:vertical-rl] font-semibold text-[8px] md:text-[10px] tracking-widest uppercase leading-none">{item.name}</span>
                             </Link>
                         );
                     })}
