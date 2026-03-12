@@ -13,32 +13,20 @@ use Illuminate\Support\Facades\Http;
 class BookController extends Controller
 {
     /**
-     * Fetch Book Metadata (Google Books -> OpenLibrary -> Cover Fallback)
+     * Fetch Book Metadata (Used ONLY for single manual additions)
      */
     private function fetchBookDetails($isbn)
     {
         if (!$isbn) {
-            return [
-                'description' => null,
-                'cover_url' => null
-            ];
+            return ['description' => null, 'cover_url' => null];
         }
 
         try {
-            /*
-            |--------------------------------------------------------------------------
-            | 1️⃣ GOOGLE BOOKS API
-            |--------------------------------------------------------------------------
-            */
-            $google = Http::timeout(8)
-                ->retry(2, 200)
-                ->get('https://www.googleapis.com/books/v1/volumes', [
-                    'q' => "isbn:$isbn"
-                ]);
+            // 1. Google Books API (Faster timeout)
+            $google = Http::timeout(3)->get('https://www.googleapis.com/books/v1/volumes', ['q' => "isbn:$isbn"]);
 
             if ($google->successful() && isset($google['items'][0])) {
                 $info = $google['items'][0]['volumeInfo'];
-
                 return [
                     'description' => $info['description'] ?? null,
                     'cover_url' => isset($info['imageLinks']['thumbnail'])
@@ -47,28 +35,19 @@ class BookController extends Controller
                 ];
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | 2️⃣ OPENLIBRARY BOOK API
-            |--------------------------------------------------------------------------
-            */
-            $open = Http::timeout(8)
-                ->retry(2, 200)
-                ->get('https://openlibrary.org/api/books', [
-                    'bibkeys' => "ISBN:$isbn",
-                    'format' => 'json',
-                    'jscmd' => 'data'
-                ]);
+            // 2. OpenLibrary API (Faster timeout)
+            $open = Http::timeout(3)->get('https://openlibrary.org/api/books', [
+                'bibkeys' => "ISBN:$isbn",
+                'format' => 'json',
+                'jscmd' => 'data'
+            ]);
 
             if ($open->successful()) {
                 $data = $open->json();
-
                 if (isset($data["ISBN:$isbn"])) {
                     $book = $data["ISBN:$isbn"];
-
                     return [
                         'description' => $book['notes'] ?? null,
-                        // Safely check if 'cover' exists before trying to access sizes
                         'cover_url' => isset($book['cover'])
                             ? ($book['cover']['large'] ?? $book['cover']['medium'] ?? $book['cover']['small'] ?? null)
                             : null
@@ -77,23 +56,17 @@ class BookController extends Controller
             }
 
         } catch (\Exception $e) {
-            // Ignore timeout/network errors so imports and saves continue smoothly
+            // Ignore network errors
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | 3️⃣ FINAL COVER FALLBACK
-        |--------------------------------------------------------------------------
-        */
+        // FIX FOR 404 ERRORS: We return null instead of a broken link.
+        // The frontend React component will see null and safely show the pink CSS cover.
         return [
             'description' => null,
-            'cover_url' => "https://covers.openlibrary.org/b/isbn/{$isbn}-L.jpg?default=false"
+            'cover_url' => null
         ];
     }
 
-    /**
-     * Display Books
-     */
     public function index(Request $request)
     {
         $search = $request->input('search');
@@ -115,9 +88,6 @@ class BookController extends Controller
         ]);
     }
 
-    /**
-     * Store Book
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -130,21 +100,14 @@ class BookController extends Controller
             'language' => 'nullable|string|max:50',
         ]);
 
-        // Safely strip non-numeric/X characters (PHP 8.1+ compliant)
         $isbn = $request->isbn ? preg_replace('/[^0-9X]/i', '', $request->isbn) : null;
+        $apiData = $this->fetchBookDetails($isbn); // Safe to fetch here because it's only 1 book
 
-        $apiData = $this->fetchBookDetails($isbn);
-
-        Book::create(array_merge($validated, [
-            'isbn' => $isbn
-        ], $apiData));
+        Book::create(array_merge($validated, ['isbn' => $isbn], $apiData));
 
         return redirect()->back();
     }
 
-    /**
-     * Update Book
-     */
     public function update(Request $request, Book $book)
     {
         $validated = $request->validate([
@@ -157,37 +120,31 @@ class BookController extends Controller
             'language' => 'nullable|string|max:50',
         ]);
 
-        // Safely strip non-numeric/X characters (PHP 8.1+ compliant)
         $isbn = $request->isbn ? preg_replace('/[^0-9X]/i', '', $request->isbn) : null;
 
-        $apiData = $this->fetchBookDetails($isbn);
+        // Only fetch API data if they changed the ISBN or if the book doesn't have a cover yet
+        $apiData = ($isbn !== $book->isbn || !$book->cover_url)
+            ? $this->fetchBookDetails($isbn)
+            : ['description' => $book->description, 'cover_url' => $book->cover_url];
 
-        $book->update(array_merge($validated, [
-            'isbn' => $isbn
-        ], $apiData));
+        $book->update(array_merge($validated, ['isbn' => $isbn], $apiData));
 
         return redirect()->back();
     }
 
-    /**
-     * Delete Book
-     */
     public function destroy(Book $book)
     {
         $book->delete();
         return redirect()->back();
     }
 
-    /**
-     * Export CSV
-     */
     public function export()
     {
         return Excel::download(new BooksExport, 'gerona_library_books.csv');
     }
 
     /**
-     * CSV Import (Smart Import + Auto Copies)
+     * CSV Import (Super Fast - No API freezing)
      */
     public function import(Request $request)
     {
@@ -197,7 +154,6 @@ class BookController extends Controller
 
         $file = $request->file('csv_file');
         $handle = fopen($file->getRealPath(), "r");
-
         $header = fgetcsv($handle, 1000, ",");
 
         if ($header) {
@@ -213,16 +169,14 @@ class BookController extends Controller
                 $data = array_combine($header, $row);
 
                 $title = strtoupper(trim($data['title'] ?? ''));
-                if (!$title) {
+                if (!$title)
                     continue;
-                }
 
                 $rawIsbn = $data['isbn'] ?? '';
                 $isbn = $rawIsbn ? preg_replace('/[^0-9X]/i', '', $rawIsbn) : null;
 
-                $apiData = $this->fetchBookDetails($isbn);
-
-                // Creates or fetches the Master Book
+                // FIX FOR FREEZING: We completely removed the API fetching from here.
+                // It now instantly saves the book data directly from the CSV.
                 $book = Book::firstOrCreate(
                     [
                         'title' => $title,
@@ -234,16 +188,12 @@ class BookController extends Controller
                         'year_published' => trim($data['year published'] ?? '') ?: null,
                         'category' => trim($data['category'] ?? '') ?: 'Uncategorized',
                         'language' => trim($data['language'] ?? '') ?: 'Unknown',
-                        'description' => $apiData['description'],
-                        'cover_url' => $apiData['cover_url']
+                        'description' => null,
+                        'cover_url' => null
                     ]
                 );
 
-                /*
-                |--------------------------------------------------------------------------
-                | COPY GENERATION
-                |--------------------------------------------------------------------------
-                */
+                // Instantly generate copies
                 $accessionNo = trim($data['accession no.'] ?? '');
                 $copiesTotal = (int) ($data['copies total'] ?? 1);
 
@@ -261,7 +211,6 @@ class BookController extends Controller
                 } else {
                     for ($i = 1; $i <= $copiesTotal; $i++) {
                         $autoAccession = 'AUTO-' . $book->id . '-C' . $i;
-
                         BookCopy::firstOrCreate(
                             ['accession_number' => $autoAccession],
                             [

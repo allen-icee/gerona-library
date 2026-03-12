@@ -76,7 +76,6 @@ export default function BookIndex({
                                 <Icon icon="solar:download-square-bold-duotone" className="w-4 h-4 mr-2 group-hover:-translate-y-0.5 transition-transform" /> Export
                             </a>
 
-                            {/* NEW: IMPORT CSV BUTTON */}
                             <label className="inline-flex items-center justify-center flex-1 sm:flex-none px-4 h-10 text-xs font-bold transition-all bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white rounded-xl border border-emerald-200 shadow-sm cursor-pointer group">
                                 <Icon icon="solar:upload-square-bold-duotone" className="w-4 h-4 mr-2 group-hover:-translate-y-0.5 transition-transform" />
                                 Import CSV
@@ -88,7 +87,6 @@ export default function BookIndex({
                     </div>
                 </div>
 
-                {/* TABLE REMAINS THE SAME... */}
                 <div className="bg-white border border-pink-100 rounded-xl shadow-sm overflow-hidden flex flex-col">
                     <div className="flex-1 overflow-x-auto">
                         <Table>
@@ -108,7 +106,17 @@ export default function BookIndex({
                                     books.data.map((book: any) => (
                                         <TableRow key={book.id} className="hover:bg-pink-50/30 transition-colors border-pink-50">
                                             <TableCell className="font-bold text-slate-800 pl-6 py-3">{book.title}</TableCell>
-                                            <TableCell className="text-stone-600 font-medium text-sm py-3">{book.author}</TableCell>
+
+                                            {/* --- FIXED AUTHOR TOOLTIP --- */}
+                                            <TableCell className="py-3">
+                                                <div
+                                                    className="text-stone-600 font-medium text-sm truncate max-w-[150px] sm:max-w-[250px] cursor-help"
+                                                    title={book.author}
+                                                >
+                                                    {book.author}
+                                                </div>
+                                            </TableCell>
+
                                             <TableCell className="py-3"><span className="px-2.5 py-0.5 rounded-md text-[10px] font-black bg-stone-100 text-stone-600 border border-stone-200">{book.category || "Uncategorized"}</span></TableCell>
                                             <TableCell className="text-center py-3"><span className={`px-2.5 py-0.5 rounded-md text-[10px] font-black border ${book.copies_count > 0 ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-red-50 text-red-600 border-red-200"}`}>{book.copies_count} copies</span></TableCell>
                                             <TableCell className="text-right pr-6 py-3"><BookActions book={book} /></TableCell>
@@ -118,25 +126,41 @@ export default function BookIndex({
                             </TableBody>
                         </Table>
                     </div>
-                    {/* --- PAGINATION CONTROLS --- */}
+
+                    {/* --- FIXED PAGINATION CONTROLS --- */}
                     <div className="p-4 border-t border-pink-50 bg-stone-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <span className="text-xs font-medium text-stone-500">
                             Showing <span className="font-black text-slate-800">{books.from || 0}</span> to <span className="font-black text-slate-800">{books.to || 0}</span> of <span className="font-black text-slate-800">{books.total}</span> records
                         </span>
 
                         <div className="flex flex-wrap justify-center gap-1">
-                            {books.links.map((link: any, index: number) => (
-                                <Link
-                                    key={index}
-                                    href={link.url || "#"}
-                                    preserveScroll
-                                    className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${link.active
-                                        ? "bg-pink-500 text-white border-pink-500 shadow-md shadow-pink-200"
-                                        : "bg-white text-stone-600 border-stone-200 hover:bg-pink-50 hover:text-pink-600 hover:border-pink-200"
-                                        } ${!link.url ? "opacity-50 cursor-not-allowed bg-stone-100" : ""}`}
-                                    dangerouslySetInnerHTML={{ __html: link.label }}
-                                />
-                            ))}
+                            {books.links.map((link: any, index: number) => {
+                                const isActive = link.active;
+                                const isNull = !link.url;
+
+                                // Extracted styles so we can apply them to both Span (disabled) and Link (active)
+                                const linkClasses = `px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${isActive
+                                    ? "bg-pink-500 text-white border-pink-500 shadow-md shadow-pink-200"
+                                    : "bg-white text-stone-600 border-stone-200 hover:bg-pink-50 hover:text-pink-600 hover:border-pink-200"
+                                    } ${isNull ? "opacity-50 cursor-not-allowed bg-stone-100 hover:bg-stone-100 hover:text-stone-600 hover:border-stone-200" : ""}`;
+
+                                return isNull ? (
+                                    <span
+                                        key={index}
+                                        className={linkClasses}
+                                        dangerouslySetInnerHTML={{ __html: link.label }}
+                                    />
+                                ) : (
+                                    <Link
+                                        key={index}
+                                        href={link.url}
+                                        preserveScroll
+                                        preserveState // <-- Prevents losing search focus when changing pages!
+                                        className={linkClasses}
+                                        dangerouslySetInnerHTML={{ __html: link.label }}
+                                    />
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
