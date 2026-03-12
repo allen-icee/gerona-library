@@ -66,10 +66,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/visitor-logs/{visitorLog}/checkout', [VisitorLogController::class, 'checkout'])->name('visitor-logs.checkout');
 
     // Book Master Catalog Routes
+    Route::post('/books/import', [BookController::class, 'import'])->name('books.import');
     Route::get('/books/export', [BookController::class, 'export'])->name('books.export');
     Route::get('/books', [BookController::class, 'index'])->name('books.index');
-    Route::put('/books/{book}', [BookController::class, 'update'])->name('books.update');
-    Route::delete('/books/{book}', [BookController::class, 'destroy'])->name('books.destroy');
+    Route::post('/books', [BookController::class, 'store'])->name('books.store'); // <-- RESTORED
+    Route::put('/books/{book}', [BookController::class, 'update'])->name('books.update'); // <-- RESTORED
+    Route::delete('/books/{book}', [BookController::class, 'destroy'])->name('books.destroy'); // <-- RESTORED
 
     // Physical Book Copies Routes
     Route::get('/books/{book}/copies', [BookCopyController::class, 'index'])->name('books.copies.index');
