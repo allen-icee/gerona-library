@@ -72,6 +72,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/kiosk', [VisitorLogController::class, 'adminIndex'])->name('admin.kiosk.index');
     Route::post('/visitor-logs', [VisitorLogController::class, 'store'])->name('visitor-logs.store');
     Route::patch('/visitor-logs/{visitorLog}/checkout', [VisitorLogController::class, 'checkout'])->name('visitor-logs.checkout');
+    // ADD THIS NEW LINE:
+    Route::post('/visitor-logs/smart-scan', [VisitorLogController::class, 'smartScan'])->name('visitor-logs.smart-scan');
 
     // Book Master Catalog Routes
     Route::post('/books/import', [BookController::class, 'import'])->name('books.import');

@@ -81,4 +81,41 @@ class VisitorLogController extends Controller
     {
         return Excel::download(new VisitorLogsExport, 'gerona_kiosk_logs.csv');
     }
+
+    // Add this inside VisitorLogController
+    public function smartScan(Request $request)
+    {
+        $request->validate([
+            'library_card_number' => 'required|string',
+            'purpose' => 'required|string', // We need this in case they are timing in
+        ]);
+
+        $patron = Patron::where('library_card_number', strtoupper($request->library_card_number))->first();
+
+        if (!$patron) {
+            return back()->withErrors(['error' => 'Card not found. Please register or sign in as guest.']);
+        }
+
+        $visitorName = $patron->first_name . ' ' . $patron->last_name;
+
+        // Check if this person is ALREADY inside (time_out is null)
+        $activeLog = VisitorLog::where('visitor_name', $visitorName)
+            ->whereNull('time_out')
+            ->first();
+
+        if ($activeLog) {
+            // THEY ARE INSIDE -> Time them out!
+            $activeLog->update(['time_out' => now()]);
+            return back()->with('success', "Goodbye, {$patron->first_name}! You have been timed out.");
+        } else {
+            // THEY ARE NOT INSIDE -> Time them in!
+            VisitorLog::create([
+                'visitor_name' => $visitorName,
+                'address' => $patron->school_or_barangay,
+                'purpose' => $request->purpose,
+                'time_in' => now(),
+            ]);
+            return back()->with('success', "Welcome to the library, {$patron->first_name}!");
+        }
+    }
 }

@@ -1,5 +1,3 @@
-// resources/js/Pages/Kiosk/Dashboard.tsx
-
 import { useState, FormEventHandler, useEffect, useRef } from "react";
 import { Head, useForm, router } from "@inertiajs/react";
 import { PageProps } from "@/types";
@@ -8,6 +6,8 @@ import SignatureCanvas from "react-signature-canvas";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
+import { toast } from "sonner";
+import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
 
 export default function KioskDashboard({
     activeVisitors = [],
@@ -44,13 +44,64 @@ export default function KioskDashboard({
         ...currentData,
         signature: sigPad.current?.isEmpty()
             ? ""
-            : sigPad.current?.getCanvas().toDataURL("image/png"), // Replaced getTrimmedCanvas with getCanvas
+            : sigPad.current?.getCanvas().toDataURL("image/png"),
     }));
 
     const handleToggle = (guestMode: boolean) => {
         setIsGuest(guestMode);
         clearErrors();
     };
+
+    // --- ALWAYS ACTIVE QR SCANNER LOGIC ---
+    useEffect(() => {
+        let scanner: Html5QrcodeScanner | null = null;
+
+        // Only activate the camera if we are in "Library Card" mode
+        if (!isGuest) {
+            scanner = new Html5QrcodeScanner(
+                "reader",
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                    supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA], // Force camera only
+                },
+                false
+            );
+
+            scanner.render(
+                (decodedText) => {
+                    // QR Scanned Successfully!
+                    scanner?.pause(true); // Pause scanning to prevent spamming the backend
+
+                    toast.loading("Processing Library Card...", { id: "qr-scan" });
+
+                    router.post(route("visitor-logs.smart-scan"), {
+                        library_card_number: decodedText,
+                        purpose: data.purpose,
+                    }, {
+                        preserveScroll: true,
+                        onSuccess: () => {
+                            toast.success("Scan successful!", { id: "qr-scan" });
+                            scanner?.resume(); // Resume scanning for the next person
+                        },
+                        onError: () => {
+                            toast.error("Invalid QR Code or Card not found.", { id: "qr-scan" });
+                            setTimeout(() => scanner?.resume(), 3000); // Wait 3s before allowing another scan
+                        }
+                    });
+                },
+                (error) => {
+                    // Ignore continuous scan errors
+                }
+            );
+        }
+
+        return () => {
+            if (scanner) {
+                scanner.clear().catch(e => console.error("Failed to clear scanner", e));
+            }
+        };
+    }, [isGuest, data.purpose]);
 
     const submitLog: FormEventHandler = (e) => {
         e.preventDefault();
@@ -140,32 +191,41 @@ export default function KioskDashboard({
                             </button>
                         </div>
 
+                        {/* Purpose Dropdown MOVED UP for Card Scanning */}
+                        <div className="space-y-1.5">
+                            <Label htmlFor="purpose" className="text-stone-500 text-xs font-bold uppercase tracking-widest pl-1">
+                                {!isGuest ? "1. Select Purpose before scanning" : "Purpose of Visit"} <span className="text-pink-500">*</span>
+                            </Label>
+                            <select
+                                id="purpose"
+                                value={data.purpose}
+                                onChange={(e) => setData("purpose", e.target.value)}
+                                className="flex h-12 w-full rounded-xl border border-stone-200 bg-white/50 px-4 py-2 text-base text-slate-800 focus:bg-white focus:outline-none focus:ring-4 focus:ring-pink-500/10 focus:border-pink-300 font-medium shadow-sm transition-all"
+                            >
+                                <option value="Research">Research / Study</option>
+                                <option value="Borrow Books">Borrow / Return Books</option>
+                                <option value="Computer Use">Computer / Internet Use</option>
+                                <option value="Printing">Printing Services</option>
+                                <option value="Reading">Leisure Reading</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
                         {/* Dynamic Input Fields */}
                         <div className="min-h-[130px]">
                             {!isGuest ? (
-                                <div className="space-y-2 animate-in fade-in slide-in-from-left-4 duration-300">
-                                    <Label htmlFor="patron_id" className="text-stone-500 text-xs font-bold uppercase tracking-widest pl-1">
-                                        Library Card Number <span className="text-pink-500">*</span>
+                                <div className="space-y-3 animate-in fade-in slide-in-from-left-4 duration-300">
+                                    <Label className="text-stone-500 text-xs font-bold uppercase tracking-widest pl-1">
+                                        2. Scan QR Code <span className="text-pink-500">*</span>
                                     </Label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <Icon icon="solar:qr-code-bold-duotone" className="h-6 w-6 text-pink-400" />
-                                        </div>
-                                        <Input
-                                            id="patron_id"
-                                            value={data.patron_id}
-                                            onChange={(e) => setData("patron_id", e.target.value)}
-                                            required={!isGuest}
-                                            placeholder="SCAN OR TYPE ID..."
-                                            className="uppercase h-14 pl-12 text-xl tracking-widest font-mono font-black bg-white border-stone-200 text-slate-800 focus:bg-white focus:ring-4 focus:ring-pink-500/10 focus:border-pink-300 placeholder:text-stone-300 rounded-xl shadow-sm transition-all"
-                                            autoFocus
-                                        />
+
+                                    {/* ALWAYS ACTIVE CAMERA CONTAINER */}
+                                    <div className="w-full bg-black rounded-2xl overflow-hidden border-2 border-pink-100 shadow-inner aspect-video relative">
+                                        <div id="reader" className="w-full h-full"></div>
                                     </div>
-                                    {errors.patron_id && (
-                                        <p className="text-xs text-rose-500 pl-1 font-bold flex items-center gap-1 mt-1.5">
-                                            <Icon icon="solar:danger-triangle-bold-duotone" className="w-4 h-4" /> {errors.patron_id}
-                                        </p>
-                                    )}
+                                    <p className="text-center text-[10px] text-stone-400 font-bold uppercase tracking-widest mt-2">
+                                        Point your library card at the camera to log in/out
+                                    </p>
                                 </div>
                             ) : (
                                 <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -213,63 +273,45 @@ export default function KioskDashboard({
                                             />
                                         </div>
                                     </div>
+
+                                    {/* Signature Pad (Guests Only) */}
+                                    <div className="space-y-2 pt-2">
+                                        <div className="flex justify-between items-center pl-1">
+                                            <Label className="text-stone-500 text-xs font-bold uppercase tracking-widest">Signature (Optional)</Label>
+                                            <button
+                                                type="button"
+                                                onClick={() => sigPad.current?.clear()}
+                                                className="text-[10px] font-bold text-pink-500 hover:text-pink-700 uppercase tracking-widest bg-pink-50 px-3 py-1 rounded-md transition-colors"
+                                            >
+                                                Clear
+                                            </button>
+                                        </div>
+                                        <div className="bg-white rounded-xl overflow-hidden border border-stone-200 shadow-sm focus-within:ring-4 focus-within:ring-pink-500/10 focus-within:border-pink-300 transition-all">
+                                            <SignatureCanvas
+                                                ref={sigPad}
+                                                canvasProps={{ className: "w-full h-24 cursor-crosshair" }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Submit Button (Guests Only) */}
+                                    <Button
+                                        type="submit"
+                                        disabled={processing}
+                                        className="w-full h-14 rounded-xl text-base font-black tracking-widest uppercase bg-pink-500 hover:bg-pink-600 text-white shadow-[0_8px_20px_rgba(236,72,153,0.25)] hover:shadow-[0_10px_25px_rgba(236,72,153,0.35)] hover:-translate-y-0.5 transition-all disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-none mt-6"
+                                    >
+                                        {processing ? (
+                                            <Icon icon="solar:spinner-bold-duotone" className="w-6 h-6 animate-spin" />
+                                        ) : (
+                                            <>
+                                                <Icon icon="solar:login-3-bold-duotone" className="w-6 h-6 mr-2" />
+                                                Log Time In
+                                            </>
+                                        )}
+                                    </Button>
                                 </div>
                             )}
                         </div>
-
-                        {/* Purpose Dropdown */}
-                        <div className="space-y-1.5">
-                            <Label htmlFor="purpose" className="text-stone-500 text-xs font-bold uppercase tracking-widest pl-1">Purpose of Visit <span className="text-pink-500">*</span></Label>
-                            <select
-                                id="purpose"
-                                value={data.purpose}
-                                onChange={(e) => setData("purpose", e.target.value)}
-                                className="flex h-12 w-full rounded-xl border border-stone-200 bg-white/50 px-4 py-2 text-base text-slate-800 focus:bg-white focus:outline-none focus:ring-4 focus:ring-pink-500/10 focus:border-pink-300 font-medium shadow-sm transition-all"
-                            >
-                                <option value="Research">Research / Study</option>
-                                <option value="Borrow Books">Borrow / Return Books</option>
-                                <option value="Computer Use">Computer / Internet Use</option>
-                                <option value="Printing">Printing Services</option>
-                                <option value="Reading">Leisure Reading</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-
-                        {/* Signature Pad */}
-                        <div className="space-y-2 pt-2">
-                            <div className="flex justify-between items-center pl-1">
-                                <Label className="text-stone-500 text-xs font-bold uppercase tracking-widest">Signature (Optional)</Label>
-                                <button
-                                    type="button"
-                                    onClick={() => sigPad.current?.clear()}
-                                    className="text-[10px] font-bold text-pink-500 hover:text-pink-700 uppercase tracking-widest bg-pink-50 px-3 py-1 rounded-md transition-colors"
-                                >
-                                    Clear
-                                </button>
-                            </div>
-                            <div className="bg-white rounded-xl overflow-hidden border border-stone-200 shadow-sm focus-within:ring-4 focus-within:ring-pink-500/10 focus-within:border-pink-300 transition-all">
-                                <SignatureCanvas
-                                    ref={sigPad}
-                                    canvasProps={{ className: "w-full h-24 cursor-crosshair" }}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Submit Button */}
-                        <Button
-                            type="submit"
-                            disabled={processing}
-                            className="w-full h-14 rounded-xl text-base font-black tracking-widest uppercase bg-pink-500 hover:bg-pink-600 text-white shadow-[0_8px_20px_rgba(236,72,153,0.25)] hover:shadow-[0_10px_25px_rgba(236,72,153,0.35)] hover:-translate-y-0.5 transition-all disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-none mt-6"
-                        >
-                            {processing ? (
-                                <Icon icon="solar:spinner-bold-duotone" className="w-6 h-6 animate-spin" />
-                            ) : (
-                                <>
-                                    <Icon icon="solar:login-3-bold-duotone" className="w-6 h-6 mr-2" />
-                                    Log Time In
-                                </>
-                            )}
-                        </Button>
                     </form>
                 </div>
             </div>
