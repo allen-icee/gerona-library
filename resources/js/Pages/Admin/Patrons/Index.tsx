@@ -6,8 +6,8 @@ import { Head, router } from "@inertiajs/react";
 import { PageProps } from "@/types";
 import { Input } from "@/Components/ui/input";
 import { Icon } from "@iconify/react";
-import { toast } from "sonner"; // For notifications
-import html2canvas from "html2canvas"; // Add this!
+import { toast } from "sonner";
+import html2canvas from "html2canvas";
 
 import AddPatronModal from "./Partials/AddPatronModal";
 import PatronsTable from "./Partials/PatronTables";
@@ -21,6 +21,7 @@ export default function PatronIndex({
     const [patronToPrint, setPatronToPrint] = useState<any>(null);
     const cardRef = useRef<HTMLDivElement>(null); // Ref to target the card
 
+    // Debounced Search
     useEffect(() => {
         const delayBounceFn = setTimeout(() => {
             if (search !== filters.search) {
@@ -116,9 +117,9 @@ export default function PatronIndex({
             </div>
 
             {/* OFF-SCREEN RENDER CONTAINER */}
-            {/* We position it way off-screen instead of "hidden" because html2canvas cannot read "display: none" elements */}
+            {/* Fixed positioning guarantees html2canvas won't cut it off due to window scrolling */}
             {patronToPrint && (
-                <div className="fixed top-[-10000px] left-[-10000px]">
+                <div className="fixed top-0 left-0 opacity-0 -z-50 pointer-events-none">
                     <div ref={cardRef}>
                         <LibraryCard patron={patronToPrint} />
                     </div>

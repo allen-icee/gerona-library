@@ -80,6 +80,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/patrons/export', [PatronController::class, 'export'])->name('patrons.export');
     Route::get('/patrons', [PatronController::class, 'index'])->name('patrons.index');
     Route::post('/patrons', [PatronController::class, 'store'])->name('patrons.store');
+
+    // ---> ADD THIS MISSING ROUTE <---
+    Route::put('/patrons/{patron}', [PatronController::class, 'update'])->name('patrons.update');
+
     Route::delete('/patrons/{patron}', [PatronController::class, 'destroy'])->name('patrons.destroy');
 
     // Circulation Engine Routes

@@ -1,6 +1,5 @@
 import React from "react";
-import { QRCodeSVG } from "qrcode.react";
-import { Icon } from "@iconify/react";
+import { QRCodeCanvas } from "qrcode.react";
 
 export interface Patron {
     first_name: string;
@@ -57,30 +56,34 @@ export default function LibraryCard({ patron, cardId = "library-card-element" }:
                     left: "-75px",
                     top: "50%",
                     transform: "translateY(-50%)",
-                    height: "320px", // Made even larger per your request
+                    height: "320px",
                     width: "320px",
                     objectFit: "contain",
-                    opacity: 0.06, // Slightly reduced opacity since it's bigger
+                    opacity: 0.06,
                     zIndex: 0,
                     pointerEvents: "none",
                 }}
             />
 
-            {/* 2. Absolute Bottom-Left Book Overlay (From your Tailwind reference) */}
-            <Icon
-                icon="emojione-monotone:open-book"
+            {/* 2. INLINE SVG: Replaces external Iconify request to prevent html2canvas CORS crashes */}
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 64 64"
                 style={{
                     position: "absolute",
                     right: "-16px",
                     bottom: "-16px",
-                    width: "128px",  // w-32 equivalent
-                    height: "128px", // h-32 equivalent
-                    color: "#f43f5e", // text-rose-500
-                    opacity: 0.06,    // opacity-5 equivalent
+                    width: "128px",
+                    height: "128px",
+                    color: "#f43f5e",
+                    opacity: 0.06,
                     zIndex: 0,
                     pointerEvents: "none"
                 }}
-            />
+                fill="currentColor"
+            >
+                <path d="M62 14c-2-1-10-3-22-1l-8 2-8-2c-12-2-20 0-22 1a2 2 0 0 0-1 2v36c0 1 1 2 2 1 2-1 10-2 21 0l8 3 8-3c11-2 19-1 21 0 1 1 2 0 2-1V16a2 2 0 0 0-1-2z" />
+            </svg>
 
             {/* Left Column: Text Data */}
             <div style={{ flex: 1, zIndex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", paddingRight: "8px" }}>
@@ -128,13 +131,17 @@ export default function LibraryCard({ patron, cardId = "library-card-element" }:
             {/* Right Column: Massive SVG QR Code & ID */}
             <div style={{ width: "105px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 1 }}>
 
-                {/* Razor-sharp SVG QR */}
-                <QRCodeSVG
+                {/* 3. HIGH-DPI CANVAS: Renders at 4x scale (380px) but shrunk to 95px so html2canvas captures a super sharp image */}
+                <QRCodeCanvas
                     value={patron.library_card_number}
-                    size={95}
+                    size={380}
                     level="M"
                     includeMargin={false}
                     fgColor="#be185d"
+                    style={{
+                        width: "95px",
+                        height: "95px"
+                    }}
                 />
 
                 {/* ID Number */}

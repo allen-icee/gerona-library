@@ -251,7 +251,7 @@ export default function PatronActions({ patron, onPrint }: { patron: any; onPrin
                                 {errors.last_name && <p className="text-xs text-red-600">{errors.last_name}</p>}
                             </div>
                             <div className="col-span-6 sm:col-span-2 space-y-1.5 pt-1">
-                                <Label className="text-xs font-bold uppercase text-slate-600">Suffix</Label>
+
                                 <SuffixSelect value={data.suffix} onChange={(val) => setData("suffix", val)} />
                             </div>
                         </div>
@@ -294,14 +294,13 @@ export default function PatronActions({ patron, onPrint }: { patron: any; onPrin
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1.5">
-                                <Label htmlFor={`edit_email_${patron.id}`} className="text-xs font-bold uppercase text-slate-600">Email *</Label>
+                                <Label htmlFor={`edit_email_${patron.id}`} className="text-xs font-bold uppercase text-slate-600">Email (Locked)</Label>
                                 <Input
                                     id={`edit_email_${patron.id}`}
                                     type="email"
                                     value={data.email}
-                                    onChange={(e) => setData("email", e.target.value)}
-                                    required
-                                    className="h-10 border-fuchsia-200 focus-visible:ring-fuchsia-500 rounded-lg"
+                                    disabled // <-- Add this
+                                    className="h-10 border-fuchsia-200 focus-visible:ring-fuchsia-500 rounded-lg bg-stone-100 cursor-not-allowed text-stone-500" // <-- Update styling to look disabled
                                 />
                             </div>
                             <div className="space-y-1.5">
