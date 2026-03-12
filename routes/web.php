@@ -51,7 +51,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Kiosk Dashboard Route
     Route::get('/kiosk', function () {
-        return Inertia::render('Kiosk/Dashboard');
+        // 1. Fetch everyone currently inside (where time_out is null)
+        $activeVisitors = \App\Models\VisitorLog::whereNull('time_out')
+            ->orderBy('time_in', 'desc')
+            ->get();
+
+        // 2. Pass that data to the React frontend
+        return Inertia::render('Kiosk/Dashboard', [
+            'activeVisitors' => $activeVisitors
+        ]);
     })->name('kiosk.dashboard');
 
     // Profile Routes

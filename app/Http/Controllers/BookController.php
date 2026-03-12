@@ -9,6 +9,7 @@ use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\BooksExport;
 use Illuminate\Support\Facades\Http;
+use App\Jobs\FetchBookMetadata; // <-- THIS WAS MISSING!
 
 class BookController extends Controller
 {
@@ -59,8 +60,6 @@ class BookController extends Controller
             // Ignore network errors
         }
 
-        // FIX FOR 404 ERRORS: We return null instead of a broken link.
-        // The frontend React component will see null and safely show the pink CSS cover.
         return [
             'description' => null,
             'cover_url' => null
@@ -101,7 +100,7 @@ class BookController extends Controller
         ]);
 
         $isbn = $request->isbn ? preg_replace('/[^0-9X]/i', '', $request->isbn) : null;
-        $apiData = $this->fetchBookDetails($isbn); // Safe to fetch here because it's only 1 book
+        $apiData = $this->fetchBookDetails($isbn);
 
         Book::create(array_merge($validated, ['isbn' => $isbn], $apiData));
 
@@ -122,7 +121,6 @@ class BookController extends Controller
 
         $isbn = $request->isbn ? preg_replace('/[^0-9X]/i', '', $request->isbn) : null;
 
-        // Only fetch API data if they changed the ISBN or if the book doesn't have a cover yet
         $apiData = ($isbn !== $book->isbn || !$book->cover_url)
             ? $this->fetchBookDetails($isbn)
             : ['description' => $book->description, 'cover_url' => $book->cover_url];
@@ -143,9 +141,6 @@ class BookController extends Controller
         return Excel::download(new BooksExport, 'gerona_library_books.csv');
     }
 
-    /**
-     * CSV Import (Super Fast - No API freezing)
-     */
     public function import(Request $request)
     {
         $request->validate([
@@ -175,8 +170,6 @@ class BookController extends Controller
                 $rawIsbn = $data['isbn'] ?? '';
                 $isbn = $rawIsbn ? preg_replace('/[^0-9X]/i', '', $rawIsbn) : null;
 
-                // FIX FOR FREEZING: We completely removed the API fetching from here.
-                // It now instantly saves the book data directly from the CSV.
                 $book = Book::firstOrCreate(
                     [
                         'title' => $title,
@@ -192,6 +185,11 @@ class BookController extends Controller
                         'cover_url' => null
                     ]
                 );
+
+                // ---> THIS WAS MISSING! Dispatch the job to fetch the cover <---
+                if ($isbn && empty($book->cover_url)) {
+                    FetchBookMetadata::dispatch($book);
+                }
 
                 // Instantly generate copies
                 $accessionNo = trim($data['accession no.'] ?? '');
