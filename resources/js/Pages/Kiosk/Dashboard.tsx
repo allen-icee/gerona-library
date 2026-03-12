@@ -44,7 +44,7 @@ export default function KioskDashboard({
         ...currentData,
         signature: sigPad.current?.isEmpty()
             ? ""
-            : sigPad.current?.getTrimmedCanvas().toDataURL("image/png"),
+            : sigPad.current?.getCanvas().toDataURL("image/png"), // Replaced getTrimmedCanvas with getCanvas
     }));
 
     const handleToggle = (guestMode: boolean) => {

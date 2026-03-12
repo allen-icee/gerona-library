@@ -14,7 +14,9 @@ class Book extends Model
         'publisher',
         'year_published',
         'category',
-        'language'
+        'language',
+        'description', // <-- ADD THIS
+        'cover_url'
     ];
 
     public function copies(): HasMany
