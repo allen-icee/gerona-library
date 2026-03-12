@@ -1,21 +1,10 @@
-// resources/js/Pages/Public/Catalog.tsx
-
 import { FormEventHandler } from "react";
 import PublicLayout from "@/Layouts/PublicLayout";
 import { Head, useForm, Link } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
 import { Input } from "@/Components/ui/input";
 import CustomSelect from "@/Components/CustomSelect";
-import BookCover from "@/Components/BookCover"; // <-- Import the new component
-
-interface Book {
-    id: number;
-    title: string;
-    author: string;
-    isbn: string;
-    category: string;
-    available_copies: number;
-}
+import BookCard from "@/Components/Public/BookCard"; // <-- Import our new smart component!
 
 export default function Catalog({ books, filters = {}, categories = [] }: any) {
     const { data, setData, get } = useForm({
@@ -34,14 +23,16 @@ export default function Catalog({ books, filters = {}, categories = [] }: any) {
         get(route("catalog.index"), { preserveState: true });
     };
 
-    const sortValueMap: Record<string, string> = { "Default": "", "Title": "title", "Author": "author", "Newest": "newest" };
-    const sortDisplayMap: Record<string, string> = { "": "Default", "title": "Title", "author": "Author", "newest": "Newest" };
+    // Added "Year" to align with your CSV logic
+    const sortValueMap: Record<string, string> = { "Recently Added": "newest", "Title (A-Z)": "title", "Author (A-Z)": "author", "Year Published": "year" };
+    const sortDisplayMap: Record<string, string> = { "newest": "Recently Added", "title": "Title (A-Z)", "author": "Author (A-Z)", "year": "Year Published" };
 
     return (
         <PublicLayout>
             <Head title="Library Catalog" />
 
             <div className="flex flex-col gap-8">
+                {/* HEADER */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-rose-100">
                     <div>
                         <div className="inline-flex items-center gap-2 text-rose-500 font-potta text-[10px] uppercase tracking-widest mb-1">
@@ -65,29 +56,47 @@ export default function Catalog({ books, filters = {}, categories = [] }: any) {
                 </div>
 
                 <div className="grid grid-cols-12 gap-8">
+                    {/* SIDEBAR FILTERS */}
                     <aside className="col-span-12 lg:col-span-3">
-                        <div className="bg-white rounded-2xl border border-rose-100 p-6 shadow-sm space-y-6">
+                        <div className="bg-white rounded-2xl border border-rose-100 p-6 shadow-sm space-y-6 sticky top-6">
                             <h3 className="font-black text-sm uppercase tracking-wider text-rose-500 flex items-center gap-2">
                                 <Icon icon="solar:filter-bold-duotone" className="w-5 h-5" /> Filters
                             </h3>
                             <div>
                                 <label className="text-xs font-bold uppercase text-stone-600 mb-2 block relative z-30">Category</label>
-                                <CustomSelect value={data.category || "All Categories"} onChange={(val) => setData("category", val === "All Categories" ? "" : val)} options={["All Categories", ...(categories || [])]} theme="rose" />
+                                {/* DYNAMIC CATEGORIES INJECTED HERE */}
+                                <CustomSelect
+                                    value={data.category || "All Categories"}
+                                    onChange={(val) => setData("category", val === "All Categories" ? "" : val)}
+                                    options={["All Categories", ...categories]}
+                                    theme="rose"
+                                />
                             </div>
                             <div>
                                 <label className="text-xs font-bold uppercase text-stone-600 mb-2 block relative z-20">Availability</label>
-                                <CustomSelect value={data.available === "1" ? "Available Only" : "All"} onChange={(val) => setData("available", val === "Available Only" ? "1" : "")} options={["All", "Available Only"]} theme="rose" />
+                                <CustomSelect
+                                    value={data.available === "1" ? "Available Now" : "Show All"}
+                                    onChange={(val) => setData("available", val === "Available Now" ? "1" : "")}
+                                    options={["Show All", "Available Now"]}
+                                    theme="rose"
+                                />
                             </div>
                             <div>
                                 <label className="text-xs font-bold uppercase text-stone-600 mb-2 block relative z-10">Sort By</label>
-                                <CustomSelect value={sortDisplayMap[data.sort || ""]} onChange={(val) => setData("sort", sortValueMap[val])} options={["Default", "Title", "Author", "Newest"]} theme="rose" />
+                                <CustomSelect
+                                    value={sortDisplayMap[data.sort || "newest"]}
+                                    onChange={(val) => setData("sort", sortValueMap[val])}
+                                    options={["Recently Added", "Title (A-Z)", "Author (A-Z)", "Year Published"]}
+                                    theme="rose"
+                                />
                             </div>
-                            <button onClick={applyFilters} className="w-full bg-rose-50 text-rose-600 font-bold text-sm py-3 rounded-xl hover:bg-rose-100 transition border border-rose-200 mt-2 shadow-sm">
+                            <button onClick={applyFilters} className="w-full bg-rose-500 text-white font-bold text-sm py-3 rounded-xl hover:bg-rose-600 transition shadow-md shadow-rose-200 mt-2">
                                 Apply Filters
                             </button>
                         </div>
                     </aside>
 
+                    {/* BOOK GRID */}
                     <section className="col-span-12 lg:col-span-9">
                         {books.data.length === 0 ? (
                             <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-rose-200">
@@ -97,37 +106,20 @@ export default function Catalog({ books, filters = {}, categories = [] }: any) {
                             </div>
                         ) : (
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                {books.data.map((book: Book) => (
-                                    <div key={book.id} className="group flex flex-col cursor-pointer">
-                                        <div className="relative aspect-[2/3] bg-white rounded-xl overflow-hidden border border-rose-100 shadow-sm group-hover:shadow-md group-hover:-translate-y-1 transition-all duration-300">
-
-                                            {/* --- THE NEW COMPONENT --- */}
-                                            <BookCover isbn={book.isbn} title={book.title} />
-
-                                            <div className="absolute top-2 right-2">
-                                                <div className={`text-white text-[9px] px-2 py-1 rounded-md font-bold shadow-sm ${book.available_copies > 0 ? "bg-emerald-500" : "bg-slate-700"}`}>
-                                                    {book.available_copies > 0 ? "IN" : "OUT"}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="mt-3 px-1">
-                                            <p className="text-[10px] uppercase text-rose-500 font-bold mb-0.5 tracking-wider">{book.category}</p>
-                                            <h3 className="text-sm font-semibold text-slate-800 line-clamp-2 group-hover:text-rose-500 transition-colors">{book.title}</h3>
-                                            <p className="text-xs text-stone-400 mt-1 line-clamp-1">{book.author}</p>
-                                        </div>
-                                    </div>
+                                {books.data.map((book: any) => (
+                                    <BookCard key={book.id} book={book} />
                                 ))}
                             </div>
                         )}
 
+                        {/* PAGINATION */}
                         {books.links && books.links.length > 3 && (
                             <div className="flex justify-center mt-12 gap-2 flex-wrap">
                                 {books.links.map((link: any, i: number) => (
                                     <Link
                                         key={i}
                                         href={link.url || "#"}
-                                        className={`px-4 py-2 text-sm font-medium rounded-lg transition ${link.active ? "bg-rose-500 text-white shadow-sm" : "bg-white text-stone-600 border border-stone-200 hover:border-rose-300 hover:text-rose-500"} ${!link.url && "opacity-50 cursor-not-allowed"}`}
+                                        className={`px-4 py-2 text-sm font-medium rounded-lg transition ${link.active ? "bg-rose-500 text-white shadow-md shadow-rose-200" : "bg-white text-stone-600 border border-stone-200 hover:border-rose-300 hover:text-rose-500"} ${!link.url && "opacity-50 cursor-not-allowed"}`}
                                         dangerouslySetInnerHTML={{ __html: link.label }}
                                     />
                                 ))}
