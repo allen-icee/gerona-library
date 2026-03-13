@@ -63,11 +63,7 @@ class FetchBookMetadata implements ShouldQueue
             // Ignore network timeouts so the queue doesn't crash
         }
 
-        // 3. Final Fallback if both APIs fail
-        if (!$this->book->cover_url) {
-            $this->book->update([
-                'cover_url' => "https://covers.openlibrary.org/b/isbn/{$isbn}-L.jpg?default=false"
-            ]);
-        }
+        // DELETED THE BLIND FALLBACK HERE.
+        // If it reaches here, the database simply keeps cover_url as null.
     }
 }
