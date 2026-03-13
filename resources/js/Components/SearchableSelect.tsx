@@ -1,3 +1,5 @@
+// resources/js/Components/SearchableSelect.tsx
+
 import { useState, useEffect, useRef, KeyboardEvent } from "react";
 import { Icon } from "@iconify/react";
 
@@ -9,16 +11,35 @@ interface Props {
     placeholder?: string;
     disabled?: boolean;
     error?: string;
+    theme?: "amber" | "fuchsia" | "rose" | "pink";
     onKeyDown?: (e: KeyboardEvent<HTMLInputElement>) => void;
 }
 
 export default function SearchableSelect({
-    id, value, onChange, options, placeholder = "Select an option...", disabled = false, error, onKeyDown
+    id,
+    value,
+    onChange,
+    options,
+    placeholder = "Select an option...",
+    disabled = false,
+    error,
+    theme = "amber",
+    onKeyDown
 }: Props) {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState(value);
     const [placement, setPlacement] = useState<"top" | "bottom">("bottom");
     const wrapperRef = useRef<HTMLDivElement>(null);
+
+    // Matching the theme styles from CustomSelect.tsx
+    const themeStyles = {
+        amber: { focus: "focus:border-amber-400 focus:ring-amber-400", activeBg: "bg-amber-50 text-amber-700 font-bold", hoverBg: "hover:bg-amber-50/50 hover:text-amber-600" },
+        fuchsia: { focus: "focus:border-fuchsia-500 focus:ring-fuchsia-500", activeBg: "bg-fuchsia-50 text-fuchsia-700 font-bold", hoverBg: "hover:bg-fuchsia-50/50 hover:text-fuchsia-600" },
+        rose: { focus: "focus:border-rose-400 focus:ring-rose-400", activeBg: "bg-rose-50 text-rose-700 font-bold", hoverBg: "hover:bg-rose-50/50 hover:text-rose-600" },
+        pink: { focus: "focus:border-pink-400 focus:ring-pink-400", activeBg: "bg-pink-50 text-pink-700 font-bold", hoverBg: "hover:bg-pink-50/50 hover:text-pink-600" },
+    };
+
+    const activeTheme = themeStyles[theme];
 
     useEffect(() => { setSearchTerm(value); }, [value]);
 
@@ -58,16 +79,16 @@ export default function SearchableSelect({
                     onKeyDown={onKeyDown}
                     disabled={disabled}
                     placeholder={placeholder}
-                    // EXACT MATCH to your Input component styling:
-                    className={`w-full bg-white border border-pink-200 focus:border-pink-500 focus:ring-pink-500 focus-visible:ring-pink-500 focus-visible:outline-none text-slate-800 rounded-xl h-10 text-sm pl-3 pr-10 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${error ? "border-red-600 focus:ring-red-600" : ""}`}
+                    // Base input styles synced with Register.tsx inputs + Dynamic Theme support
+                    className={`w-full bg-stone-50 border border-stone-200 text-slate-800 rounded-xl h-12 pl-4 pr-10 text-sm shadow-sm transition-all focus:outline-none focus:ring-1 disabled:opacity-50 disabled:cursor-not-allowed ${activeTheme.focus} ${error ? "border-rose-500 focus:border-rose-500 focus:ring-rose-500" : ""}`}
                 />
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-stone-400">
-                    <Icon icon="solar:alt-arrow-down-bold" className={`transition-transform duration-200 ${isOpen ? (placement === "top" ? "" : "rotate-180") : ""}`} width="16" />
+                <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-stone-400">
+                    <Icon icon="solar:alt-arrow-down-bold" className={`transition-transform duration-200 ${isOpen ? (placement === "top" ? "" : "rotate-180") : ""}`} width="18" />
                 </div>
             </div>
 
             {isOpen && !disabled && (
-                <ul className={`absolute z-50 w-full bg-white border border-pink-100 max-h-48 overflow-y-auto shadow-xl shadow-stone-200/50 rounded-xl text-sm py-1 hide-scrollbar ${placement === "top" ? "bottom-full mb-2" : "top-full mt-2"}`}>
+                <ul className={`absolute z-50 w-full bg-white border border-stone-100 max-h-48 overflow-y-auto shadow-xl shadow-stone-200/50 rounded-xl text-sm py-1 hide-scrollbar ${placement === "top" ? "bottom-full mb-2" : "top-full mt-2"}`}>
                     {filteredOptions.length > 0 ? (
                         filteredOptions.map((opt) => (
                             <li
@@ -79,7 +100,7 @@ export default function SearchableSelect({
                                     setIsOpen(false);
                                     document.getElementById(id || "")?.focus();
                                 }}
-                                className={`px-4 py-2.5 cursor-pointer text-slate-700 transition-colors ${value === opt ? "bg-pink-50 text-pink-600 font-bold" : "hover:bg-pink-50/50 hover:text-pink-600"}`}
+                                className={`px-4 py-2.5 cursor-pointer text-slate-700 transition-colors ${value === opt ? activeTheme.activeBg : `hover:bg-stone-50 ${activeTheme.hoverBg}`}`}
                             >
                                 {opt}
                             </li>

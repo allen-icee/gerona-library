@@ -17,7 +17,7 @@ export default function Home() {
                     Uses items-stretch to balance the left content and right carousel. 
                     Gap scales from 6 on mobile to 10 on desktop.
                 */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 w-full items-stretch">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-10 w-full items-stretch">
 
                     {/* LEFT COLUMN: Welcome & Actions */}
                     <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-6 w-full">
@@ -101,12 +101,12 @@ export default function Home() {
 
                     {/* RIGHT COLUMN: Carousel */}
                     <div className="lg:col-span-5 xl:col-span-4 w-full flex flex-col items-center justify-center h-full">
-                        <div className="w-full h-[250px] sm:h-[350px] lg:h-full min-h-[300px] flex items-center justify-center rounded-3xl overflow-hidden relative border border-pink-100 shadow-sm">
+                        <div className="w-full h-[250px] sm:h-[350px] lg:h-full min-h-[300px] flex items-center justify-center rounded-3xl overflow-hidden relative ">
                             <Carousel />
                         </div>
                         <p className="mt-4 text-center text-xs text-stone-400 font-medium tracking-wide uppercase">
                             <Icon icon="solar:gallery-wide-bold-duotone" className="inline w-4 h-4 mr-1.5 -mt-0.5" />
-                            Library Gallery
+                            On-site Images
                         </p>
                     </div>
 

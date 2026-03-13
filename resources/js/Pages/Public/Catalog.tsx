@@ -71,7 +71,7 @@ export default function Catalog({ books, filters = {}, categories = [] }: Catalo
             <Head title="Library Catalog" />
 
             {/* Added animation wrapper and max-w to match Home.tsx */}
-            <div className="flex flex-col gap-6 md:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700 w-full py-2">
+            <div className="flex flex-col gap-6 md:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700 w-full">
 
                 {/* HEADER & SEARCH */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6 pb-6 border-b border-rose-100">

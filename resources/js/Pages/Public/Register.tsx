@@ -252,7 +252,6 @@ export default function Register() {
                                     </div>
 
                                     <div className="col-span-6 md:col-span-2 pt-0.5">
-                                        <label className="text-[11px] font-bold text-transparent uppercase tracking-wider mb-1.5 block hidden md:block">.</label>
                                         <SuffixSelect value={data.suffix} onChange={(val) => setData("suffix", val)} />
                                     </div>
                                 </div>

@@ -79,7 +79,7 @@ export default function Carousel() {
         <>
             {/* 3D Stack Container */}
             <div className="relative w-full h-full flex items-center justify-center perspective-[1000px]">
-                
+
                 {/* Left Arrow */}
                 {active > 0 && (
                     <button
@@ -126,11 +126,10 @@ export default function Carousel() {
                                 <img
                                     src={src}
                                     alt={`Carousel item ${i + 1}`}
-                                    className={`w-full h-full object-cover rounded-[1.5rem] cursor-pointer select-none transition-shadow duration-300 ${
-                                        isActiveSlide
-                                            ? "shadow-[0_15px_40px_rgba(244,114,182,0.5)] border-4 border-white"
-                                            : "shadow-lg border-2 border-white/60"
-                                    }`}
+                                    className={`w-full h-full object-cover rounded-[1.5rem] cursor-pointer select-none transition-shadow duration-300 ${isActiveSlide
+                                        ? "shadow-[0_15px_40px_rgba(244,114,182,0.5)] border-4 border-white"
+                                        : "shadow-lg border-2 border-white/60"
+                                        }`}
                                     draggable={false}
                                     onClick={() => openViewer(i)}
                                 />
