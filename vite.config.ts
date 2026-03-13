@@ -7,7 +7,7 @@ export default defineConfig({
     server: {
         host: true, // This does the same thing as --host
         hmr: {
-            host: '192.168.11.11', // <--- REPLACE THIS WITH YOUR ACTUAL IPV4 ADDRESS
+            host: '192.168.10.251', // <--- REPLACE THIS WITH YOUR ACTUAL IPV4 ADDRESS
         },
     },
     plugins: [

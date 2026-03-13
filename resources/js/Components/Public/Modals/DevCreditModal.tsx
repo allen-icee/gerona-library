@@ -1,7 +1,7 @@
 // resources/js/Components/Public/Modals/DevCreditModal.tsx
 
 import { useState } from "react";
-import { createPortal } from "react-dom"; // Must import createPortal to escape the dialog
+import { createPortal } from "react-dom";
 import {
     Dialog,
     DialogContent,
@@ -33,7 +33,7 @@ export default function DevCreditModal({
 
     return (
         <>
-            {/* CONFETTI FIX: Teleported directly to the document.body to guarantee it covers the screen */}
+            {/* CONFETTI FIX: Teleported directly to the document.body */}
             {isOpen && typeof document !== "undefined" && createPortal(
                 <div className="fixed inset-0 z-[999999] pointer-events-none flex items-center justify-center">
                     <Lottie
@@ -49,8 +49,23 @@ export default function DevCreditModal({
                 onClose(open);
                 if (!open) setIsImageZoomed(false);
             }}>
-                {/* SOLID THEME: Replaced bg-pink-50/30 with bg-white and removed backdrop-blur-md */}
-                <DialogContent showCloseButton={false} className="bg-white border-4 border-rose-100 rounded-[2rem] sm:max-w-[750px] w-[95vw] p-6 md:p-8 shadow-2xl max-h-[90vh] overflow-y-auto hide-scrollbar">
+                <DialogContent
+                    showCloseButton={false}
+                    onInteractOutside={(e) => {
+                        // Prevent Radix from closing the main modal if the photo is zoomed
+                        if (isImageZoomed) {
+                            e.preventDefault();
+                        }
+                    }}
+                    onEscapeKeyDown={(e) => {
+                        if (isImageZoomed) {
+                            e.preventDefault();
+                            setIsImageZoomed(false);
+                        }
+                    }}
+                    // THE FIX: Changed max-h-[90vh] to max-h-[90svh] to respect mobile browser UI bounds
+                    className="bg-white border-4 border-rose-100 rounded-[2rem] sm:max-w-[750px] w-[95vw] p-6 md:p-8 shadow-2xl max-h-[90svh] overflow-y-auto hide-scrollbar"
+                >
 
                     {/* CUSTOM CLOSE BUTTON */}
                     <DialogClose className="absolute right-4 top-4 z-[100] bg-white text-rose-500 p-2.5 rounded-full shadow-lg hover:bg-rose-50 hover:scale-110 transition-all border border-rose-200 focus:outline-none">
@@ -75,13 +90,13 @@ export default function DevCreditModal({
                                 (e.target as HTMLImageElement).src = "https://placehold.co/800x350/ffe4e6/f43f5e?text=Insert+Team+Photo+Here";
                             }}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end justify-center pb-3 opacity-90">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end justify-center pb-3 opacity-90 pointer-events-none">
                             <span className="text-white font-black tracking-[0.3em] uppercase text-xs drop-shadow-md flex items-center gap-1.5">
                                 <Icon icon="solar:diploma-verified-bold-duotone" className="w-5 h-5 text-rose-300" />
                                 OJT of 2026
                             </span>
                         </div>
-                        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
                             <div className="bg-white/90 backdrop-blur-sm text-rose-600 px-4 py-2 rounded-full font-bold text-xs flex items-center gap-2 shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
                                 <Icon icon="solar:maximize-square-minimalistic-bold-duotone" className="w-4 h-4" />
                                 Click to Expand
@@ -92,10 +107,9 @@ export default function DevCreditModal({
                     {/* HEADER */}
                     <DialogHeader className="mb-2 mt-2">
                         <DialogTitle className="text-3xl md:text-4xl font-serif font-black text-slate-800 flex items-center justify-center gap-3">
-
                             The Library Team
                         </DialogTitle>
-                        <p className="text-sm md:text-base text-stone-500 font-medium text-center  px-4">
+                        <p className="text-sm md:text-base text-stone-500 font-medium text-center px-4">
                             Working together to make the library a welcoming place for everyone.
                         </p>
                     </DialogHeader>
@@ -164,24 +178,33 @@ export default function DevCreditModal({
                 </DialogContent>
             </Dialog>
 
-            {/* FULL SCREEN IMAGE LIGHTBOX: Also teleported so it works perfectly */}
+            {/* FULL SCREEN IMAGE LIGHTBOX */}
             {isImageZoomed && typeof document !== "undefined" && createPortal(
                 <div
-                    className="fixed inset-0 z-[999999] bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4 md:p-10 cursor-zoom-out animate-in fade-in duration-300"
+                    className="fixed inset-0 z-[999999] bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4 md:p-10 animate-in fade-in duration-300 pointer-events-auto h-[100svh]"
                     onClick={() => setIsImageZoomed(false)}
                 >
-                    <div className="relative max-w-6xl w-full h-full flex flex-col items-center justify-center">
+                    <div
+                        className="relative max-w-6xl w-full h-full flex flex-col items-center justify-center"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <img
                             src="/images/dev-team.jpg"
                             alt="MIS Internship Team Full View"
-                            className="w-auto h-auto max-w-full max-h-[85vh] rounded-2xl shadow-2xl object-contain animate-in zoom-in-95 duration-300 border-4 border-white/10"
+                            // THE FIX: Changed max-h-[80vh] to max-h-[80svh]
+                            className="w-auto h-auto max-w-full max-h-[80svh] rounded-2xl shadow-2xl object-contain animate-in zoom-in-95 duration-300 border-4 border-white/10"
                             onError={(e) => {
                                 (e.target as HTMLImageElement).src = "https://placehold.co/1200x800/1e293b/f43f5e?text=Insert+Team+Photo+Here";
                             }}
                         />
-                        <p className="text-white/60 font-bold text-sm tracking-widest uppercase mt-6">
-                            Click anywhere to close
-                        </p>
+
+                        <button
+                            onClick={() => setIsImageZoomed(false)}
+                            className="mt-6 px-6 py-2.5 bg-white/10 hover:bg-white/25 text-white font-bold rounded-full backdrop-blur-sm border border-white/20 transition-all flex items-center gap-2 hover:scale-105 active:scale-95"
+                        >
+                            <Icon icon="lucide:x" className="w-4 h-4" />
+                            Close Photo
+                        </button>
                     </div>
                 </div>,
                 document.body

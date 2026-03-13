@@ -19,7 +19,7 @@ export default function LibraryCreditModal({
         <Dialog open={isOpen} onOpenChange={onClose}>
             {/* Outer border is now Pink. Default font is Arial. */}
             {/* Outer border is now Pink. Default font is Arial. */}
-            <DialogContent className="font-['Arial',sans-serif] bg-gradient-to-br from-[#d4af37] via-[#fdf5d3] to-[#c7a445] border-[6px] border-pink-300 rounded-xl sm:max-w-[750px] max-h-[90vh] p-0 shadow-2xl overflow-hidden flex justify-center [&>button]:absolute [&>button]:right-4 [&>button]:top-4 [&>button]:bg-white [&>button]:text-rose-500 [&>button]:p-2 [&>button]:rounded-full [&>button]:shadow-lg hover:[&>button]:bg-rose-50 hover:[&>button]:scale-110 [&>button]:transition-all [&>button]:border [&>button]:border-rose-200 [&>button]:z-[100] [&>button>svg]:w-5 [&>button>svg]:h-5">
+            <DialogContent className="font-['Arial',sans-serif] bg-gradient-to-br from-[#d4af37] via-[#fdf5d3] to-[#c7a445] border-[6px] border-pink-300 rounded-xl sm:max-w-[750px] max-h-[90svh] p-0 shadow-2xl overflow-hidden flex justify-center [&>button]:absolute [&>button]:right-4 [&>button]:top-4 [&>button]:bg-white [&>button]:text-rose-500 [&>button]:p-2 [&>button]:rounded-full [&>button]:shadow-lg hover:[&>button]:bg-rose-50 hover:[&>button]:scale-110 [&>button]:transition-all [&>button]:border [&>button]:border-rose-200 [&>button]:z-[100] [&>button>svg]:w-5 [&>button>svg]:h-5">
                 <DialogDescription className="sr-only">
                     Dedication and credits for the Dr. Jorge Cleofas Bocobo Library.
                 </DialogDescription>

@@ -16,33 +16,37 @@ export default function PublicLayout({
     const isRegister = url.startsWith("/get-card");
 
     return (
-        <div className="min-h-screen bg-[#FFF0F5] font-sans text-stone-800 relative flex flex-col overflow-x-hidden selection:bg-pink-200">
+        // Using 100dvh ensures mobile browsers with URL bars don't cut off the footer or jump layout
+        <div className="min-h-[100dvh] bg-[#FFF0F5] font-sans text-stone-800 relative flex flex-col overflow-x-hidden selection:bg-pink-200">
 
             {/* Background blobs */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-pink-200/40 rounded-full blur-3xl pointer-events-none z-0"></div>
             <div className="absolute bottom-[10%] right-[-5%] w-[30%] h-[50%] bg-rose-200/30 rounded-full blur-3xl pointer-events-none z-0"></div>
 
-            {/* BOOKMARK LOGO */}
-            <Link
-                href="/"
-                className="absolute top-0 left-4 md:left-6 bg-rose-500 text-white px-3 md:px-5 py-3 md:py-4 rounded-b-[1.2rem] md:rounded-b-[1.5rem] shadow-lg shadow-pink-300/50 border-2 border-t-0 border-pink-200 z-50 flex flex-col items-center group transition-all duration-300 hover:pt-6 hover:pb-5"
-                title="Library Home"
-            >
-                <img
-                    src="/images/GeronaLibraryLogo.png"
-                    alt="Library Logo"
-                    className="w-16 h-16 md:w-18 md:h-18 mb-1 group-hover:scale-110 transition-transform"
-                />
-                <span className="font-potta text-[9px] md:text-[11px] uppercase tracking-wider leading-none mt-1">
-                    Library
-                </span>
-            </Link>
-
             {/* MAIN CONTENT AREA */}
-            <div className="max-w-[100rem] mx-auto w-full flex flex-col flex-1 pt-16 md:pt-20 px-4 md:px-8 relative z-10">
+            <div className="max-w-[100rem] mx-auto w-full flex flex-col flex-1 relative z-10 px-4 md:px-8">
+
+                {/* BOOKMARK LOGO 
+                    Moved inside the max-w container so it aligns perfectly with the content bounds. 
+                */}
+                <Link
+                    href="/"
+                    className="absolute top-0 left-4 md:left-8 bg-rose-500 text-white px-3 md:px-5 py-3 md:py-4 rounded-b-[1.2rem] md:rounded-b-[1.5rem] shadow-lg shadow-pink-300/50 border-2 border-t-0 border-pink-200 z-50 flex flex-col items-center group transition-all duration-300 hover:pt-6 hover:pb-5"
+                    title="Library Home"
+                >
+                    <img
+                        src="/images/GeronaLibraryLogo.png"
+                        alt="Library Logo"
+                        className="w-16 h-16 md:w-18 md:h-18 mb-1 group-hover:scale-110 transition-transform"
+                    />
+                    <span className="font-potta text-[9px] md:text-[11px] uppercase tracking-wider leading-none mt-1">
+                        Library
+                    </span>
+                </Link>
 
                 {/* FOLDER TABS */}
-                <div className="flex flex-row space-x-1.5 md:space-x-2 items-end z-20 pl-20 md:pl-5 no-scrollbar overflow-x-auto pr-4">
+                {/* Fixed the overlap issue by replacing pl-20/pl-5 with pl-[6.5rem] (mobile) and pl-[9.5rem] (desktop) to safely clear the logo */}
+                <div className="flex flex-row space-x-1.5 md:space-x-2 items-end z-20 overflow-x-auto no-scrollbar pr-4 pt-12 md:pt-16 pl-[6.5rem] sm:pl-[7.5rem] md:pl-[9.5rem] lg:pl-[10rem]">
                     <Link
                         href="/"
                         className={`flex items-center gap-1.5 px-4 md:px-6 py-2.5 md:py-3.5 rounded-t-xl md:rounded-t-2xl border-2 border-b-0 relative translate-y-[2px] transition-all duration-300 min-w-max ${isHome
@@ -97,8 +101,9 @@ export default function PublicLayout({
                 </div>
 
                 {/* FOLDER BODY */}
-                <div className="w-full relative z-10 flex flex-col flex-1">
-                    <main className="bg-white rounded-3xl shadow-xl shadow-pink-200/50 border-2 border-pink-200 p-6 md:p-10 flex flex-col flex-1">
+                {/* Added pb-8 to account for the dynamic viewport height so footer breathes well */}
+                <div className="w-full relative z-10 flex flex-col flex-1 pb-6 md:pb-8">
+                    <main className="bg-white rounded-3xl shadow-xl shadow-pink-200/50 border-2 border-pink-200 p-4 sm:p-6 md:p-10 flex flex-col flex-1">
                         {children}
                     </main>
 
