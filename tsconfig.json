@@ -1,12 +1,4 @@
 {
-    "paths": {
-        "@/*": [
-            "resources/js/*"
-        ],
-        "@/lib/*": [
-            "resources/js/lib/*"
-        ]
-    },
     "compilerOptions": {
         "allowJs": true,
         "module": "ESNext",
@@ -22,6 +14,9 @@
         "paths": {
             "@/*": [
                 "./resources/js/*"
+            ],
+            "@/lib/*": [
+                "./resources/js/lib/*"
             ],
             "ziggy-js": [
                 "./vendor/tightenco/ziggy"

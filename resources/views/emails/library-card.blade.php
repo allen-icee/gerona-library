@@ -176,10 +176,11 @@
                     </td>
 
                     <td class="card-right">
-                        <div class="qr-wrapper">
+                        <div class="qr-wrapper"
+                            style="background: white; padding: 10px; border-radius: 8px; display: inline-block;">
                             <img class="qr-image"
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&color=be185d&data={{ $patron->library_card_number }}"
-                                alt="QR Code">
+                                src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&color=000000&bgcolor=FFFFFF&margin=10&ecc=H&data={{ $patron->library_card_number }}"
+                                style="width: 150px; height: 150px; display: block;" alt="QR Code">
                         </div>
                         <p class="id-number">{{ $patron->library_card_number }}</p>
                     </td>

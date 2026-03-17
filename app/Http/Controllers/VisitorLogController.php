@@ -87,7 +87,7 @@ class VisitorLogController extends Controller
     {
         $request->validate([
             'library_card_number' => 'required|string',
-            'purpose' => 'required|string', // We need this in case they are timing in
+            'purpose' => 'required|string',
         ]);
 
         $patron = Patron::where('library_card_number', strtoupper($request->library_card_number))->first();
@@ -96,7 +96,11 @@ class VisitorLogController extends Controller
             return back()->withErrors(['error' => 'Card not found. Please register or sign in as guest.']);
         }
 
-        $visitorName = $patron->first_name . ' ' . $patron->last_name;
+        // Cleanly format the full name
+        $visitorName = trim("{$patron->first_name} " . ($patron->middle_initial ? "{$patron->middle_initial}. " : "") . "{$patron->last_name} {$patron->suffix}");
+
+        // Properly construct the address from your actual database columns
+        $address = "Brgy. {$patron->barangay}, {$patron->municipality}";
 
         // Check if this person is ALREADY inside (time_out is null)
         $activeLog = VisitorLog::where('visitor_name', $visitorName)
@@ -111,7 +115,7 @@ class VisitorLogController extends Controller
             // THEY ARE NOT INSIDE -> Time them in!
             VisitorLog::create([
                 'visitor_name' => $visitorName,
-                'address' => $patron->school_or_barangay,
+                'address' => $address, // <-- FIXED: No longer null!
                 'purpose' => $request->purpose,
                 'time_in' => now(),
             ]);
