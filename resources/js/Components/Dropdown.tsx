@@ -1,3 +1,4 @@
+//resources\js\Components\Dropdown.tsx
 import { Transition } from '@headlessui/react';
 import { InertiaLinkProps, Link } from '@inertiajs/react';
 import {
@@ -15,8 +16,8 @@ const DropDownContext = createContext<{
     toggleOpen: () => void;
 }>({
     open: false,
-    setOpen: () => {},
-    toggleOpen: () => {},
+    setOpen: () => { },
+    toggleOpen: () => { },
 });
 
 const Dropdown = ({ children }: PropsWithChildren) => {

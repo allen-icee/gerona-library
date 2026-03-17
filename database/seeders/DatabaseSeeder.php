@@ -1,5 +1,5 @@
 <?php
-
+//database\seeders\DatabaseSeeder.php
 namespace Database\Seeders;
 
 use App\Models\User;
@@ -8,18 +8,13 @@ use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // 1. Create the Official Access Roles (Just Two Now!)
         $librarianRole = Role::firstOrCreate(['name' => 'Librarian']);
         $kioskRole = Role::firstOrCreate(['name' => 'Kiosk']);
 
-        // 2. Create the Master Librarian Account
         $librarian = User::firstOrCreate(
-            ['username' => 'librarian'], // <-- New official username
+            ['username' => 'librarian'],
             [
                 'name' => 'Head Librarian',
                 'email' => 'librarian@geronalibrary.gov.ph',
@@ -28,7 +23,6 @@ class DatabaseSeeder extends Seeder
         );
         $librarian->assignRole($librarianRole);
 
-        // 3. Create the locked-down Kiosk Account
         $kiosk = User::firstOrCreate(
             ['username' => 'kiosk'],
             [

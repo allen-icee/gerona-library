@@ -1,5 +1,5 @@
 <?php
-
+//app\Exports\VisitorLogsExport.php
 namespace App\Exports;
 
 use App\Models\VisitorLog;
@@ -11,7 +11,6 @@ class VisitorLogsExport implements FromCollection, WithHeadings, WithMapping
 {
     public function collection()
     {
-        // Order by the most recent visits first
         return VisitorLog::orderBy('time_in', 'desc')->get();
     }
 

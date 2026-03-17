@@ -1,5 +1,5 @@
 <?php
-
+//app\Models\User.php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +13,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
-        'username', // <-- ADDED THIS
+        'username',
         'email',
         'password',
     ];

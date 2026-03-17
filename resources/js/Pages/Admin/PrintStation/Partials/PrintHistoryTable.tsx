@@ -1,3 +1,4 @@
+//resources\js\Pages\Admin\PrintStation\Partials\PrintHistoryTable.tsx
 import { Icon } from "@iconify/react";
 import { Link } from "@inertiajs/react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/Components/ui/table";
@@ -6,13 +7,11 @@ export default function PrintHistoryTable({ logs }: { logs: any }) {
     return (
         <div className="bg-white border border-pink-100 shadow-sm shadow-pink-100/50 rounded-xl overflow-hidden flex flex-col h-full">
 
-            {/* Header */}
             <div className="bg-pink-50/50 border-b border-pink-100 px-4 py-3 flex items-center gap-2">
                 <Icon icon="solar:history-bold-duotone" className="w-5 h-5 text-pink-500" />
                 <h2 className="text-sm font-bold text-slate-800">Historical Logs</h2>
             </div>
 
-            {/* Shadcn Table */}
             <div className="flex-1 overflow-x-auto">
                 <Table>
                     <TableHeader className="bg-white hover:bg-white border-b border-pink-50">
@@ -33,8 +32,8 @@ export default function PrintHistoryTable({ logs }: { logs: any }) {
                             logs?.data?.map((log: any) => (
                                 <TableRow key={log.id} className="hover:bg-pink-50/30 transition-colors border-pink-50">
                                     <TableCell className="pl-4 py-3">
-                                        <p className="font-bold text-slate-800 text-xs truncate max-w-[120px]">{log.visitor_name}</p>
-                                        <p className="text-[10px] text-slate-400 mt-0.5 truncate max-w-[120px]">{log.school_or_barangay}</p>
+                                        <p className="font-bold text-slate-800 text-xs truncate max-w-30">{log.visitor_name}</p>
+                                        <p className="text-[10px] text-slate-400 mt-0.5 truncate max-w-30">{log.school_or_barangay}</p>
                                         <p className="text-[9px] text-pink-400 mt-1 flex items-center gap-1 font-medium">
                                             <Icon icon="solar:shield-user-bold-duotone" className="w-3 h-3" />
                                             {log.logger?.name}
@@ -62,7 +61,6 @@ export default function PrintHistoryTable({ logs }: { logs: any }) {
                 </Table>
             </div>
 
-            {/* Pagination */}
             {logs?.links && logs.links.length > 3 && (
                 <div className="bg-slate-50 border-t border-stone-100 px-4 py-3 flex items-center justify-center gap-1 flex-wrap">
                     {logs.links.map((link: any, i: number) => (

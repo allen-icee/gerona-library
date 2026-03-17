@@ -1,3 +1,4 @@
+//resources\js\Pages\Admin\Circulation\Partials\CheckoutForm.tsx
 import { FormEventHandler, useMemo } from "react";
 import { useForm } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
@@ -7,7 +8,7 @@ import { Button } from "@/Components/ui/button";
 import CustomSelect from "@/Components/CustomSelect";
 
 export default function CheckoutForm({ patrons, availableCopies }: { patrons: any[]; availableCopies: any[] }) {
-    // Set default due date to 7 days from today
+
     const defaultDueDate = new Date();
     defaultDueDate.setDate(defaultDueDate.getDate() + 7);
     const defaultDueString = defaultDueDate.toISOString().split("T")[0] + "T17:00";
@@ -18,7 +19,6 @@ export default function CheckoutForm({ patrons, availableCopies }: { patrons: an
         due_at: defaultDueString,
     });
 
-    // 1. Map Patrons into a Label -> ID dictionary so CustomSelect can display names but save IDs
     const patronOptionsMap = useMemo(() => {
         const map = new Map<string, string>();
         patrons.forEach((p) => {
@@ -30,7 +30,6 @@ export default function CheckoutForm({ patrons, availableCopies }: { patrons: an
     const patronOptions = Array.from(patronOptionsMap.keys());
     const selectedPatronLabel = patronOptions.find(key => patronOptionsMap.get(key) === data.patron_id?.toString()) || "";
 
-    // 2. Map Book Copies into a Label -> ID dictionary
     const copyOptionsMap = useMemo(() => {
         const map = new Map<string, string>();
         availableCopies.forEach((c) => {
@@ -47,7 +46,7 @@ export default function CheckoutForm({ patrons, availableCopies }: { patrons: an
         post(route("circulation.checkout"), {
             preserveScroll: true,
             onSuccess: () => {
-                reset("book_copy_id"); // Keep the patron in case they are borrowing multiple
+                reset("book_copy_id");
                 clearErrors();
             },
         });
@@ -123,7 +122,7 @@ export default function CheckoutForm({ patrons, availableCopies }: { patrons: an
                 <Button
                     type="submit"
                     disabled={processing}
-                    className="w-full bg-gradient-to-r from-rose-400 to-rose-500 hover:from-rose-500 hover:to-rose-600 text-white shadow-md shadow-rose-200 font-bold rounded-xl border-none h-11 mt-2"
+                    className="w-full bg-linear-to-r from-rose-400 to-rose-500 hover:from-rose-500 hover:to-rose-600 text-white shadow-md shadow-rose-200 font-bold rounded-xl border-none h-11 mt-2"
                 >
                     {processing ? "Processing..." : "Issue Book"}
                 </Button>

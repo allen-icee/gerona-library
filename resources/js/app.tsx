@@ -1,3 +1,4 @@
+//resources\js\app.tsx
 import '../css/app.css';
 import './bootstrap';
 

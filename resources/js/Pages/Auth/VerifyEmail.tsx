@@ -1,3 +1,4 @@
+//resources\js\Pages\Auth\VerifyEmail.tsx
 import PrimaryButton from '@/Components/PrimaryButton';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';

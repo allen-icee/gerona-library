@@ -1,5 +1,5 @@
 <?php
-
+//app\Http\Controllers\PatronController.php
 namespace App\Http\Controllers;
 
 use App\Models\Patron;
@@ -35,8 +35,6 @@ class PatronController extends Controller
 
     public function store(Request $request)
     {
-        // Notice we removed 'library_card_number' from the validation, 
-        // because the controller now generates it automatically!
         $validated = $request->validate([
             'first_name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZñÑ\s\-\,]+$/'],
             'last_name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZñÑ\s\-\,]+$/'],
@@ -57,14 +55,12 @@ class PatronController extends Controller
             'status' => 'required|in:Active,Suspended',
         ]);
 
-        // Auto-generate the Library Card Number: GER-{GenderCode}-{Sequence}
         $genderCode = match ($request->gender) {
             'Male' => '01',
             'Female' => '02',
             default => '03',
         };
 
-        // Find the last created patron to get the sequence number
         $lastPatron = Patron::orderBy('id', 'desc')->first();
         $nextSequence = 1;
 
@@ -77,7 +73,6 @@ class PatronController extends Controller
 
         $patron = Patron::create($validated);
 
-        // Optional: Send the email with their new library card attached
         Mail::to($patron->email)->send(new LibraryCardGenerated($patron));
 
         return redirect()->back();
@@ -94,7 +89,6 @@ class PatronController extends Controller
             'type' => 'required|in:Citizen,Student,Teacher/LGU Staff',
             'gender' => 'required|in:Male,Female,Other',
 
-            // Allow them to keep their own email, but it must still be a gmail
             'email' => ['required', 'email', 'ends_with:@gmail.com', 'unique:patrons,email,' . $patron->id],
 
             'province' => 'required|string|max:255',
@@ -106,9 +100,6 @@ class PatronController extends Controller
             'contact_number' => ['nullable', 'numeric', 'digits_between:7,11'],
             'status' => 'required|in:Active,Suspended',
         ]);
-
-        // Note: We DO NOT update the library_card_number here. 
-        // IDs should be permanent once generated.
 
         $patron->update($validated);
 
@@ -124,7 +115,6 @@ class PatronController extends Controller
 
     public function export()
     {
-        // This will instantly download a file named "gerona_patrons.csv"
         return Excel::download(new PatronsExport, 'gerona_patrons.csv');
     }
 }

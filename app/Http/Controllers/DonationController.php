@@ -1,5 +1,5 @@
 <?php
-
+//app\Http\Controllers\DonationController.php
 namespace App\Http\Controllers;
 
 use App\Models\Donation;
@@ -17,7 +17,6 @@ class DonationController extends Controller
             ->orderBy('date_received', 'desc')
             ->paginate(15);
 
-        // Calculate totals for the dashboard metric cards
         $totals = [
             'total_value' => Donation::sum('estimated_value'),
             'total_donations' => Donation::count(),
@@ -33,7 +32,6 @@ class DonationController extends Controller
 
     public function store(Request $request)
     {
-        // In production, move this to a DonationStoreRequest class
         $validated = $request->validate([
             'donator_name' => 'required|string|max:255',
             'donator_type' => 'required|in:Individual,LGU Official,NGO / Foundation,Private Company',
@@ -43,14 +41,12 @@ class DonationController extends Controller
             'date_received' => 'required|date|before_or_equal:today',
         ]);
 
-        $validated['received_by'] = Auth::id(); // Securely attribute to the logged-in staff
+        $validated['received_by'] = Auth::id();
 
         Donation::create($validated);
 
         return redirect()->back()->with('success', 'Donation recorded successfully.');
     }
-    // app/Http/Controllers/DonationController.php
-
     public function update(Request $request, Donation $donation)
     {
         $validated = $request->validate([

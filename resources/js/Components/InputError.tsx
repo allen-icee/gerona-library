@@ -1,3 +1,4 @@
+//resources\js\Components\InputError.tsx
 import { HTMLAttributes } from 'react';
 
 export default function InputError({

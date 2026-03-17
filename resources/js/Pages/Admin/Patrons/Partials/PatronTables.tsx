@@ -47,7 +47,7 @@ export default function PatronsTable({ patrons, onPrint }: { patrons: any, onPri
                                         </span>
                                     </TableCell>
                                     <TableCell className="py-3">
-                                        <p className="text-xs text-stone-500 font-medium truncate max-w-[200px]" title={`${patron.barangay}, ${patron.municipality}`}>
+                                        <p className="text-xs text-stone-500 font-medium truncate max-w-50" title={`${patron.barangay}, ${patron.municipality}`}>
                                             {patron.barangay}, {patron.municipality}
                                         </p>
                                     </TableCell>
@@ -66,7 +66,6 @@ export default function PatronsTable({ patrons, onPrint }: { patrons: any, onPri
                 </Table>
             </div>
 
-            {/* Pagination Controls */}
             {patrons.total > 15 && (
                 <div className="bg-slate-50 border-t border-stone-100 px-6 py-3 flex items-center justify-between">
                     <p className="text-[11px] text-stone-500 font-medium uppercase tracking-wider">
@@ -78,8 +77,8 @@ export default function PatronsTable({ patrons, onPrint }: { patrons: any, onPri
                                 key={index}
                                 href={link.url || "#"}
                                 className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition-colors ${link.active
-                                        ? "bg-fuchsia-500 text-white shadow-sm shadow-fuchsia-200"
-                                        : "bg-white text-slate-500 border border-slate-200 hover:border-fuchsia-300 hover:text-fuchsia-500"
+                                    ? "bg-fuchsia-500 text-white shadow-sm shadow-fuchsia-200"
+                                    : "bg-white text-slate-500 border border-slate-200 hover:border-fuchsia-300 hover:text-fuchsia-500"
                                     } ${!link.url && "opacity-50 cursor-not-allowed"}`}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                             />

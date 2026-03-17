@@ -1,5 +1,5 @@
 <?php
-
+//app\Models\BorrowTransaction.php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -19,14 +19,12 @@ class BorrowTransaction extends Model
         'status',
     ];
 
-    // Cast the dates so we can format them easily in React
     protected $casts = [
         'borrowed_at' => 'datetime',
         'due_at' => 'datetime',
         'returned_at' => 'datetime',
     ];
 
-    // Relationships to pull in the Patron, Book, and Librarian data
     public function patron(): BelongsTo
     {
         return $this->belongsTo(Patron::class);

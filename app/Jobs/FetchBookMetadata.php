@@ -1,5 +1,5 @@
 <?php
-
+//app\Jobs\FetchBookMetadata.php
 namespace App\Jobs;
 
 use App\Models\Book;
@@ -29,7 +29,6 @@ class FetchBookMetadata implements ShouldQueue
         $isbn = $this->book->isbn;
 
         try {
-            // 1. Try Google Books
             $google = Http::timeout(5)->get("https://www.googleapis.com/books/v1/volumes?q=isbn:{$isbn}");
 
             if ($google->successful() && isset($google['items'][0])) {
@@ -40,10 +39,9 @@ class FetchBookMetadata implements ShouldQueue
                         ? str_replace('http://', 'https://', $info['imageLinks']['thumbnail'])
                         : $this->book->cover_url
                 ]);
-                return; // Stop here if Google succeeded
+                return;
             }
 
-            // 2. Try OpenLibrary if Google Failed
             $open = Http::timeout(5)->get("https://openlibrary.org/api/books?bibkeys=ISBN:{$isbn}&format=json&jscmd=data");
 
             if ($open->successful()) {
@@ -63,7 +61,5 @@ class FetchBookMetadata implements ShouldQueue
             // Ignore network timeouts so the queue doesn't crash
         }
 
-        // DELETED THE BLIND FALLBACK HERE.
-        // If it reaches here, the database simply keeps cover_url as null.
     }
 }

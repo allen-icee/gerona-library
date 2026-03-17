@@ -1,3 +1,4 @@
+//resources\js\Pages\Auth\ForgotPassword.tsx
 import InputError from '@/Components/InputError';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';

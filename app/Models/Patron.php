@@ -1,5 +1,5 @@
 <?php
-
+//app\Models\Patron.php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -10,9 +10,9 @@ class Patron extends Model
     protected $fillable = [
         'library_card_number',
         'first_name',
-        'middle_initial', // NEW
+        'middle_initial',
         'last_name',
-        'suffix', // NEW
+        'suffix',
         'type',
         'email',
         'gender',

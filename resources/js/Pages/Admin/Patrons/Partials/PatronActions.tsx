@@ -34,7 +34,6 @@ export default function PatronActions({ patron, onPrint }: { patron: any; onPrin
         status: patron.status || "Active",
     });
 
-    // --- JSON LOCATION STATE ---
     const [locationData, setLocationData] = useState<any>(null);
     const [provinces, setProvinces] = useState<string[]>([]);
     const [municipalities, setMunicipalities] = useState<string[]>([]);
@@ -53,7 +52,6 @@ export default function PatronActions({ patron, onPrint }: { patron: any; onPrin
                     });
                     setProvinces(provList.sort());
 
-                    // Populate existing locations if available
                     if (patron.province) {
                         for (const regionKey in json) {
                             const provs = json[regionKey].province_list;
@@ -204,7 +202,7 @@ export default function PatronActions({ patron, onPrint }: { patron: any; onPrin
                 setIsEditOpen(open);
                 if (!open) reset();
             }}>
-                <DialogContent className="sm:max-w-[700px] bg-white rounded-2xl border-fuchsia-100 shadow-xl shadow-stone-200/50 max-h-[90vh] overflow-y-auto custom-scrollbar">
+                <DialogContent className="sm:max-w-175 bg-white rounded-2xl border-fuchsia-100 shadow-xl shadow-stone-200/50 max-h-[90vh] overflow-y-auto custom-scrollbar">
                     <DialogHeader>
                         <DialogTitle className="text-xl font-black text-slate-800 flex items-center gap-2">
                             <Icon icon="solar:pen-bold-duotone" className="w-6 h-6 text-fuchsia-500" />
@@ -299,7 +297,7 @@ export default function PatronActions({ patron, onPrint }: { patron: any; onPrin
                                     id={`edit_email_${patron.id}`}
                                     type="email"
                                     value={data.email}
-                                    disabled // <-- Add this
+                                    disabled
                                     className="h-10 border-fuchsia-200 focus-visible:ring-fuchsia-500 rounded-lg bg-stone-100 cursor-not-allowed text-stone-500" // <-- Update styling to look disabled
                                 />
                             </div>
@@ -367,7 +365,7 @@ export default function PatronActions({ patron, onPrint }: { patron: any; onPrin
                             <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)} className="rounded-xl font-bold text-slate-500 hover:bg-slate-100 border-stone-200">
                                 Cancel
                             </Button>
-                            <Button type="submit" disabled={processing} className="bg-gradient-to-r from-fuchsia-400 to-fuchsia-500 hover:from-fuchsia-500 hover:to-fuchsia-600 text-white shadow-md font-bold rounded-xl border-none">
+                            <Button type="submit" disabled={processing} className="bg-linear-to-r from-fuchsia-400 to-fuchsia-500 hover:from-fuchsia-500 hover:to-fuchsia-600 text-white shadow-md font-bold rounded-xl border-none">
                                 {processing ? "Updating..." : "Update Patron"}
                             </Button>
                         </DialogFooter>
@@ -375,7 +373,6 @@ export default function PatronActions({ patron, onPrint }: { patron: any; onPrin
                 </DialogContent>
             </Dialog>
 
-            {/* DELETE MODAL (Unchanged but using Toast inside action block above) */}
             <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
                 <DialogContent className="sm:max-w-sm bg-white rounded-2xl border-red-100 shadow-xl shadow-stone-200/50">
                     <DialogHeader>

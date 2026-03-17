@@ -1,3 +1,4 @@
+//resources\js\Pages\Admin\PrintStation\Index.tsx
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head } from "@inertiajs/react";
 import { PageProps } from "@/types";
@@ -26,10 +27,9 @@ export default function PrintServices({
 
             <div className="max-w-full space-y-6">
 
-                {/* COMPACT HEADER */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-2xl border border-pink-100 shadow-sm shadow-pink-100/50">
                     <div className="flex items-center gap-3">
-                        <div className="bg-gradient-to-br from-pink-300 to-pink-500 w-12 h-12 rounded-xl flex items-center justify-center shadow-lg shadow-pink-300/50 text-white">
+                        <div className="bg-linear-to-br from-pink-300 to-pink-500 w-12 h-12 rounded-xl flex items-center justify-center shadow-lg shadow-pink-300/50 text-white">
                             <Icon icon="solar:printer-minimalistic-bold-duotone" className="w-6 h-6" />
                         </div>
                         <div>
@@ -52,12 +52,11 @@ export default function PrintServices({
                 </div>
 
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
-                    {/* Left Column: Active Queue (Takes up 2/3 width on large screens) */}
+
                     <div className="xl:col-span-2">
                         <PrintQueueManager queue={printQueue} />
                     </div>
 
-                    {/* Right Column: History Table (Takes up 1/3 width on large screens) */}
                     <div className="xl:col-span-1">
                         <PrintHistoryTable logs={printLogs} />
                     </div>

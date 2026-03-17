@@ -24,13 +24,8 @@ export default function Dashboard({
             <Head title="Dashboard" />
 
             <div className="max-w-full space-y-8">
-                {/* Header & Live Clock */}
                 <DashboardHeader user={auth.user} />
-
-                {/* Quick Navigation Links */}
                 <QuickActions />
-
-                {/* Live Statistics Cards */}
                 <MetricCards metrics={metrics} />
             </div>
         </AdminLayout>

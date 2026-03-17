@@ -141,13 +141,13 @@ export default function AddPatronModal() {
             }}
         >
             <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-fuchsia-400 to-fuchsia-600 hover:from-fuchsia-500 hover:to-fuchsia-700 text-white shadow-md shadow-fuchsia-200 border-none font-bold text-xs h-10 rounded-xl w-full sm:w-auto">
+                <Button className="bg-linear-to-r from-fuchsia-400 to-fuchsia-600 hover:from-fuchsia-500 hover:to-fuchsia-700 text-white shadow-md shadow-fuchsia-200 border-none font-bold text-xs h-10 rounded-xl w-full sm:w-auto">
                     <Icon icon="solar:user-plus-bold-duotone" className="w-4 h-4 mr-2" />
                     Register Patron
                 </Button>
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-[700px] bg-white rounded-2xl border-fuchsia-100 shadow-xl shadow-stone-200/50 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <DialogContent className="sm:max-w-175 bg-white rounded-2xl border-fuchsia-100 shadow-xl shadow-stone-200/50 max-h-[90vh] overflow-y-auto custom-scrollbar">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-black text-slate-800 flex items-center gap-2">
                         <Icon icon="solar:user-id-bold-duotone" className="w-6 h-6 text-fuchsia-500" />
@@ -200,7 +200,6 @@ export default function AddPatronModal() {
                         </div>
                     </div>
 
-                    {/* TYPE & GENDER */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5 relative z-40">
                             <Label className="text-xs font-bold uppercase text-slate-600">Patron Type *</Label>
@@ -238,7 +237,6 @@ export default function AddPatronModal() {
                         </div>
                     )}
 
-                    {/* EMAIL & CONTACT */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <Label htmlFor="email" className="text-xs font-bold uppercase text-slate-600">Email Address (@gmail.com) *</Label>
@@ -267,7 +265,6 @@ export default function AddPatronModal() {
                         </div>
                     </div>
 
-                    {/* LOCATION CASCADING DROPDOWNS */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 relative z-20">
                         <div className="space-y-1.5">
                             <Label className="text-xs font-bold uppercase text-slate-600">Province *</Label>
@@ -321,7 +318,7 @@ export default function AddPatronModal() {
                         <Button type="button" variant="outline" onClick={() => setIsOpen(false)} className="rounded-xl font-bold text-slate-500 hover:bg-slate-100 border-stone-200">
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={processing} className="bg-gradient-to-r from-fuchsia-400 to-fuchsia-500 hover:from-fuchsia-500 hover:to-fuchsia-600 text-white shadow-md font-bold rounded-xl border-none">
+                        <Button type="submit" disabled={processing} className="bg-linear-to-r from-fuchsia-400 to-fuchsia-500 hover:from-fuchsia-500 hover:to-fuchsia-600 text-white shadow-md font-bold rounded-xl border-none">
                             {processing ? "Saving..." : "Register Patron"}
                         </Button>
                     </DialogFooter>

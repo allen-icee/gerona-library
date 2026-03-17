@@ -28,7 +28,6 @@ export default function EditDonationModal({ donation, isOpen, onClose }: { donat
             date_received: "",
         });
 
-    // Populate data when a record is passed to the modal
     useEffect(() => {
         if (donation && isOpen) {
             setData({
@@ -75,7 +74,7 @@ export default function EditDonationModal({ donation, isOpen, onClose }: { donat
                 }
             }}
         >
-            <DialogContent className="sm:max-w-[500px] bg-white rounded-2xl border-fuchsia-100 shadow-xl shadow-stone-200/50">
+            <DialogContent className="sm:max-w-125 bg-white rounded-2xl border-fuchsia-100 shadow-xl shadow-stone-200/50">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-black text-slate-800 flex items-center gap-2">
                         <Icon icon="solar:pen-bold-duotone" className="w-6 h-6 text-fuchsia-500" />
@@ -206,7 +205,7 @@ export default function EditDonationModal({ donation, isOpen, onClose }: { donat
                         <Button
                             type="submit"
                             disabled={processing}
-                            className="bg-gradient-to-r from-fuchsia-400 to-fuchsia-500 hover:from-fuchsia-500 hover:to-fuchsia-600 text-white shadow-md font-bold rounded-xl border-none"
+                            className="bg-linear-to-r from-fuchsia-400 to-fuchsia-500 hover:from-fuchsia-500 hover:to-fuchsia-600 text-white shadow-md font-bold rounded-xl border-none"
                         >
                             {processing ? "Updating..." : "Update Record"}
                         </Button>

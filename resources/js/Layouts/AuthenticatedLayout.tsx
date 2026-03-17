@@ -1,3 +1,4 @@
+//resources\js\Layouts\AuthenticatedLayout.tsx
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';

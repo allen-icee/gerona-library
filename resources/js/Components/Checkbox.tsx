@@ -1,3 +1,4 @@
+//resources\js\Components\Checkbox.tsx
 import { InputHTMLAttributes } from 'react';
 
 export default function Checkbox({

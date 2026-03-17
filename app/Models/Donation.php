@@ -1,5 +1,5 @@
 <?php
-
+//app\Models\Donation.php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -22,7 +22,6 @@ class Donation extends Model
         'estimated_value' => 'decimal:2',
     ];
 
-    // Relationship to see which staff member received the donation
     public function receiver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'received_by');

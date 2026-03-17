@@ -1,3 +1,4 @@
+//resources\js\Components\ApplicationLogo.tsx
 import { SVGAttributes } from 'react';
 
 export default function ApplicationLogo(props: SVGAttributes<SVGElement>) {

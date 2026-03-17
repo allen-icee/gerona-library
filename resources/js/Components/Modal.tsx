@@ -1,3 +1,4 @@
+//resources\js\Components\Modal.tsx
 import {
     Dialog,
     DialogPanel,
@@ -11,7 +12,7 @@ export default function Modal({
     show = false,
     maxWidth = '2xl',
     closeable = true,
-    onClose = () => {},
+    onClose = () => { },
 }: PropsWithChildren<{
     show: boolean;
     maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';

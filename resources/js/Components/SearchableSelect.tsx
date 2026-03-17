@@ -31,7 +31,6 @@ export default function SearchableSelect({
     const [placement, setPlacement] = useState<"top" | "bottom">("bottom");
     const wrapperRef = useRef<HTMLDivElement>(null);
 
-    // Matching the theme styles from CustomSelect.tsx
     const themeStyles = {
         amber: { focus: "focus:border-amber-400 focus:ring-amber-400", activeBg: "bg-amber-50 text-amber-700 font-bold", hoverBg: "hover:bg-amber-50/50 hover:text-amber-600" },
         fuchsia: { focus: "focus:border-fuchsia-500 focus:ring-fuchsia-500", activeBg: "bg-fuchsia-50 text-fuchsia-700 font-bold", hoverBg: "hover:bg-fuchsia-50/50 hover:text-fuchsia-600" },
@@ -72,14 +71,14 @@ export default function SearchableSelect({
                     value={searchTerm}
                     onChange={(e) => {
                         setSearchTerm(e.target.value);
-                        onChange(e.target.value); // Syncs state back to inertia form!
+                        onChange(e.target.value);
                         openDropdown();
                     }}
                     onFocus={openDropdown}
                     onKeyDown={onKeyDown}
                     disabled={disabled}
                     placeholder={placeholder}
-                    // Base input styles synced with Register.tsx inputs + Dynamic Theme support
+
                     className={`w-full bg-stone-50 border border-stone-200 text-slate-800 rounded-xl h-12 pl-4 pr-10 text-sm shadow-sm transition-all focus:outline-none focus:ring-1 disabled:opacity-50 disabled:cursor-not-allowed ${activeTheme.focus} ${error ? "border-rose-500 focus:border-rose-500 focus:ring-rose-500" : ""}`}
                 />
                 <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-stone-400">

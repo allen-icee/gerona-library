@@ -1,7 +1,7 @@
 // resources/js/Pages/Admin/Patrons/Index.tsx
 
 import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom"; // <-- Imported React Portal!
+import { createPortal } from "react-dom";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, router } from "@inertiajs/react";
 import { PageProps } from "@/types";
@@ -22,7 +22,6 @@ export default function PatronIndex({
     const [patronToPrint, setPatronToPrint] = useState<any>(null);
     const cardRef = useRef<HTMLDivElement>(null);
 
-    // Debounced Search
     useEffect(() => {
         const delayBounceFn = setTimeout(() => {
             if (search !== filters.search) {
@@ -36,7 +35,6 @@ export default function PatronIndex({
         return () => clearTimeout(delayBounceFn);
     }, [search]);
 
-    // Generate Photo Logic
     const downloadPhoto = async () => {
         if (!cardRef.current) return;
 
@@ -44,7 +42,7 @@ export default function PatronIndex({
             toast.loading("Capturing high-res photo...", { id: "generate-id" });
 
             const dataUrl = await htmlToImage.toPng(cardRef.current, {
-                pixelRatio: 4, // Max sharpness
+                pixelRatio: 4,
                 backgroundColor: 'transparent',
                 skipFonts: false,
             });
@@ -66,10 +64,9 @@ export default function PatronIndex({
             <Head title="Patron Registry" />
 
             <div className="max-w-full space-y-6">
-                {/* COMPACT HEADER */}
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-4 rounded-2xl border border-fuchsia-100 shadow-sm shadow-fuchsia-100/50">
                     <div className="flex items-center gap-3">
-                        <div className="bg-gradient-to-br from-fuchsia-400 to-fuchsia-600 w-12 h-12 rounded-xl flex items-center justify-center shadow-md shadow-fuchsia-200 text-white">
+                        <div className="bg-linear-to-br from-fuchsia-400 to-fuchsia-600 w-12 h-12 rounded-xl flex items-center justify-center shadow-md shadow-fuchsia-200 text-white">
                             <Icon icon="solar:users-group-two-rounded-bold-duotone" className="w-6 h-6" />
                         </div>
                         <div>
@@ -104,38 +101,31 @@ export default function PatronIndex({
                         <AddPatronModal />
                     </div>
                 </div>
-
-                {/* DATA TABLE */}
                 <PatronsTable patrons={patrons} onPrint={setPatronToPrint} />
             </div>
 
-            {/* PORTALED PHOTO PREVIEW MODAL */}
-            {/* This completely bypasses the AdminLayout stacking issues */}
             {patronToPrint && typeof document !== 'undefined' && createPortal(
                 <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-stone-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
 
                     <div className="bg-stone-50 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
                         <div className="p-6 md:p-8 flex flex-col items-center">
 
-                            {/* Header */}
                             <div className="text-center mb-8">
                                 <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
                                     <Icon icon="solar:gallery-bold-duotone" className="w-8 h-8" />
                                 </div>
                                 <h2 className="text-2xl font-black text-slate-800 tracking-tight">Save ID Photo</h2>
-                                <p className="text-slate-500 text-xs mt-2 leading-relaxed max-w-[250px] mx-auto">
+                                <p className="text-slate-500 text-xs mt-2 leading-relaxed max-w-62.5 mx-auto">
                                     Download a perfectly cropped, high-resolution PNG image ready for ID badge software.
                                 </p>
                             </div>
 
-                            {/* The Card */}
                             <div className="shadow-2xl shadow-rose-900/15 rounded-md mb-8 ring-1 ring-slate-900/5">
                                 <div ref={cardRef} className="bg-white overflow-hidden rounded-md">
                                     <LibraryCard patron={patronToPrint} />
                                 </div>
                             </div>
 
-                            {/* Actions */}
                             <div className="flex gap-3 w-full">
                                 <button
                                     onClick={() => setPatronToPrint(null)}
@@ -155,7 +145,7 @@ export default function PatronIndex({
                         </div>
                     </div>
                 </div>,
-                document.body // <-- Attaches it directly to the HTML body!
+                document.body
             )}
         </AdminLayout>
     );

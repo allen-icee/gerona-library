@@ -1,3 +1,4 @@
+//resources\js\Pages\Admin\Books\Copies.tsx
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, Link } from "@inertiajs/react";
 import { PageProps } from "@/types";
@@ -5,7 +6,7 @@ import { Icon } from "@iconify/react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/Components/ui/table";
 
 import AddCopyModal from "./Partials/AddCopyModal";
-import CopyActions from "./Partials/CopyActions"; // <--- We import the new Actions here!
+import CopyActions from "./Partials/CopyActions";
 
 export default function BookCopies({ book, copies }: PageProps<{ book: any; copies: any[] }>) {
     return (
@@ -55,7 +56,6 @@ export default function BookCopies({ book, copies }: PageProps<{ book: any; copi
                                                 {copy.source === "Donated" && copy.donator_name && <span className="block text-[10px] text-pink-500 font-bold mt-0.5">from {copy.donator_name}</span>}
                                             </TableCell>
                                             <TableCell className="text-right pr-6 py-3">
-                                                {/* Replaced raw delete button with dropdown component! */}
                                                 <CopyActions copy={copy} />
                                             </TableCell>
                                         </TableRow>

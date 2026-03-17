@@ -1,3 +1,4 @@
+//resources\js\Pages\Admin\Books\Partials\BookActions.tsx
 import { useState, FormEventHandler, KeyboardEvent } from "react";
 import { useForm, router } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
@@ -81,9 +82,8 @@ export default function BookActions({ book }: { book: any }) {
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* EDIT MODAL */}
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogContent className="sm:max-w-[500px] bg-white rounded-2xl border-pink-100 shadow-xl shadow-stone-200/50">
+                <DialogContent className="sm:max-w-125 bg-white rounded-2xl border-pink-100 shadow-xl shadow-stone-200/50">
                     <DialogHeader>
                         <DialogTitle className="text-xl font-black flex items-center gap-2"><Icon icon="solar:pen-bold-duotone" className="text-pink-500 w-6 h-6" /> Edit Record</DialogTitle>
                     </DialogHeader>
@@ -130,7 +130,6 @@ export default function BookActions({ book }: { book: any }) {
                 </DialogContent>
             </Dialog>
 
-            {/* DELETE MODAL REMAINS THE SAME (Truncated for brevity, paste your exact delete modal here) */}
         </>
     );
 }

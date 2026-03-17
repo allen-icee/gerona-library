@@ -13,7 +13,6 @@ export default function DonationsIndex({
     totals,
 }: PageProps<{ donations: any; totals: any }>) {
 
-    // Helper to format PHP currency
     const formatPHP = (amount: number) => {
         return new Intl.NumberFormat("en-PH", {
             style: "currency",
@@ -26,10 +25,10 @@ export default function DonationsIndex({
             <Head title="Donations Tracker" />
 
             <div className="max-w-full space-y-6">
-                {/* HEADER */}
+
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-2xl border border-fuchsia-100 shadow-sm shadow-fuchsia-100/50">
                     <div className="flex items-center gap-3">
-                        <div className="bg-gradient-to-br from-fuchsia-300 to-fuchsia-500 w-12 h-12 rounded-xl flex items-center justify-center shadow-lg shadow-fuchsia-300/50 text-white">
+                        <div className="bg-linear-to-br from-fuchsia-300 to-fuchsia-500 w-12 h-12 rounded-xl flex items-center justify-center shadow-lg shadow-fuchsia-300/50 text-white">
                             <Icon icon="solar:gift-bold-duotone" className="w-6 h-6" />
                         </div>
                         <div>
@@ -51,14 +50,12 @@ export default function DonationsIndex({
                             Export
                         </a>
 
-                        {/* ADD MODAL */}
                         <AddDonationModal />
                     </div>
                 </div>
 
-                {/* METRIC CARDS */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <Card className="shadow-sm border-fuchsia-100 bg-gradient-to-br from-white to-fuchsia-50/30">
+                    <Card className="shadow-sm border-fuchsia-100 bg-linear-to-br from-white to-fuchsia-50/30">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-xs font-bold uppercase tracking-wider text-stone-500">
                                 Total Est. Value
@@ -71,7 +68,7 @@ export default function DonationsIndex({
                             </div>
                         </CardContent>
                     </Card>
-                    <Card className="shadow-sm border-fuchsia-100 bg-gradient-to-br from-white to-fuchsia-50/30">
+                    <Card className="shadow-sm border-fuchsia-100 bg-linear-to-br from-white to-fuchsia-50/30">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-xs font-bold uppercase tracking-wider text-stone-500">
                                 Total Logged
@@ -84,7 +81,7 @@ export default function DonationsIndex({
                             </div>
                         </CardContent>
                     </Card>
-                    <Card className="shadow-sm border-fuchsia-100 bg-gradient-to-br from-white to-fuchsia-50/30">
+                    <Card className="shadow-sm border-fuchsia-100 bg-linear-to-br from-white to-fuchsia-50/30">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-xs font-bold uppercase tracking-wider text-stone-500">
                                 Book Donors
@@ -97,7 +94,7 @@ export default function DonationsIndex({
                             </div>
                         </CardContent>
                     </Card>
-                    <Card className="shadow-sm border-fuchsia-100 bg-gradient-to-br from-white to-fuchsia-50/30">
+                    <Card className="shadow-sm border-fuchsia-100 bg-linear-to-br from-white to-fuchsia-50/30">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-xs font-bold uppercase tracking-wider text-stone-500">
                                 Equipment Grants
@@ -112,7 +109,6 @@ export default function DonationsIndex({
                     </Card>
                 </div>
 
-                {/* TABLE PORTION */}
                 <DonationsTable donations={donations} />
             </div>
         </AdminLayout>

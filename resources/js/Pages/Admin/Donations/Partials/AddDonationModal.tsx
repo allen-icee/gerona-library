@@ -46,7 +46,6 @@ export default function AddDonationModal() {
         });
     };
 
-    // Handler to move focus to the next field on Enter key press
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, nextElementId: string) => {
         if (e.key === "Enter") {
             e.preventDefault();
@@ -66,12 +65,12 @@ export default function AddDonationModal() {
                 }
             }}
         >
-            <DialogTrigger className="inline-flex items-center justify-center bg-gradient-to-r from-fuchsia-400 to-fuchsia-500 hover:from-fuchsia-500 hover:to-fuchsia-600 text-white shadow-md shadow-fuchsia-200 border-none font-bold text-xs px-4 py-2 h-[34px] rounded-lg transition-all duration-200">
+            <DialogTrigger className="inline-flex items-center justify-center bg-linear-to-r from-fuchsia-400 to-fuchsia-500 hover:from-fuchsia-500 hover:to-fuchsia-600 text-white shadow-md shadow-fuchsia-200 border-none font-bold text-xs px-4 py-2 h-8.5 rounded-lg transition-all duration-200">
                 <Icon icon="solar:add-circle-bold-duotone" className="w-4 h-4 mr-2" />
                 Log Donation
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-[500px] bg-white rounded-2xl border-fuchsia-100 shadow-xl shadow-stone-200/50">
+            <DialogContent className="sm:max-w-125 bg-white rounded-2xl border-fuchsia-100 shadow-xl shadow-stone-200/50">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-black text-slate-800 flex items-center gap-2">
                         <Icon icon="solar:gift-bold-duotone" className="w-6 h-6 text-fuchsia-500" />
@@ -91,7 +90,6 @@ export default function AddDonationModal() {
                             id="donator_name"
                             value={data.donator_name}
                             onChange={(e) => {
-                                // Letters, numbers, spaces, and basic punctuation
                                 const val = e.target.value.replace(/[^a-zA-Z0-9\s\-.,&']/g, "");
                                 setData("donator_name", val);
                             }}
@@ -141,7 +139,6 @@ export default function AddDonationModal() {
                             id="description"
                             value={data.description}
                             onChange={(e) => {
-                                // Allow basic safe description characters
                                 const val = e.target.value.replace(/[^a-zA-Z0-9\s\-.,&'()]/g, "");
                                 setData("description", val);
                             }}
@@ -163,7 +160,6 @@ export default function AddDonationModal() {
                                 type="text"
                                 value={data.estimated_value}
                                 onChange={(e) => {
-                                    // Number and single decimal point only
                                     let val = e.target.value.replace(/[^0-9.]/g, "");
                                     val = val.replace(/(\..*?)\..*/g, '$1');
                                     setData("estimated_value", val);
@@ -208,7 +204,7 @@ export default function AddDonationModal() {
                         <Button
                             type="submit"
                             disabled={processing}
-                            className="bg-gradient-to-r from-fuchsia-400 to-fuchsia-500 hover:from-fuchsia-500 hover:to-fuchsia-600 text-white shadow-md font-bold rounded-xl border-none"
+                            className="bg-linear-to-r from-fuchsia-400 to-fuchsia-500 hover:from-fuchsia-500 hover:to-fuchsia-600 text-white shadow-md font-bold rounded-xl border-none"
                         >
                             {processing ? "Saving..." : "Save Record"}
                         </Button>

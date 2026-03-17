@@ -1,3 +1,4 @@
+//resources\js\Pages\Kiosk\Dashboard.tsx
 import { useState, FormEventHandler, useEffect, useRef } from "react";
 import { Head, useForm, router } from "@inertiajs/react";
 import { PageProps } from "@/types";
@@ -52,26 +53,23 @@ export default function KioskDashboard({
         clearErrors();
     };
 
-    // --- ALWAYS ACTIVE QR SCANNER LOGIC ---
     useEffect(() => {
         let scanner: Html5QrcodeScanner | null = null;
 
-        // Only activate the camera if we are in "Library Card" mode
         if (!isGuest) {
             scanner = new Html5QrcodeScanner(
                 "reader",
                 {
                     fps: 10,
                     qrbox: { width: 250, height: 250 },
-                    supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA], // Force camera only
+                    supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
                 },
                 false
             );
 
             scanner.render(
                 (decodedText) => {
-                    // QR Scanned Successfully!
-                    scanner?.pause(true); // Pause scanning to prevent spamming the backend
+                    scanner?.pause(true);
 
                     toast.loading("Processing Library Card...", { id: "qr-scan" });
 
@@ -82,11 +80,11 @@ export default function KioskDashboard({
                         preserveScroll: true,
                         onSuccess: () => {
                             toast.success("Scan successful!", { id: "qr-scan" });
-                            scanner?.resume(); // Resume scanning for the next person
+                            scanner?.resume();
                         },
                         onError: () => {
                             toast.error("Invalid QR Code or Card not found.", { id: "qr-scan" });
-                            setTimeout(() => scanner?.resume(), 3000); // Wait 3s before allowing another scan
+                            setTimeout(() => scanner?.resume(), 3000);
                         }
                     });
                 },
@@ -126,14 +124,11 @@ export default function KioskDashboard({
         <div className="min-h-screen bg-[#FDFBF7] flex flex-col md:flex-row relative overflow-hidden font-sans">
             <Head title="Library Kiosk" />
 
-            {/* Subtle Aesthetic Pink Blobs */}
-            <div className="absolute top-[-10%] right-[-5%] w-[45rem] h-[45rem] bg-pink-200/30 rounded-full blur-[100px] pointer-events-none z-0"></div>
-            <div className="absolute bottom-[-10%] right-[25%] w-[35rem] h-[35rem] bg-rose-200/20 rounded-full blur-[100px] pointer-events-none z-0"></div>
+            <div className="absolute top-[-10%] right-[-5%] w-180 h-180 bg-pink-200/30 rounded-full blur-[100px] pointer-events-none z-0"></div>
+            <div className="absolute bottom-[-10%] right-[25%] w-140 h-140 bg-rose-200/20 rounded-full blur-[100px] pointer-events-none z-0"></div>
 
-            {/* LEFT SIDE: Sidebar Form */}
             <div className="w-full md:w-5/12 lg:w-[32%] bg-white/90 backdrop-blur-2xl text-stone-800 flex flex-col shadow-[15px_0_40px_rgba(236,72,153,0.04)] z-10 border-r border-white relative">
 
-                {/* Clean Floating Header */}
                 <div className="pt-10 pb-6 px-8 flex flex-col items-center text-center relative z-20">
                     <img
                         src="/images/GeronaLibraryLogo.png"
@@ -149,7 +144,6 @@ export default function KioskDashboard({
                     </p>
                 </div>
 
-                {/* Elegant Clock Widget */}
                 <div className="px-8 pb-8 flex flex-col items-center justify-center border-b border-stone-100">
                     <div className="text-5xl font-mono font-black tracking-tighter text-pink-500 drop-shadow-sm">
                         {currentTime.toLocaleTimeString([], {
@@ -167,11 +161,9 @@ export default function KioskDashboard({
                     </div>
                 </div>
 
-                {/* Scrollable Form Area */}
                 <div className="p-8 flex-1 overflow-y-auto hide-scrollbar">
                     <form onSubmit={submitLog} className="space-y-6">
 
-                        {/* iOS-Style Segmented Toggle */}
                         <div className="flex p-1.5 bg-stone-100/80 rounded-2xl border border-stone-200/50">
                             <button
                                 type="button"
@@ -191,7 +183,6 @@ export default function KioskDashboard({
                             </button>
                         </div>
 
-                        {/* Purpose Dropdown MOVED UP for Card Scanning */}
                         <div className="space-y-1.5">
                             <Label htmlFor="purpose" className="text-stone-500 text-xs font-bold uppercase tracking-widest pl-1">
                                 {!isGuest ? "1. Select Purpose before scanning" : "Purpose of Visit"} <span className="text-pink-500">*</span>
@@ -211,15 +202,13 @@ export default function KioskDashboard({
                             </select>
                         </div>
 
-                        {/* Dynamic Input Fields */}
-                        <div className="min-h-[130px]">
+                        <div className="min-h-32.5">
                             {!isGuest ? (
                                 <div className="space-y-3 animate-in fade-in slide-in-from-left-4 duration-300">
                                     <Label className="text-stone-500 text-xs font-bold uppercase tracking-widest pl-1">
                                         2. Scan QR Code <span className="text-pink-500">*</span>
                                     </Label>
 
-                                    {/* ALWAYS ACTIVE CAMERA CONTAINER */}
                                     <div className="w-full bg-black rounded-2xl overflow-hidden border-2 border-pink-100 shadow-inner aspect-video relative">
                                         <div id="reader" className="w-full h-full"></div>
                                     </div>
@@ -274,7 +263,6 @@ export default function KioskDashboard({
                                         </div>
                                     </div>
 
-                                    {/* Signature Pad (Guests Only) */}
                                     <div className="space-y-2 pt-2">
                                         <div className="flex justify-between items-center pl-1">
                                             <Label className="text-stone-500 text-xs font-bold uppercase tracking-widest">Signature (Optional)</Label>
@@ -294,7 +282,6 @@ export default function KioskDashboard({
                                         </div>
                                     </div>
 
-                                    {/* Submit Button (Guests Only) */}
                                     <Button
                                         type="submit"
                                         disabled={processing}
@@ -316,10 +303,8 @@ export default function KioskDashboard({
                 </div>
             </div>
 
-            {/* RIGHT SIDE: Active Visitors Grid */}
             <div className="w-full md:w-7/12 lg:w-[68%] p-8 md:p-12 overflow-y-auto relative z-10 flex flex-col">
 
-                {/* Clean Header */}
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4 border-b border-stone-200 pb-4">
                     <div>
                         <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
@@ -333,7 +318,6 @@ export default function KioskDashboard({
                     </div>
                 </div>
 
-                {/* Empty State vs Grid */}
                 {activeVisitors.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center text-stone-400 bg-white/40 backdrop-blur-sm rounded-[2rem] border-2 border-dashed border-pink-200/50 min-h-[50vh]">
                         <Icon icon="solar:ghost-smile-bold-duotone" className="w-24 h-24 mb-4 text-pink-200" />
@@ -385,7 +369,6 @@ export default function KioskDashboard({
                 )}
             </div>
 
-            {/* SECRET STAFF LOGOUT BUTTON */}
             <button
                 onClick={() => router.post(route("logout"))}
                 className="absolute bottom-6 right-6 text-stone-300 hover:text-pink-500 transition-colors focus:outline-none z-50 p-2"

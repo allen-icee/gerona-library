@@ -23,7 +23,6 @@ export default function Print() {
     const [searchTerm, setSearchTerm] = useState("");
     const [showDropdown, setShowDropdown] = useState(false);
 
-    // State to control the full-screen success overlay
     const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
 
     const {
@@ -46,7 +45,6 @@ export default function Print() {
         }[],
     });
 
-    /* Fetch Active Visitors */
     useEffect(() => {
         axios
             .get("/api/print-station/active-visitors")
@@ -54,37 +52,30 @@ export default function Print() {
             .catch(() => { });
     }, []);
 
-    // SECURITY CHECK: Is the currently typed/selected name exactly matching an active visitor?
     const isValidVisitor = data.visitor_name.trim() !== "" && activeVisitors.some(
         (v) => v.visitor_name.toLowerCase() === data.visitor_name.trim().toLowerCase()
     );
 
-    /* Submit */
     const submitPrintJob: FormEventHandler = (e) => {
         e.preventDefault();
 
-        // Extra layer of protection in case they hack the disabled button
         if (!isValidVisitor) return;
 
         post(route("print-station.upload"), {
             preserveScroll: true,
             forceFormData: true,
             onSuccess: () => {
-                // Clear the form fields
                 reset();
                 setSearchTerm("");
                 if (fileInputRef.current) fileInputRef.current.value = "";
 
-                // Show the full-screen overlay
                 setShowSuccessOverlay(true);
 
-                // Hide the overlay after 4 seconds automatically
                 setTimeout(() => setShowSuccessOverlay(false), 4000);
             },
         });
     };
 
-    /* File Upload */
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files) return;
 
@@ -129,13 +120,10 @@ export default function Print() {
         v.visitor_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    /* ======================================================= */
-
     return (
         <PublicLayout>
             <Head title="Print Station" />
 
-            {/* FULL SCREEN SUCCESS OVERLAY RENDERED IN A PORTAL */}
             {showSuccessOverlay && typeof window !== "undefined" && createPortal(
                 <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm transition-all duration-500 animate-in fade-in zoom-in px-4">
                     <div className="flex flex-col items-center max-w-lg mx-auto text-center">
@@ -159,7 +147,6 @@ export default function Print() {
 
             <div className="flex flex-col gap-6 md:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700 w-full ">
 
-                {/* HEADER */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6 pb-6 border-b border-fuchsia-100">
                     <div className="flex-1">
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-fuchsia-50 text-fuchsia-600 rounded-full font-potta text-[10px] uppercase tracking-widest border border-fuchsia-100 shadow-sm mb-3 md:mb-2">
@@ -170,7 +157,7 @@ export default function Print() {
                             Library Service
                         </div>
                         <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-black text-slate-800 tracking-tight leading-tight">
-                            Print <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 to-purple-500">Station</span>
+                            Print <span className="text-transparent bg-clip-text bg-linear-to-r from-fuchsia-500 to-purple-500">Station</span>
                         </h1>
                         <p className="text-sm text-stone-500 font-medium mt-1.5 md:mt-2">
                             Upload your documents directly to the librarian's desk.
@@ -178,10 +165,8 @@ export default function Print() {
                     </div>
                 </div>
 
-                {/* MAIN GRID */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
 
-                    {/* LEFT COLUMN — INFO & LOTTIE */}
                     <aside className="lg:col-span-4 flex flex-col gap-6 w-full">
                         <div className="bg-white rounded-3xl border border-fuchsia-100 p-5 md:p-6 shadow-sm space-y-5">
                             <h3 className="font-serif font-black text-lg text-slate-800 flex items-center gap-2">
@@ -222,15 +207,12 @@ export default function Print() {
                         </div>
                     </aside>
 
-                    {/* RIGHT COLUMN — FORM */}
                     <section className="lg:col-span-8 w-full">
                         <div className="bg-white rounded-3xl border border-fuchsia-100 p-5 md:p-6 shadow-sm">
                             <form onSubmit={submitPrintJob} className="space-y-6 md:space-y-8">
 
-                                {/* Action Bar: Search & Upload combined */}
                                 <div className="flex flex-col md:flex-row gap-4 md:items-end z-30 relative">
 
-                                    {/* Visitor Search */}
                                     <div className="relative flex-1">
                                         <Label className="font-bold text-sm mb-2 block flex items-center justify-between text-stone-600">
                                             <span>Find Your Name</span>
@@ -294,7 +276,6 @@ export default function Print() {
                                         )}
                                     </div>
 
-                                    {/* Upload Trigger */}
                                     <div className="w-full md:w-auto shrink-0">
                                         <input
                                             ref={fileInputRef}
@@ -318,7 +299,6 @@ export default function Print() {
                                     </div>
                                 </div>
 
-                                {/* Documents List */}
                                 <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-1 md:pr-2 custom-scrollbar">
                                     {data.documents.length === 0 ? (
                                         <div className="py-12 md:py-16 text-center border-2 border-dashed border-stone-200 rounded-3xl bg-stone-50 flex flex-col items-center justify-center gap-3 px-4">
@@ -407,7 +387,7 @@ export default function Print() {
                                     disabled={processing || data.documents.length === 0 || !isValidVisitor}
                                     className={`w-full font-bold md:font-black h-12 md:h-14 text-sm md:text-base rounded-2xl transition-all duration-300 ${!isValidVisitor
                                         ? "bg-stone-200 text-stone-500 cursor-not-allowed shadow-none hover:bg-stone-200"
-                                        : "bg-gradient-to-r from-fuchsia-500 to-purple-500 hover:from-fuchsia-600 hover:to-purple-600 text-white shadow-lg shadow-fuchsia-200/50 hover:shadow-xl hover:-translate-y-0.5 border-0"
+                                        : "bg-linear-to-r from-fuchsia-500 to-purple-500 hover:from-fuchsia-600 hover:to-purple-600 text-white shadow-lg shadow-fuchsia-200/50 hover:shadow-xl hover:-translate-y-0.5 border-0"
                                         }`}
                                 >
                                     {processing

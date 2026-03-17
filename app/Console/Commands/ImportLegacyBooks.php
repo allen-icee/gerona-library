@@ -1,5 +1,5 @@
 <?php
-
+//app\Console\Commands\ImportLegacyBooks.php
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
@@ -10,7 +10,6 @@ use Carbon\Carbon;
 
 class ImportLegacyBooks extends Command
 {
-    // The command signature requires the filename as an argument
     protected $signature = 'import:legacy-books {filename}';
     protected $description = 'Safely import legacy Excel/CSV inventory into normalized tables';
 
@@ -28,7 +27,6 @@ class ImportLegacyBooks extends Command
 
         $file = fopen($path, 'r');
 
-        // Read and trim headers to remove accidental spaces
         $headers = array_map('trim', fgetcsv($file));
         $headerCount = count($headers);
 
@@ -41,25 +39,20 @@ class ImportLegacyBooks extends Command
         try {
             while (($row = fgetcsv($file)) !== false) {
 
-                // Skip completely empty rows at the bottom of the Excel file
                 if (empty(array_filter($row))) {
                     $bar->advance();
                     continue;
                 }
 
-                // CLEAN THE DIRTY CSV ROW:
-                // If Excel exported too few or too many columns, we force it to match the header length
                 $currentRowCount = count($row);
                 if ($currentRowCount < $headerCount) {
-                    $row = array_pad($row, $headerCount, null); // Pad with nulls
+                    $row = array_pad($row, $headerCount, null);
                 } elseif ($currentRowCount > $headerCount) {
-                    $row = array_slice($row, 0, $headerCount); // Chop off extra invisible columns
+                    $row = array_slice($row, 0, $headerCount);
                 }
 
-                // Now it is 100% safe to combine
                 $data = array_combine($headers, $row);
 
-                // 1. Find or Create the Master Book Record
                 $book = Book::firstOrCreate(
                     [
                         'title' => trim($data['Title'] ?? 'Unknown Title'),
@@ -74,18 +67,16 @@ class ImportLegacyBooks extends Command
                     ]
                 );
 
-                // 2. Insert the specific Physical Copy
                 $accessionNo = trim($data['Accession No.'] ?? '');
 
                 if (!empty($accessionNo) && !BookCopy::where('accession_number', $accessionNo)->exists()) {
 
-                    // Safely parse Date Acquired
                     $dateAcquired = null;
                     if (!empty($data['Date Acquired'])) {
                         try {
                             $dateAcquired = Carbon::parse($data['Date Acquired'])->format('Y-m-d');
                         } catch (\Exception $e) {
-                            $dateAcquired = null; // Ignore badly formatted Excel dates
+                            $dateAcquired = null;
                         }
                     }
 

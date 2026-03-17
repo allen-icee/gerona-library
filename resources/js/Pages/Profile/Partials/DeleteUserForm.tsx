@@ -1,3 +1,4 @@
+//resources\js\Pages\Profile\Partials\DeleteUserForm.tsx
 import DangerButton from '@/Components/DangerButton';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';

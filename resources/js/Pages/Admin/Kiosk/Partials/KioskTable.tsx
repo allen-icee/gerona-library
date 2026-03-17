@@ -33,7 +33,6 @@ export default function KioskTable({ visitorLogs, isHistoryMode }: { visitorLogs
         <>
             <div className="bg-white border border-emerald-100 rounded-xl shadow-sm shadow-emerald-100/50 overflow-hidden flex flex-col">
 
-                {/* Internal Card Header */}
                 <div className="bg-emerald-50/50 border-b border-emerald-100 px-5 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Icon icon={isHistoryMode ? "solar:history-bold-duotone" : "solar:users-group-rounded-bold-duotone"} className="w-5 h-5 text-emerald-500" />
@@ -54,12 +53,11 @@ export default function KioskTable({ visitorLogs, isHistoryMode }: { visitorLogs
                     )}
                 </div>
 
-                {/* Data Table */}
                 <div className="flex-1 overflow-x-auto">
                     <Table>
                         <TableHeader className="bg-white hover:bg-white border-b border-emerald-50">
                             <TableRow className="hover:bg-transparent">
-                                <TableHead className="text-[10px] uppercase text-stone-400 font-bold tracking-wider pl-6 w-[250px]">Visitor Details</TableHead>
+                                <TableHead className="text-[10px] uppercase text-stone-400 font-bold tracking-wider pl-6 w-62.5">Visitor Details</TableHead>
                                 <TableHead className="text-[10px] uppercase text-stone-400 font-bold tracking-wider">Purpose</TableHead>
                                 <TableHead className="text-[10px] uppercase text-stone-400 font-bold tracking-wider">Time In</TableHead>
                                 <TableHead className="text-[10px] uppercase text-stone-400 font-bold tracking-wider">Time Out</TableHead>
@@ -147,7 +145,6 @@ export default function KioskTable({ visitorLogs, isHistoryMode }: { visitorLogs
                     </Table>
                 </div>
 
-                {/* Pagination */}
                 {visitorLogs.links && visitorLogs.total > 15 && (
                     <div className="bg-slate-50 border-t border-stone-100 px-6 py-3 flex items-center justify-between gap-4 flex-wrap">
                         <p className="text-[11px] text-stone-500 font-medium">

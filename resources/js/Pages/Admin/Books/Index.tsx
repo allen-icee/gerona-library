@@ -1,3 +1,4 @@
+//resources\js\Pages\Admin\Books\Index.tsx
 import { useState, useEffect } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, router, Link } from "@inertiajs/react";
@@ -25,7 +26,6 @@ export default function BookIndex({
         return () => clearTimeout(delayBounceFn);
     }, [search]);
 
-    // --- CSV IMPORT LOGIC ---
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -41,7 +41,7 @@ export default function BookIndex({
             onError: () => toast.error("Failed to import CSV. Check file format.", { id: "csv-import" }),
         });
 
-        e.target.value = ''; // Reset input to allow re-uploading the same file
+        e.target.value = '';
     };
 
     return (
@@ -51,7 +51,7 @@ export default function BookIndex({
 
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-2xl border border-pink-100 shadow-sm shadow-pink-100/50">
                     <div className="flex items-center gap-3">
-                        <div className="bg-gradient-to-br from-pink-400 to-pink-600 w-12 h-12 rounded-xl flex items-center justify-center shadow-md shadow-pink-300 text-white">
+                        <div className="bg-linear-to-br from-pink-400 to-pink-600 w-12 h-12 rounded-xl flex items-center justify-center shadow-md shadow-pink-300 text-white">
                             <Icon icon="solar:book-bookmark-bold-duotone" className="w-6 h-6" />
                         </div>
                         <div>
@@ -107,10 +107,9 @@ export default function BookIndex({
                                         <TableRow key={book.id} className="hover:bg-pink-50/30 transition-colors border-pink-50">
                                             <TableCell className="font-bold text-slate-800 pl-6 py-3">{book.title}</TableCell>
 
-                                            {/* --- FIXED AUTHOR TOOLTIP --- */}
                                             <TableCell className="py-3">
                                                 <div
-                                                    className="text-stone-600 font-medium text-sm truncate max-w-[150px] sm:max-w-[250px] cursor-help"
+                                                    className="text-stone-600 font-medium text-sm truncate max-w-37.5 sm:max-w-62.5 cursor-help"
                                                     title={book.author}
                                                 >
                                                     {book.author}
@@ -127,7 +126,6 @@ export default function BookIndex({
                         </Table>
                     </div>
 
-                    {/* --- FIXED PAGINATION CONTROLS --- */}
                     <div className="p-4 border-t border-pink-50 bg-stone-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <span className="text-xs font-medium text-stone-500">
                             Showing <span className="font-black text-slate-800">{books.from || 0}</span> to <span className="font-black text-slate-800">{books.to || 0}</span> of <span className="font-black text-slate-800">{books.total}</span> records
@@ -138,7 +136,6 @@ export default function BookIndex({
                                 const isActive = link.active;
                                 const isNull = !link.url;
 
-                                // Extracted styles so we can apply them to both Span (disabled) and Link (active)
                                 const linkClasses = `px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${isActive
                                     ? "bg-pink-500 text-white border-pink-500 shadow-md shadow-pink-200"
                                     : "bg-white text-stone-600 border-stone-200 hover:bg-pink-50 hover:text-pink-600 hover:border-pink-200"
@@ -155,7 +152,7 @@ export default function BookIndex({
                                         key={index}
                                         href={link.url}
                                         preserveScroll
-                                        preserveState // <-- Prevents losing search focus when changing pages!
+                                        preserveState
                                         className={linkClasses}
                                         dangerouslySetInnerHTML={{ __html: link.label }}
                                     />

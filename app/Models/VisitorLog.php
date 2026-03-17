@@ -1,5 +1,5 @@
 <?php
-
+//app\Models\VisitorLog.php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;

@@ -1,5 +1,5 @@
 <?php
-
+//app\Http\Controllers\DashboardController.php
 namespace App\Http\Controllers;
 
 use App\Models\BookCopy;
@@ -14,7 +14,6 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        // 1. If the user is just a Kiosk account, send them straight to the public kiosk view
         if ($request->user()->hasRole('Kiosk')) {
             $activeVisitors = VisitorLog::whereNull('time_out')
                 ->whereDate('time_in', today())
@@ -26,8 +25,7 @@ class DashboardController extends Controller
             ]);
         }
 
-        // 2. If the user is an Admin/Librarian, render the newly refactored Admin Dashboard
-        return Inertia::render('Admin/Dashboard/Index', [ // <--- Updated path here
+        return Inertia::render('Admin/Dashboard/Index', [
             'metrics' => [
                 'totalCopies' => BookCopy::count(),
                 'activePatrons' => Patron::where('status', 'Active')->count(),

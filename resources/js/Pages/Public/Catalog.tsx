@@ -48,7 +48,6 @@ export default function Catalog({ books, filters = {}, categories = [] }: Catalo
 
     const clearFilters = () => {
         setData({ search: "", category: "", available: "", sort: "newest" });
-        // Small timeout ensures state updates before fetching
         setTimeout(() => applyFilters(), 50);
     };
 
@@ -70,10 +69,8 @@ export default function Catalog({ books, filters = {}, categories = [] }: Catalo
         <PublicLayout>
             <Head title="Library Catalog" />
 
-            {/* Added animation wrapper and max-w to match Home.tsx */}
             <div className="flex flex-col gap-6 md:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700 w-full">
 
-                {/* HEADER & SEARCH */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6 pb-6 border-b border-rose-100">
                     <div className="flex-1">
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-rose-50 text-rose-600 rounded-full font-potta text-[10px] uppercase tracking-widest border border-rose-100 shadow-sm mb-3 md:mb-2">
@@ -81,7 +78,7 @@ export default function Catalog({ books, filters = {}, categories = [] }: Catalo
                             Library Service
                         </div>
                         <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-black text-slate-800 tracking-tight leading-tight">
-                            Browse <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-500">Catalog</span>
+                            Browse <span className="text-transparent bg-clip-text bg-linear-to-r from-rose-500 to-pink-500">Catalog</span>
                         </h1>
                         <p className="text-sm text-stone-500 font-medium mt-1.5 md:mt-2">
                             Showing {books.total || 0} items in our collection.
@@ -99,12 +96,8 @@ export default function Catalog({ books, filters = {}, categories = [] }: Catalo
                     </form>
                 </div>
 
-                {/* MAIN CONTENT GRID */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
 
-                    {/* SIDEBAR FILTERS 
-                        Notice `lg:sticky lg:top-6`. This saves mobile users from a stuck, screen-blocking filter box.
-                    */}
                     <aside className="lg:col-span-3 lg:sticky lg:top-6 w-full">
                         <div className="bg-white rounded-3xl border border-rose-100 p-5 md:p-6 shadow-sm space-y-5">
                             <h3 className="font-serif font-black text-lg text-slate-800 flex items-center gap-2 mb-4">
@@ -154,7 +147,6 @@ export default function Catalog({ books, filters = {}, categories = [] }: Catalo
                         </div>
                     </aside>
 
-                    {/* BOOK GRID */}
                     <section className="lg:col-span-9 w-full">
                         {books.data.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-16 md:py-24 bg-rose-50/50 rounded-3xl border border-dashed border-rose-200 px-4">
@@ -178,7 +170,6 @@ export default function Catalog({ books, filters = {}, categories = [] }: Catalo
                             </div>
                         )}
 
-                        {/* PAGINATION */}
                         {books.links && books.links.length > 3 && (
                             <div className="flex justify-center mt-10 md:mt-12 gap-1.5 md:gap-2 flex-wrap pb-4 md:pb-0">
                                 {books.links.map((link, i) => (
@@ -186,7 +177,7 @@ export default function Catalog({ books, filters = {}, categories = [] }: Catalo
                                         key={i}
                                         href={link.url || "#"}
                                         className={`px-3 md:px-4 py-2 text-xs md:text-sm font-medium rounded-xl transition-all duration-300 ${link.active
-                                            ? "bg-gradient-to-br from-rose-400 to-rose-500 text-white shadow-md shadow-rose-200 border-rose-500"
+                                            ? "bg-linear-to-br from-rose-400 to-rose-500 text-white shadow-md shadow-rose-200 border-rose-500"
                                             : "bg-white text-stone-600 border border-stone-200 hover:border-rose-300 hover:text-rose-500 hover:-translate-y-0.5 hover:shadow-sm"
                                             } ${!link.url && "opacity-50 cursor-not-allowed hover:translate-y-0 hover:shadow-none"}`}
                                         dangerouslySetInnerHTML={{ __html: link.label }}

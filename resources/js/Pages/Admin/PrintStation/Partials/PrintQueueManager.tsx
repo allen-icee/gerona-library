@@ -1,3 +1,4 @@
+//resources\js\Pages\Admin\PrintStation\Partials\PrintQueueManager.tsx
 import { useState, useMemo } from "react";
 import { useForm, router } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
@@ -14,11 +15,10 @@ interface GroupedPrintJob {
     jobs: PrintJob[];
 }
 
-// 🟢 Reliable Native Tailwind Checkbox
 const TailwindCheckbox = ({ checked, onChange }: { checked: boolean, onChange: () => void }) => (
     <label className="flex items-center cursor-pointer relative">
         <input type="checkbox" checked={checked} onChange={onChange} className="peer sr-only" />
-        <div className="w-5 h-5 rounded-[4px] border-2 border-pink-300 bg-white peer-checked:bg-pink-500 peer-checked:border-pink-500 flex items-center justify-center transition-all">
+        <div className="w-5 h-5 rounded-lg border-2 border-pink-300 bg-white peer-checked:bg-pink-500 peer-checked:border-pink-500 flex items-center justify-center transition-all">
             <svg className={`w-3.5 h-3.5 text-white ${checked ? 'block' : 'hidden'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
@@ -28,7 +28,6 @@ const TailwindCheckbox = ({ checked, onChange }: { checked: boolean, onChange: (
 
 export default function PrintQueueManager({ queue }: { queue: PrintJob[] }) {
 
-    // Grouping Logic
     const groupedQueue = useMemo(() => {
         const groups: Record<string, GroupedPrintJob> = {};
         queue.forEach((job) => {
@@ -46,7 +45,6 @@ export default function PrintQueueManager({ queue }: { queue: PrintJob[] }) {
         return Object.values(groups);
     }, [queue]);
 
-    // Modals & Selection State
     const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
     const [logModalOpen, setLogModalOpen] = useState(false);
     const [discardModalOpen, setDiscardModalOpen] = useState(false);
@@ -59,7 +57,6 @@ export default function PrintQueueManager({ queue }: { queue: PrintJob[] }) {
         pages_printed: 1,
     });
 
-    // Checkbox Handlers
     const isGroupSelected = (jobs: PrintJob[]) => jobs.length > 0 && jobs.every(j => selectedFiles.includes(j.filename));
 
     const handleSelectGroup = (jobs: PrintJob[]) => {
@@ -75,7 +72,6 @@ export default function PrintQueueManager({ queue }: { queue: PrintJob[] }) {
         setSelectedFiles(prev => prev.includes(filename) ? prev.filter(f => f !== filename) : [...prev, filename]);
     };
 
-    // Modal Triggers
     const openLogModal = (jobs: PrintJob[], visitor_name: string, school_or_barangay: string) => {
         const toLog = jobs.filter(j => selectedFiles.includes(j.filename));
         if (toLog.length === 0) return;
@@ -98,7 +94,6 @@ export default function PrintQueueManager({ queue }: { queue: PrintJob[] }) {
         setDiscardModalOpen(true);
     };
 
-    // Submit Handlers
     const submitPrintLog = (e?: React.FormEvent) => {
         if (e) e.preventDefault();
         post(route("print-queue.log"), {
@@ -156,7 +151,6 @@ export default function PrintQueueManager({ queue }: { queue: PrintJob[] }) {
                         return (
                             <div key={group.visitor_name} className="bg-white border border-pink-100 shadow-sm shadow-pink-100/50 rounded-xl overflow-hidden">
 
-                                {/* Group Header - Compact */}
                                 <div className="bg-pink-50/50 border-b border-pink-100 px-4 py-3 flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <TailwindCheckbox checked={isGroupSelected(group.jobs)} onChange={() => handleSelectGroup(group.jobs)} />
@@ -168,7 +162,6 @@ export default function PrintQueueManager({ queue }: { queue: PrintJob[] }) {
                                         </div>
                                     </div>
 
-                                    {/* Action Buttons - Compact */}
                                     <div className="flex gap-2">
                                         <button
                                             disabled={groupSelectedCount === 0}
@@ -180,14 +173,13 @@ export default function PrintQueueManager({ queue }: { queue: PrintJob[] }) {
                                         <button
                                             disabled={groupSelectedCount === 0}
                                             onClick={() => openLogModal(group.jobs, group.visitor_name, group.school_or_barangay)}
-                                            className="h-8 px-3 text-xs font-bold rounded-lg bg-gradient-to-r from-pink-400 to-pink-500 text-white shadow-md shadow-pink-200 hover:from-pink-500 hover:to-pink-600 disabled:opacity-50 flex items-center transition-all"
+                                            className="h-8 px-3 text-xs font-bold rounded-lg bg-linear-to-r from-pink-400 to-pink-500 text-white shadow-md shadow-pink-200 hover:from-pink-500 hover:to-pink-600 disabled:opacity-50 flex items-center transition-all"
                                         >
                                             <Icon icon="solar:check-read-bold-duotone" className="w-4 h-4 mr-1.5" /> Log & Clear
                                         </button>
                                     </div>
                                 </div>
 
-                                {/* Files Table - Pure HTML/Tailwind for compactness */}
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-left text-sm whitespace-nowrap">
                                         <thead className="bg-white border-b border-stone-100 text-[10px] uppercase text-stone-400 font-bold tracking-wider">
@@ -207,7 +199,7 @@ export default function PrintQueueManager({ queue }: { queue: PrintJob[] }) {
                                                         <TailwindCheckbox checked={selectedFiles.includes(job.filename)} onChange={() => handleSelectFile(job.filename)} />
                                                     </td>
                                                     <td className="px-4 py-2.5">
-                                                        <div className="flex items-center gap-2 text-slate-700 font-semibold max-w-[200px] truncate">
+                                                        <div className="flex items-center gap-2 text-slate-700 font-semibold max-w-50 truncate">
                                                             <Icon icon="solar:document-text-bold-duotone" className="w-4 h-4 text-pink-400 shrink-0" />
                                                             <span className="truncate" title={job.original_name}>{job.original_name}</span>
                                                         </div>
@@ -218,7 +210,6 @@ export default function PrintQueueManager({ queue }: { queue: PrintJob[] }) {
                                                         <span className="bg-pink-100 text-pink-700 px-2 py-0.5 rounded text-[10px] font-black">x{job.copies}</span>
                                                     </td>
                                                     <td className="px-4 py-2.5 text-right">
-                                                        {/* ADDED THE WORD DOWNLOAD HERE */}
                                                         <a href={route("print-queue.download", job.filename)} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-pink-500 bg-pink-50 hover:bg-pink-500 hover:text-white border border-pink-100 rounded-lg transition-all" title="Download">
                                                             <Icon icon="solar:download-bold-duotone" className="w-3.5 h-3.5" />
                                                             Download

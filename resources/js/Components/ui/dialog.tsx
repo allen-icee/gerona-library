@@ -1,3 +1,4 @@
+//resources\js\Components\ui\dialog.tsx
 import * as React from "react";
 import { XIcon } from "lucide-react";
 import { Dialog as DialogPrimitive } from "radix-ui";

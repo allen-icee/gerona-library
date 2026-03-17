@@ -1,3 +1,4 @@
+//resources\js\Pages\Profile\Partials\UpdateProfileInformationForm.tsx
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';

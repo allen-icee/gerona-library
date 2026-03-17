@@ -1,3 +1,4 @@
+//resources\js\Components\InputLabel.tsx
 import { LabelHTMLAttributes } from 'react';
 
 export default function InputLabel({

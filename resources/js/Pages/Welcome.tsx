@@ -1,3 +1,4 @@
+//resources\js\Pages\Welcome.tsx
 import { Head, Link } from "@inertiajs/react";
 import { PageProps } from "@/types";
 import { BookOpen, Library } from "lucide-react";
@@ -9,7 +10,6 @@ export default function Welcome({
         <div className="min-h-screen bg-slate-900 flex flex-col font-sans selection:bg-amber-600 selection:text-white">
             <Head title="Welcome - Gerona Municipal Library" />
 
-            {/* Top Navigation Bar */}
             <header className="absolute top-0 w-full p-6 flex justify-between items-center z-20">
                 <div className="flex items-center gap-3 text-stone-100">
                     <Library className="w-8 h-8 text-amber-500" />
@@ -36,9 +36,8 @@ export default function Welcome({
                 </nav>
             </header>
 
-            {/* Main Hero Section */}
             <main className="flex-1 flex items-center justify-center p-6 relative overflow-hidden">
-                {/* Decorative Ambient Background */}
+
                 <div className="absolute inset-0 z-0">
                     <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-amber-400 via-transparent to-transparent"></div>
                     <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-slate-700 via-transparent to-transparent"></div>
@@ -89,7 +88,6 @@ export default function Welcome({
                 </div>
             </main>
 
-            {/* Minimal Footer */}
             <footer className="w-full p-6 text-center text-sm text-slate-500 z-20 relative">
                 &copy; {new Date().getFullYear()} Municipality of Gerona. All
                 rights reserved.

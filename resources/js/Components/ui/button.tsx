@@ -1,3 +1,4 @@
+//resources\js\Components\ui\button.tsx
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
@@ -42,7 +43,7 @@ const buttonVariants = cva(
 const Button = React.forwardRef<
     HTMLButtonElement,
     React.ComponentProps<"button"> &
-        VariantProps<typeof buttonVariants> & { asChild?: boolean }
+    VariantProps<typeof buttonVariants> & { asChild?: boolean }
 >(
     (
         {

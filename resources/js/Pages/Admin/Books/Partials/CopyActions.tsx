@@ -1,3 +1,4 @@
+//resources\js\Pages\Admin\Books\Partials\CopyActions.tsx
 import { useState, FormEventHandler, KeyboardEvent } from "react";
 import { useForm, router } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
@@ -79,9 +80,8 @@ export default function CopyActions({ copy }: { copy: any }) {
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* EDIT MODAL REMAINS SIMILAR TO AddCopyModal BUT USING `put` and DYNAMIC IDs */}
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogContent className="sm:max-w-[500px] bg-white rounded-2xl border-pink-100 shadow-xl">
+                <DialogContent className="sm:max-w-125 bg-white rounded-2xl border-pink-100 shadow-xl">
                     <DialogHeader><DialogTitle className="flex items-center gap-2"><Icon icon="solar:pen-bold-duotone" className="w-6 h-6 text-pink-500" /> Edit Copy</DialogTitle></DialogHeader>
                     <form onSubmit={submitEdit} className="space-y-4 py-2">
                         <div className="space-y-1.5">
@@ -116,7 +116,6 @@ export default function CopyActions({ copy }: { copy: any }) {
                 </DialogContent>
             </Dialog>
 
-            {/* CUSTOM DELETE MODAL */}
             <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
                 <DialogContent className="sm:max-w-sm bg-white rounded-2xl border-red-100 shadow-xl">
                     <DialogHeader>

@@ -1,3 +1,4 @@
+//resources\js\Pages\Auth\Register.tsx
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';

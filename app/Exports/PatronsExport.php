@@ -1,5 +1,5 @@
 <?php
-
+//app\Exports\PatronsExport.php
 namespace App\Exports;
 
 use App\Models\Patron;
@@ -14,7 +14,6 @@ class PatronsExport implements FromCollection, WithHeadings, WithMapping
         return Patron::all();
     }
 
-    // These are the column headers at the top of the CSV
     public function headings(): array
     {
         return [
@@ -35,7 +34,6 @@ class PatronsExport implements FromCollection, WithHeadings, WithMapping
         ];
     }
 
-    // This maps the database columns to the headers exactly
     public function map($patron): array
     {
         return [

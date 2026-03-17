@@ -45,7 +45,6 @@
             text-transform: uppercase;
         }
 
-        /* Email-safe layout replicating the physical card */
         .card-replica {
             background: #ffffff;
             border: 1px solid #fbcfe8;

@@ -1,3 +1,4 @@
+//resources\js\Components\LibraryCard.tsx
 import React from "react";
 import { QRCodeCanvas } from "qrcode.react";
 
@@ -31,10 +32,10 @@ export default function LibraryCard({ patron, cardId = "library-card-element" }:
     return (
         <div
             id={cardId}
-            // REMOVED TAILWIND CLASSES HERE TO PREVENT OKLCH INHERITANCE CRASH
+
             style={{
-                fontFamily: "ui-sans-serif, system-ui, sans-serif", // Replaces font-sans
-                color: "#000000", // Replaces text-black
+                fontFamily: "ui-sans-serif, system-ui, sans-serif",
+                color: "#000000",
                 width: "3.375in",
                 height: "2.125in",
                 boxSizing: "border-box",
@@ -79,7 +80,7 @@ export default function LibraryCard({ patron, cardId = "library-card-element" }:
                     zIndex: 0,
                     pointerEvents: "none"
                 }}
-                fill="#f43f5e" /* CHANGED FROM currentColor TO HARDCODED HEX TO STOP PARSE CRASHES */
+                fill="#f43f5e"
             >
                 <path d="M62 14c-2-1-10-3-22-1l-8 2-8-2c-12-2-20 0-22 1a2 2 0 0 0-1 2v36c0 1 1 2 2 1 2-1 10-2 21 0l8 3 8-3c11-2 19-1 21 0 1 1 2 0 2-1V16a2 2 0 0 0-1-2z" />
             </svg>

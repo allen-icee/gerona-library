@@ -9,7 +9,7 @@ import registerAnimation from "@/assets/lottie/qr-scan.json";
 import SuffixSelect from "@/Components/SuffixSelect";
 import CustomSelect from "@/Components/CustomSelect";
 import SearchableSelect from "@/Components/SearchableSelect";
-import SuccessCardModal from "@/Components/Public/Modals/SuccessCardModal"; // NEW MODAL IMPORT
+import SuccessCardModal from "@/Components/Public/Modals/SuccessCardModal";
 
 const PATRON_TYPES = ["Citizen", "Student", "Teacher/LGU Staff"];
 const GENDERS = ["Male", "Female", "Other"];
@@ -35,7 +35,6 @@ export default function Register() {
         contact_number: "",
     });
 
-    // --- JSON LOCATION STATE ---
     const [locationData, setLocationData] = useState<any>(null);
     const [provinces, setProvinces] = useState<string[]>([]);
     const [municipalities, setMunicipalities] = useState<string[]>([]);
@@ -126,23 +125,20 @@ export default function Register() {
         }
     };
 
-    // Updated input class for touch-friendly height and rounded borders
     const inputClass = "w-full bg-stone-50 border border-stone-200 rounded-xl h-12 px-4 text-sm outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all";
 
     return (
         <PublicLayout>
             <Head title="Library Card Registration - Gerona Library" />
 
-            {/* Success Modal Overlay */}
             <SuccessCardModal
                 isOpen={isSuccess}
                 onClose={() => window.location.reload()}
-                patronData={flash.patron} // Pass the full object here!
+                patronData={flash.patron}
             />
 
             <div className="flex flex-col gap-6 md:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700 w-full py-2">
 
-                {/* HEADER */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6 pb-6 border-b border-amber-100">
                     <div className="flex-1">
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 text-amber-600 rounded-full font-potta text-[10px] uppercase tracking-widest border border-amber-100 shadow-sm mb-3 md:mb-2">
@@ -151,7 +147,7 @@ export default function Register() {
                         </div>
 
                         <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-black text-slate-800 tracking-tight leading-tight">
-                            Library Card <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Registration</span>
+                            Library Card <span className="text-transparent bg-clip-text bg-linear-to-r from-amber-400 to-orange-500">Registration</span>
                         </h1>
 
                         <p className="text-sm text-stone-500 font-medium mt-1.5 md:mt-2">
@@ -160,13 +156,10 @@ export default function Register() {
                     </div>
                 </div>
 
-                {/* MAIN GRID */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
 
-                    {/* LEFT COLUMN */}
                     <aside className="lg:col-span-4 flex flex-col gap-6 w-full">
 
-                        {/* HOW IT WORKS CARD */}
                         <div className="bg-white rounded-3xl border border-amber-100 p-5 md:p-6 shadow-sm space-y-5">
                             <h3 className="font-serif font-black text-lg text-slate-800 flex items-center gap-2">
                                 <Icon icon="solar:info-circle-bold-duotone" className="w-5 h-5 text-amber-500" />
@@ -193,9 +186,6 @@ export default function Register() {
                             </ul>
                         </div>
 
-                        {/* LOTTIE ANIMATION CARD 
-                            Height slightly increased to h-64 md:h-72 to ensure large, prominent animation
-                        */}
                         <div className="bg-amber-50/50 rounded-3xl border border-amber-100 shadow-sm overflow-hidden flex justify-center items-center w-full h-64 md:h-72">
                             <Lottie
                                 animationData={registerAnimation}
@@ -206,12 +196,10 @@ export default function Register() {
 
                     </aside>
 
-                    {/* RIGHT COLUMN — FORM */}
                     <section className="lg:col-span-8 w-full">
                         <div className="bg-white border border-amber-100 rounded-3xl p-5 md:p-8 shadow-sm">
                             <form onSubmit={submit} onKeyDown={handleFormKeyDown} className="space-y-5 md:space-y-6">
 
-                                {/* NAMES */}
                                 <div className="grid grid-cols-12 gap-4">
                                     <div className="col-span-12 md:col-span-5">
                                         <label className="text-[11px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 block">First Name *</label>
@@ -256,7 +244,6 @@ export default function Register() {
                                     </div>
                                 </div>
 
-                                {/* TYPE & GENDER */}
                                 <div className="grid md:grid-cols-2 gap-4">
                                     <div className="z-30 relative">
                                         <label className="text-[11px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 block">Patron Type *</label>
@@ -279,7 +266,6 @@ export default function Register() {
                                     </div>
                                 </div>
 
-                                {/* CONDITIONAL SCHOOL FIELD */}
                                 {data.type === "Student" && (
                                     <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                                         <label className="text-[11px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 block">School *</label>
@@ -295,7 +281,6 @@ export default function Register() {
                                     </div>
                                 )}
 
-                                {/* CONTACT & EMAIL */}
                                 <div className="grid md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="text-[11px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 block">Email Address (@gmail.com) *</label>
@@ -326,7 +311,6 @@ export default function Register() {
                                     </div>
                                 </div>
 
-                                {/* LOCATION CASCADING DROPDOWNS */}
                                 <div className="grid md:grid-cols-3 gap-4 z-10 relative">
                                     <div>
                                         <label className="text-[11px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 block">Province *</label>
@@ -364,7 +348,6 @@ export default function Register() {
                                     </div>
                                 </div>
 
-                                {/* STREET */}
                                 <div>
                                     <label className="text-[11px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 block">Street / House No. (Optional)</label>
                                     <input
@@ -376,11 +359,10 @@ export default function Register() {
                                     />
                                 </div>
 
-                                {/* SUBMIT */}
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="w-full font-bold md:font-black h-12 md:h-14 text-sm md:text-base rounded-2xl transition-all duration-300 bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white shadow-lg shadow-amber-200/50 hover:shadow-xl hover:-translate-y-0.5 border-0 flex items-center justify-center gap-2 mt-6 md:mt-8"
+                                    className="w-full font-bold md:font-black h-12 md:h-14 text-sm md:text-base rounded-2xl transition-all duration-300 bg-linear-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white shadow-lg shadow-amber-200/50 hover:shadow-xl hover:-translate-y-0.5 border-0 flex items-center justify-center gap-2 mt-6 md:mt-8"
                                 >
                                     {processing ? (
                                         <Icon icon="solar:spinner-bold-duotone" className="w-6 h-6 animate-spin" />

@@ -1,3 +1,4 @@
+//resources\js\Pages\Admin\Circulation\Partials\ActiveTransactionsTable.tsx
 import { useState } from "react";
 import { router } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
@@ -75,7 +76,7 @@ export default function ActiveTransactionsTable({ transactions }: { transactions
                                                 </p>
                                             </TableCell>
                                             <TableCell className="py-3">
-                                                <p className="font-bold text-slate-700 text-sm line-clamp-1 max-w-[250px]" title={transaction.book_copy.book.title}>
+                                                <p className="font-bold text-slate-700 text-sm line-clamp-1 max-w-62.5" title={transaction.book_copy.book.title}>
                                                     {transaction.book_copy.book.title}
                                                 </p>
                                                 <div className="mt-1.5">
@@ -114,7 +115,6 @@ export default function ActiveTransactionsTable({ transactions }: { transactions
                 </div>
             </div>
 
-            {/* CUSTOM RETURN MODAL */}
             <Dialog open={isReturnModalOpen} onOpenChange={setIsReturnModalOpen}>
                 <DialogContent className="sm:max-w-sm bg-white rounded-2xl border-emerald-100 shadow-xl shadow-stone-200/50">
                     <DialogHeader>

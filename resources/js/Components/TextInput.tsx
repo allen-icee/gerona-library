@@ -1,3 +1,4 @@
+//resources\js\Components\TextInput.tsx
 import {
     forwardRef,
     InputHTMLAttributes,

@@ -1,5 +1,5 @@
 <?php
-
+//app\Http\Controllers\BookController.php
 namespace App\Http\Controllers;
 
 use App\Models\Book;
@@ -9,13 +9,10 @@ use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\BooksExport;
 use Illuminate\Support\Facades\Http;
-use App\Jobs\FetchBookMetadata; // <-- THIS WAS MISSING!
+use App\Jobs\FetchBookMetadata;
 
 class BookController extends Controller
 {
-    /**
-     * Fetch Book Metadata (Used ONLY for single manual additions)
-     */
     private function fetchBookDetails($isbn)
     {
         if (!$isbn) {
@@ -23,7 +20,6 @@ class BookController extends Controller
         }
 
         try {
-            // 1. Google Books API (Faster timeout)
             $google = Http::timeout(3)->get('https://www.googleapis.com/books/v1/volumes', ['q' => "isbn:$isbn"]);
 
             if ($google->successful() && isset($google['items'][0])) {
@@ -36,7 +32,6 @@ class BookController extends Controller
                 ];
             }
 
-            // 2. OpenLibrary API (Faster timeout)
             $open = Http::timeout(3)->get('https://openlibrary.org/api/books', [
                 'bibkeys' => "ISBN:$isbn",
                 'format' => 'json',
@@ -186,12 +181,10 @@ class BookController extends Controller
                     ]
                 );
 
-                // ---> THIS WAS MISSING! Dispatch the job to fetch the cover <---
                 if ($isbn && empty($book->cover_url)) {
                     FetchBookMetadata::dispatch($book);
                 }
 
-                // Instantly generate copies
                 $accessionNo = trim($data['accession no.'] ?? '');
                 $copiesTotal = (int) ($data['copies total'] ?? 1);
 

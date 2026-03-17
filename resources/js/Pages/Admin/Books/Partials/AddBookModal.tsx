@@ -1,3 +1,4 @@
+//resources\js\Pages\Admin\Books\Partials\AddBookModal.tsx
 import { useState, FormEventHandler, KeyboardEvent } from "react";
 import { useForm } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
@@ -28,13 +29,11 @@ export default function AddBookModal() {
         title: "", author: "", isbn: "", publisher: "", year_published: "", category: "", language: "",
     });
 
-    // --- STRICT REGEX HANDLERS ---
     const handleText = (val: string, field: any) => { if (/^[^<>*!@#$%^&]*$/.test(val)) setData(field, val); };
     const handleName = (val: string, field: any) => { if (/^[a-zA-Z\s.,'-]*$/.test(val)) setData(field, val); };
     const handleISBN = (val: string, field: any) => { if (/^[0-9xX-]*$/.test(val)) setData(field, val); };
     const handleYear = (val: string, field: any) => { if (/^\d{0,4}$/.test(val)) setData(field, val); };
 
-    // --- ENTER KEY JUMPING ---
     const focusNext = (e: KeyboardEvent<HTMLInputElement>, nextId: string) => {
         if (e.key === "Enter") {
             e.preventDefault();
@@ -68,12 +67,12 @@ export default function AddBookModal() {
             }}
         >
             <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-pink-400 to-pink-600 hover:from-pink-500 hover:to-pink-700 text-white shadow-md shadow-pink-300/50 border-none font-bold text-xs h-10 rounded-xl flex-1 sm:flex-none">
+                <Button className="bg-linear-to-r from-pink-400 to-pink-600 hover:from-pink-500 hover:to-pink-700 text-white shadow-md shadow-pink-300/50 border-none font-bold text-xs h-10 rounded-xl flex-1 sm:flex-none">
                     <Icon icon="solar:add-circle-bold-duotone" className="w-4 h-4 mr-2" />
                     Add Master Record
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] bg-white rounded-2xl border-pink-100 shadow-xl shadow-stone-200/50">
+            <DialogContent className="sm:max-w-125 bg-white rounded-2xl border-pink-100 shadow-xl shadow-stone-200/50">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-black text-slate-800 flex items-center gap-2">
                         <Icon icon="solar:book-bookmark-bold-duotone" className="w-6 h-6 text-pink-500" />
@@ -200,7 +199,7 @@ export default function AddBookModal() {
                             id="submit"
                             type="submit"
                             disabled={processing}
-                            className="bg-gradient-to-r from-pink-400 to-pink-600 hover:from-pink-500 hover:to-pink-700 text-white shadow-md shadow-pink-200 font-bold rounded-xl border-none"
+                            className="bg-linear-to-r from-pink-400 to-pink-600 hover:from-pink-500 hover:to-pink-700 text-white shadow-md shadow-pink-200 font-bold rounded-xl border-none"
                         >
                             {processing ? "Saving..." : "Save Record"}
                         </Button>

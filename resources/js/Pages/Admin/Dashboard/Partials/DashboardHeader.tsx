@@ -1,5 +1,4 @@
 // resources/js/Pages/Admin/Dashboard/Partials/DashboardHeader.tsx
-
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 
@@ -14,7 +13,7 @@ export default function DashboardHeader({ user }: { user: { name: string } }) {
     return (
         <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-rose-100 shadow-sm shadow-rose-100/50">
             <div className="flex items-center gap-4">
-                <div className="bg-gradient-to-br from-rose-400 to-rose-600 w-14 h-14 rounded-xl flex items-center justify-center shadow-lg shadow-rose-300/50 text-white shrink-0">
+                <div className="bg-linear-to-br from-rose-400 to-rose-600 w-14 h-14 rounded-xl flex items-center justify-center shadow-lg shadow-rose-300/50 text-white shrink-0">
                     <Icon icon="solar:widget-5-bold-duotone" className="w-7 h-7" />
                 </div>
                 <div>

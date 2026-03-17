@@ -12,7 +12,7 @@ export default function MetricCards({ metrics }: { metrics: DashboardMetrics }) 
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
-                <Card className="shadow-sm border-rose-100 bg-gradient-to-br from-white to-rose-50/30 rounded-2xl">
+                <Card className="shadow-sm border-rose-100 bg-lienar-to-br from-white to-rose-50/30 rounded-2xl">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-xs font-bold uppercase tracking-wider text-stone-500">
                             Today's Visitors
@@ -29,7 +29,7 @@ export default function MetricCards({ metrics }: { metrics: DashboardMetrics }) 
                     </CardContent>
                 </Card>
 
-                <Card className="shadow-sm border-rose-100 bg-gradient-to-br from-white to-rose-50/30 rounded-2xl">
+                <Card className="shadow-sm border-rose-100 bg-linear-to-br from-white to-rose-50/30 rounded-2xl">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-xs font-bold uppercase tracking-wider text-stone-500">
                             Active Patrons
@@ -46,7 +46,7 @@ export default function MetricCards({ metrics }: { metrics: DashboardMetrics }) 
                     </CardContent>
                 </Card>
 
-                <Card className="shadow-sm border-rose-100 bg-gradient-to-br from-white to-rose-50/30 rounded-2xl">
+                <Card className="shadow-sm border-rose-100 bg-linear-to-br from-white to-rose-50/30 rounded-2xl">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-xs font-bold uppercase tracking-wider text-stone-500">
                             Physical Inventory
@@ -66,8 +66,8 @@ export default function MetricCards({ metrics }: { metrics: DashboardMetrics }) 
                 {/* Overdue Books - Turns Red if > 0 */}
                 <Card
                     className={`shadow-sm rounded-2xl transition-all ${metrics?.overdueBooks > 0
-                        ? "border-red-200 bg-gradient-to-br from-red-50 to-red-100/50 shadow-red-100"
-                        : "border-rose-100 bg-gradient-to-br from-white to-rose-50/30"
+                        ? "border-red-200 bg-linear-to-br from-red-50 to-red-100/50 shadow-red-100"
+                        : "border-rose-100 bg-linear-to-br from-white to-rose-50/30"
                         }`}
                 >
                     <CardHeader className="flex flex-row items-center justify-between pb-2">

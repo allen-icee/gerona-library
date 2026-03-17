@@ -1,3 +1,4 @@
+//resources\js\Pages\Admin\Books\Partials\AddCopyModal.tsx
 import { useState, FormEventHandler, KeyboardEvent } from "react";
 import { useForm } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
@@ -49,7 +50,7 @@ export default function AddCopyModal({ bookId }: { bookId: number }) {
                     <Icon icon="solar:add-circle-bold-duotone" className="w-4 h-4 mr-2 text-pink-400" /> Add Physical Copy
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] bg-white rounded-2xl border-pink-100 shadow-xl">
+            <DialogContent className="sm:max-w-125 bg-white rounded-2xl border-pink-100 shadow-xl">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-black flex items-center gap-2"><Icon icon="solar:qr-code-bold-duotone" className="w-6 h-6 text-pink-500" /> Add Copy</DialogTitle>
                 </DialogHeader>
@@ -67,7 +68,7 @@ export default function AddCopyModal({ bookId }: { bookId: number }) {
                         </div>
                         <div className="space-y-1.5">
                             <Label className="text-xs font-bold uppercase text-slate-600 z-40 relative">Status</Label>
-                            {/* CUSTOM SELECT: Jumps focus on select */}
+
                             <CustomSelect value={data.status} onChange={(val) => { setData("status", val); document.getElementById('date_acquired')?.focus(); }} options={["Available", "Maintenance"]} theme="pink" />
                         </div>
                     </div>
@@ -75,7 +76,7 @@ export default function AddCopyModal({ bookId }: { bookId: number }) {
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <Label className="text-xs font-bold uppercase text-slate-600 z-30 relative">Source</Label>
-                            {/* CUSTOM SELECT: Jumps focus on select */}
+
                             <CustomSelect value={data.source} onChange={(val) => { setData("source", val); document.getElementById(val === 'Donated' ? 'donator_name' : 'submit_copy_btn')?.focus(); }} options={["Purchased", "LGU Grant", "Donated"]} theme="pink" />
                         </div>
                         <div className="space-y-1.5">

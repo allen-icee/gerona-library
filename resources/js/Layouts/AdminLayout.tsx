@@ -1,3 +1,4 @@
+//resources\js\Layouts\AdminLayout.tsx
 import { PropsWithChildren } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import { PageProps } from "@/types";
@@ -97,7 +98,6 @@ export default function AdminLayout({ children }: PropsWithChildren) {
     const rightNavItems = navItems.slice(4);
 
     return (
-        // Added print:bg-white to remove the pinkish background on paper
         <div className="min-h-screen bg-[#FFF0F5] print:bg-white font-sans text-stone-800 relative flex flex-col overflow-x-hidden">
 
             <div className="print:hidden">
@@ -123,11 +123,9 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                 />
             </div>
 
-            {/* Background Blobs (Hidden on Print) */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-pink-200/40 rounded-full blur-3xl pointer-events-none z-0 print:hidden"></div>
             <div className="absolute bottom-[10%] right-[-5%] w-[30%] h-[50%] bg-rose-200/30 rounded-full blur-3xl pointer-events-none z-0 print:hidden"></div>
 
-            {/* THE BOOKMARK LOGO (Hidden on Print) */}
             <Link
                 href="/dashboard"
                 className="absolute top-0 left-4 md:left-8 bg-rose-500 text-white px-3 md:px-4 py-3 md:py-4 rounded-b-[1.2rem] shadow-md shadow-pink-200 z-50 flex flex-col items-center group transition-all duration-300 hover:pt-6 hover:pb-5 print:hidden"
@@ -139,7 +137,6 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                 </span>
             </Link>
 
-            {/* COMPACT PROFILE DROPDOWN (Hidden on Print) */}
             <div className="absolute top-3 right-4 md:top-4 md:right-8 z-50 print:hidden">
                 <DropdownMenu>
                     <DropdownMenuTrigger className="focus:outline-none outline-none flex items-center gap-2 group">
@@ -176,10 +173,8 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                 </DropdownMenu>
             </div>
 
-            {/* MAIN CONTENT AREA */}
             <div className="max-w-[100rem] mx-auto w-full flex-1 flex flex-row pt-10 md:pt-14 px-2 md:px-6 relative z-10 pb-4 md:pb-6 print:p-0 print:m-0">
 
-                {/* 1. LEFT TABS (Hidden on Print) */}
                 <div className="flex flex-col space-y-1 md:space-y-1.5 pt-6 md:pt-8 items-end z-20 flex-shrink-0 print:hidden">
                     {leftNavItems.map((item, index) => {
                         const active = isActive(item.path);
@@ -198,12 +193,10 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                     })}
                 </div>
 
-                {/* 2. FOLDER BODY (Main Content) - Removed shadows/borders on print */}
                 <main className="bg-white rounded-2xl md:rounded-3xl shadow-lg shadow-pink-200/30 border-2 border-pink-200 p-4 md:p-8 flex-1 relative z-10 flex flex-col min-w-0 print:border-none print:shadow-none print:p-0 print:m-0 print:bg-transparent">
                     {children}
                 </main>
 
-                {/* 3. RIGHT TABS (Hidden on Print) */}
                 <div className="flex flex-col space-y-1 md:space-y-1.5 pt-6 md:pt-8 items-start z-20 flex-shrink-0 print:hidden">
                     {rightNavItems.map((item, index) => {
                         const active = isActive(item.path);

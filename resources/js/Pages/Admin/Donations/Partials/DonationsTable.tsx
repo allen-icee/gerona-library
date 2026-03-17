@@ -41,7 +41,7 @@ export default function DonationsTable({ donations }: { donations: any }) {
                 onSuccess: () => {
                     setIsDeleteModalOpen(false);
                     setItemToDelete(null);
-                    // Reverted back to success!
+
                     toast.success("Donation record deleted successfully.");
                 },
                 onError: () => {
@@ -88,7 +88,7 @@ export default function DonationsTable({ donations }: { donations: any }) {
                                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-black bg-fuchsia-100 text-fuchsia-700 mb-1 border border-fuchsia-200">
                                                 {donation.donation_category}
                                             </span>
-                                            <p className="text-sm text-slate-600 font-medium truncate max-w-[250px]" title={donation.description}>
+                                            <p className="text-sm text-slate-600 font-medium truncate max-w-62.5" title={donation.description}>
                                                 {donation.description}
                                             </p>
                                         </TableCell>
@@ -132,7 +132,6 @@ export default function DonationsTable({ donations }: { donations: any }) {
                     </Table>
                 </div>
 
-                {/* Pagination */}
                 {donations.links && donations.links.length > 3 && (
                     <div className="bg-slate-50 border-t border-stone-100 px-4 py-3 flex items-center justify-center gap-1 flex-wrap">
                         {donations.links.map((link: any, i: number) => (
@@ -150,14 +149,12 @@ export default function DonationsTable({ donations }: { donations: any }) {
                 )}
             </div>
 
-            {/* EDIT MODAL */}
             <EditDonationModal
                 donation={itemToEdit}
                 isOpen={!!itemToEdit}
                 onClose={() => setItemToEdit(null)}
             />
 
-            {/* CUSTOM DISCARD MODAL */}
             <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
                 <DialogContent className="sm:max-w-sm bg-white rounded-2xl border-rose-100 shadow-xl shadow-stone-200/50">
                     <DialogHeader>

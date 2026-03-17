@@ -10,7 +10,6 @@ export default function Login({
 }: {
     status?: string;
 }) {
-    // Removed "remember: false" from the form state entirely
     const { data, setData, post, processing, errors, reset } = useForm({
         username: "",
         password: "",
@@ -28,7 +27,6 @@ export default function Login({
         <GuestLayout>
             <Head title="Login" />
 
-            {/* Pink Themed Header */}
             <div className="mb-8 text-center">
                 <div className="w-16 h-16 bg-pink-50 text-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm border border-pink-100">
                     <Icon icon="solar:book-bookmark-bold" className="w-8 h-8" />
@@ -44,7 +42,6 @@ export default function Login({
             )}
 
             <form onSubmit={submit} className="space-y-5">
-                {/* Username Input */}
                 <div>
                     <label htmlFor="username" className="text-xs font-bold text-stone-600 uppercase mb-1.5 block">
                         Username
@@ -72,7 +69,6 @@ export default function Login({
                     )}
                 </div>
 
-                {/* Password Input */}
                 <div>
                     <label htmlFor="password" className="text-xs font-bold text-stone-600 uppercase mb-1.5 block">
                         Password
@@ -99,7 +95,6 @@ export default function Login({
                     )}
                 </div>
 
-                {/* Submit Button (Pink Themed & Simple Text) */}
                 <button
                     type="submit"
                     disabled={processing}
