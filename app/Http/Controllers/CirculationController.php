@@ -11,6 +11,7 @@ use Inertia\Inertia;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CirculationExport;
+use Illuminate\Support\Facades\DB;
 
 class CirculationController extends Controller
 {
@@ -47,31 +48,38 @@ class CirculationController extends Controller
             return back()->withErrors(['book_copy_id' => 'This book copy is not currently available.']);
         }
 
-        BorrowTransaction::create([
-            'patron_id' => $patron->id,
-            'book_copy_id' => $copy->id,
-            'issued_by' => Auth::id(),
-            'borrowed_at' => now(),
-            'due_at' => Carbon::parse($request->due_at),
-            'status' => 'Borrowed',
-        ]);
+        // 2. WRAP IN DB::transaction
+        DB::transaction(function () use ($request, $patron, $copy) {
+            BorrowTransaction::create([
+                'patron_id' => $patron->id,
+                'book_copy_id' => $copy->id,
+                'issued_by' => Auth::id(),
+                'borrowed_at' => now(),
+                'due_at' => Carbon::parse($request->due_at),
+                'status' => 'Borrowed',
+            ]);
 
-        $copy->update(['status' => 'Borrowed']);
+            $copy->update(['status' => 'Borrowed']);
+        });
 
-        return redirect()->back();
+        // 3. RETURN WITH FLASH MESSAGE
+        return redirect()->back()->with('success', 'Book checked out successfully!');
     }
 
     public function returnBook(BorrowTransaction $transaction)
     {
-        $transaction->update([
-            'status' => 'Returned',
-            'returned_at' => now(),
-            'received_by' => Auth::id(),
-        ]);
+        // 4. WRAP RETURN IN DB::transaction
+        DB::transaction(function () use ($transaction) {
+            $transaction->update([
+                'status' => 'Returned',
+                'returned_at' => now(),
+                'received_by' => Auth::id(),
+            ]);
 
-        $transaction->bookCopy->update(['status' => 'Available']);
+            $transaction->bookCopy->update(['status' => 'Available']);
+        });
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Book returned successfully!');
     }
     public function export()
     {

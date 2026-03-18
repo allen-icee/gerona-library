@@ -169,6 +169,7 @@ export default function AddPatronModal() {
                                 value={data.first_name}
                                 onChange={(e) => setData("first_name", e.target.value.replace(/[^a-zA-ZñÑ\s\-,]/g, ""))}
                                 required
+                                placeholder="e.g. Maria Theresa"
                                 className="h-10 border-fuchsia-200 focus-visible:ring-fuchsia-500 rounded-lg"
                             />
                             {errors.first_name && <p className="text-xs text-red-600">{errors.first_name}</p>}
@@ -180,6 +181,7 @@ export default function AddPatronModal() {
                                 maxLength={2}
                                 value={data.middle_initial}
                                 onChange={(e) => setData("middle_initial", e.target.value.replace(/[^a-zA-ZñÑ]/g, "").toUpperCase())}
+                                placeholder="e.g. C"
                                 className="h-10 border-fuchsia-200 focus-visible:ring-fuchsia-500 rounded-lg text-center"
                             />
                         </div>
@@ -190,6 +192,7 @@ export default function AddPatronModal() {
                                 value={data.last_name}
                                 onChange={(e) => setData("last_name", e.target.value.replace(/[^a-zA-ZñÑ\s\-,]/g, ""))}
                                 required
+                                placeholder="e.g. Yu"
                                 className="h-10 border-fuchsia-200 focus-visible:ring-fuchsia-500 rounded-lg"
                             />
                             {errors.last_name && <p className="text-xs text-red-600">{errors.last_name}</p>}

@@ -7,6 +7,7 @@ import { PageProps } from "@/types";
 import DashboardHeader from "./Partials/DashboardHeader";
 import QuickActions from "./Partials/QuickActions";
 import MetricCards from "./Partials/MetricCards";
+import DashboardCharts from "./Partials/DashboardCharts";
 
 export interface DashboardMetrics {
     totalCopies: number;
@@ -18,7 +19,8 @@ export interface DashboardMetrics {
 export default function Dashboard({
     auth,
     metrics,
-}: PageProps<{ metrics: DashboardMetrics }>) {
+    charts,
+}: PageProps<{ metrics: DashboardMetrics; charts: any }>) {
     return (
         <AdminLayout>
             <Head title="Dashboard" />
@@ -27,6 +29,8 @@ export default function Dashboard({
                 <DashboardHeader user={auth.user} />
                 <QuickActions />
                 <MetricCards metrics={metrics} />
+
+                <DashboardCharts charts={charts} />
             </div>
         </AdminLayout>
     );

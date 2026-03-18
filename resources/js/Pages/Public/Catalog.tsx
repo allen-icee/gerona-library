@@ -1,8 +1,9 @@
 // resources/js/Pages/Public/Catalog.tsx
-import { FormEventHandler } from "react";
+import { FormEventHandler, useCallback } from "react";
 import PublicLayout from "@/Layouts/PublicLayout";
-import { Head, useForm, Link } from "@inertiajs/react";
+import { Head, useForm, Link, router } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
+import debounce from "lodash/debounce";
 import { Input } from "@/Components/ui/input";
 import CustomSelect from "@/Components/CustomSelect";
 import BookCard from "@/Components/Public/BookCard";
@@ -36,6 +37,18 @@ export default function Catalog({ books, filters = {}, categories = [] }: Catalo
         available: filters.available || "",
         sort: filters.sort || "newest",
     });
+
+    // Create a debounced search function that waits 300ms before sending the request
+    const debouncedSearch = useCallback(
+        debounce((query: string, currentCategory: string, currentAvailable: string, currentSort: string) => {
+            router.get(
+                route("catalog.index"),
+                { search: query, category: currentCategory, available: currentAvailable, sort: currentSort },
+                { preserveState: true, replace: true }
+            );
+        }, 300),
+        []
+    );
 
     const handleSearch: FormEventHandler = (e) => {
         e.preventDefault();
@@ -88,7 +101,10 @@ export default function Catalog({ books, filters = {}, categories = [] }: Catalo
                     <form onSubmit={handleSearch} className="w-full md:w-80 lg:w-96 relative group shrink-0 mt-2 md:mt-0">
                         <Input
                             value={data.search}
-                            onChange={(e) => setData("search", e.target.value)}
+                            onChange={(e) => {
+                                setData("search", e.target.value);
+                                debouncedSearch(e.target.value, data.category, data.available, data.sort);
+                            }}
                             placeholder="Search title, author, ISBN..."
                             className="h-12 pl-12 pr-4 rounded-2xl border border-rose-200 focus-visible:border-rose-400 focus-visible:ring-rose-400 text-sm bg-white shadow-sm transition-all w-full"
                         />

@@ -10,25 +10,47 @@ export default function DashboardHeader({ user }: { user: { name: string } }) {
         return () => clearInterval(timer);
     }, []);
 
+    const hour = currentTime.getHours();
+    let greeting = "Good evening";
+    let iconName = "solar:moon-stars-bold-duotone";
+    let iconColor = "text-indigo-500";
+    let bgGradient = "from-indigo-500 to-purple-600";
+
+    if (hour < 12) {
+        greeting = "Good morning";
+        iconName = "solar:sun-2-bold-duotone";
+        iconColor = "text-amber-500";
+        bgGradient = "from-amber-400 to-orange-500";
+    } else if (hour < 18) {
+        greeting = "Good afternoon";
+        iconName = "solar:sun-fog-bold-duotone";
+        iconColor = "text-orange-500";
+        bgGradient = "from-orange-400 to-rose-500";
+    }
+
     return (
-        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-rose-100 shadow-sm shadow-rose-100/50">
-            <div className="flex items-center gap-4">
-                <div className="bg-linear-to-br from-rose-400 to-rose-600 w-14 h-14 rounded-xl flex items-center justify-center shadow-lg shadow-rose-300/50 text-white shrink-0">
-                    <Icon icon="solar:widget-5-bold-duotone" className="w-7 h-7" />
+        <div className="relative overflow-hidden flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-white p-6 sm:p-8 rounded-3xl border border-rose-100 shadow-sm">
+
+            <div className={`absolute top-0 right-0 w-64 h-64 bg-linear-to-br ${bgGradient} opacity-[0.03] rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none`}></div>
+
+            <div className="flex items-center gap-5 z-10">
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm shrink-0 bg-linear-to-br ${bgGradient} bg-opacity-10 text-white`}>
+                    <Icon icon={iconName} className="w-8 h-8 drop-shadow-sm" />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-black text-slate-800 tracking-tight leading-none">
-                        Welcome back, {user.name} 👋
+                    <h1 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight leading-tight">
+                        {greeting}, <span className="text-transparent bg-clip-text bg-linear-to-r from-rose-500 to-pink-600">{user.name}</span>
                     </h1>
-                    <p className="text-slate-500 text-xs font-medium mt-1.5">
+                    <p className="text-slate-500 text-sm font-medium mt-1">
                         Here is what is happening at the Gerona Municipal Library today.
                     </p>
                 </div>
             </div>
 
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 bg-stone-900 text-white px-5 py-3 rounded-xl shadow-inner w-full xl:w-auto">
-                <div className="flex items-center gap-2 sm:border-r sm:border-stone-700 pr-4">
-                    <Icon icon="solar:calendar-bold-duotone" className="w-5 h-5 text-rose-400" />
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full xl:w-auto z-10">
+
+                <div className="flex items-center gap-2.5 bg-rose-50/50 border border-rose-100 text-rose-700 px-4 py-2.5 rounded-2xl w-full sm:w-auto">
+                    <Icon icon="solar:calendar-minimalistic-bold-duotone" className="w-5 h-5 text-rose-500" />
                     <span className="font-bold text-sm tracking-wide">
                         {currentTime.toLocaleDateString("en-PH", {
                             weekday: "short",
@@ -38,9 +60,10 @@ export default function DashboardHeader({ user }: { user: { name: string } }) {
                         })}
                     </span>
                 </div>
-                <div className="flex items-center gap-2 pl-1">
-                    <Icon icon="solar:clock-circle-bold-duotone" className="w-5 h-5 text-emerald-400" />
-                    <span className="font-black font-mono text-lg tracking-widest text-emerald-50">
+
+                <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-100 text-slate-700 px-4 py-2.5 rounded-2xl w-full sm:w-auto shadow-sm">
+                    <Icon icon="solar:clock-circle-bold-duotone" className="w-5 h-5 text-slate-400" />
+                    <span className="font-black font-mono text-base tracking-widest text-slate-800">
                         {currentTime.toLocaleTimeString("en-US", {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -49,6 +72,7 @@ export default function DashboardHeader({ user }: { user: { name: string } }) {
                     </span>
                 </div>
             </div>
+
         </div>
     );
 }

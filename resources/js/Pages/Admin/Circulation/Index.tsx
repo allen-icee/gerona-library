@@ -50,7 +50,7 @@ export default function CirculationIndex({
                         <CheckoutForm patrons={patrons} availableCopies={availableCopies} />
                     </div>
 
-                    <div className="lg:col-span-2">
+                    <div className="lg:col-span-2 overflow-x-auto">
                         <ActiveTransactionsTable transactions={activeTransactions} />
                     </div>
                 </div>

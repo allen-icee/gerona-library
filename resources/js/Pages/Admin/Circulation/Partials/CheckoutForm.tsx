@@ -53,7 +53,7 @@ export default function CheckoutForm({ patrons, availableCopies }: { patrons: an
     };
 
     return (
-        <div className="bg-white border border-rose-100 shadow-sm shadow-rose-100/50 rounded-xl overflow-hidden">
+        <div className="bg-white border border-rose-100 shadow-sm shadow-rose-100/50 rounded-xl overflow-visible">
             <div className="bg-rose-50/50 border-b border-rose-100 px-5 py-4 flex items-center gap-3">
                 <Icon icon="solar:book-arrow-up-bold-duotone" className="w-6 h-6 text-rose-500" />
                 <div>

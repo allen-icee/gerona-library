@@ -1,5 +1,5 @@
 //resources\js\Layouts\AdminLayout.tsx
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useEffect } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import { PageProps } from "@/types";
 import {
@@ -18,7 +18,7 @@ import {
     AlertTriangle,
     Info
 } from "lucide-react";
-import { Toaster } from "sonner";
+import { Toaster, toast } from "sonner";
 
 import {
     DropdownMenu,
@@ -32,6 +32,18 @@ import {
 export default function AdminLayout({ children }: PropsWithChildren) {
     const user = usePage<PageProps>().props.auth.user;
     const { url } = usePage();
+
+    // 3. Extract flash from props (you may need to add 'flash' to your PageProps type later)
+    const { flash } = usePage<PageProps>().props as any;
+
+    // 4. Add the useEffect hook right after your navItems array
+    useEffect(() => {
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.warning) toast.warning(flash.warning);
+        if (flash?.info) toast.info(flash.info);
+    }, [flash]);
+
 
     const isActive = (path: string) => url.startsWith(path);
 
