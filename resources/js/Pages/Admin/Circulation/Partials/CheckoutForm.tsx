@@ -1,14 +1,13 @@
-//resources\js\Pages\Admin\Circulation\Partials\CheckoutForm.tsx
+// resources/js/Pages/Admin/Circulation/Partials/CheckoutForm.tsx
 import { FormEventHandler, useMemo } from "react";
 import { useForm } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
 import { Button } from "@/Components/ui/button";
-import CustomSelect from "@/Components/CustomSelect";
+import SearchableSelect from "@/Components/SearchableSelect";
 
 export default function CheckoutForm({ patrons, availableCopies }: { patrons: any[]; availableCopies: any[] }) {
-
     const defaultDueDate = new Date();
     defaultDueDate.setDate(defaultDueDate.getDate() + 7);
     const defaultDueString = defaultDueDate.toISOString().split("T")[0] + "T17:00";
@@ -17,6 +16,9 @@ export default function CheckoutForm({ patrons, availableCopies }: { patrons: an
         patron_id: "",
         book_copy_id: "",
         due_at: defaultDueString,
+
+        patron_search: "",
+        copy_search: "",
     });
 
     const patronOptionsMap = useMemo(() => {
@@ -28,7 +30,6 @@ export default function CheckoutForm({ patrons, availableCopies }: { patrons: an
     }, [patrons]);
 
     const patronOptions = Array.from(patronOptionsMap.keys());
-    const selectedPatronLabel = patronOptions.find(key => patronOptionsMap.get(key) === data.patron_id?.toString()) || "";
 
     const copyOptionsMap = useMemo(() => {
         const map = new Map<string, string>();
@@ -39,14 +40,13 @@ export default function CheckoutForm({ patrons, availableCopies }: { patrons: an
     }, [availableCopies]);
 
     const copyOptions = Array.from(copyOptionsMap.keys());
-    const selectedCopyLabel = copyOptions.find(key => copyOptionsMap.get(key) === data.book_copy_id?.toString()) || "";
 
     const submitCheckout: FormEventHandler = (e) => {
         e.preventDefault();
         post(route("circulation.checkout"), {
             preserveScroll: true,
             onSuccess: () => {
-                reset("book_copy_id");
+                reset("book_copy_id", "copy_search");
                 clearErrors();
             },
         });
@@ -54,7 +54,6 @@ export default function CheckoutForm({ patrons, availableCopies }: { patrons: an
 
     return (
         <div className="bg-white border border-rose-100 shadow-sm shadow-rose-100/50 rounded-xl overflow-hidden">
-
             <div className="bg-rose-50/50 border-b border-rose-100 px-5 py-4 flex items-center gap-3">
                 <Icon icon="solar:book-arrow-up-bold-duotone" className="w-6 h-6 text-rose-500" />
                 <div>
@@ -68,9 +67,16 @@ export default function CheckoutForm({ patrons, availableCopies }: { patrons: an
                     <Label className="text-xs font-bold uppercase tracking-wider text-slate-600 z-40 relative">
                         1. Select Patron *
                     </Label>
-                    <CustomSelect
-                        value={selectedPatronLabel}
-                        onChange={(val) => setData("patron_id", patronOptionsMap.get(val) || "")}
+                    <SearchableSelect
+                        value={data.patron_search}
+                        onChange={(val) => {
+                            setData((prev) => ({
+                                ...prev,
+                                patron_search: val,
+
+                                patron_id: patronOptionsMap.get(val) || "",
+                            }));
+                        }}
                         options={patronOptions}
                         theme="rose"
                         placeholder="Search library card or name..."
@@ -86,9 +92,15 @@ export default function CheckoutForm({ patrons, availableCopies }: { patrons: an
                     <Label className="text-xs font-bold uppercase tracking-wider text-slate-600 z-30 relative">
                         2. Scan Physical Copy *
                     </Label>
-                    <CustomSelect
-                        value={selectedCopyLabel}
-                        onChange={(val) => setData("book_copy_id", copyOptionsMap.get(val) || "")}
+                    <SearchableSelect
+                        value={data.copy_search}
+                        onChange={(val) => {
+                            setData((prev) => ({
+                                ...prev,
+                                copy_search: val,
+                                book_copy_id: copyOptionsMap.get(val) || "",
+                            }));
+                        }}
                         options={copyOptions}
                         theme="rose"
                         placeholder="Scan barcode or select book..."
