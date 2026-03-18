@@ -25,18 +25,21 @@ class BorrowTransaction extends Model
         'returned_at' => 'datetime',
     ];
 
-    public function patron(): BelongsTo
+    public function patron()
     {
-        return $this->belongsTo(Patron::class);
+        // withTrashed() ensures historical logs don't crash if the patron was deleted
+        return $this->belongsTo(Patron::class)->withTrashed();
     }
 
-    public function bookCopy(): BelongsTo
+    public function bookCopy()
     {
-        return $this->belongsTo(BookCopy::class);
+        // withTrashed() ensures historical logs don't crash if the book was deleted
+        return $this->belongsTo(BookCopy::class)->withTrashed();
     }
 
     public function issuer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'issued_by');
     }
+
 }

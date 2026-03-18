@@ -1,13 +1,16 @@
 <?php
 //app\Models\BookCopy.php
 namespace App\Models;
-
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
+use Illuminate\Database\Eloquent\SoftDeletes;
 class BookCopy extends Model
 {
+    use HasFactory, SoftDeletes;
+
+    protected $guarded = [];
     protected $fillable = [
         'book_id',
         'accession_number',

@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->string('language')->default('English');
             $table->text('description')->nullable();
             $table->string('cover_url')->nullable();
-
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -24,7 +24,7 @@ return new class extends Migration {
             $table->string('municipality');
             $table->string('barangay');
             $table->string('street')->nullable();
-
+            $table->softDeletes();
             $table->string('school')->nullable();
             $table->enum('status', ['Active', 'Suspended'])->default('Active');
             $table->timestamps();

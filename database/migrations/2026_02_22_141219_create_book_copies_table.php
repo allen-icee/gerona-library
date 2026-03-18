@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->string('source')->nullable();
             $table->string('donator_name')->nullable();
             $table->text('remarks')->nullable();
-
+            $table->softDeletes();
             $table->unsignedBigInteger('library_id')->default(1);
             $table->timestamps();
         });
