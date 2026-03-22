@@ -21,7 +21,10 @@ interface Props {
     cardId?: string;
 }
 
-export default function LibraryCard({ patron, cardId = "library-card-element" }: Props) {
+export default function LibraryCard({
+    patron,
+    cardId = "library-card-element",
+}: Props) {
     const mi = patron.middle_initial ? `${patron.middle_initial}. ` : "";
     const sfx = patron.suffix ? ` ${patron.suffix}` : "";
     const fullName = `${patron.first_name} ${mi}${patron.last_name}${sfx}`;
@@ -32,7 +35,6 @@ export default function LibraryCard({ patron, cardId = "library-card-element" }:
     return (
         <div
             id={cardId}
-
             style={{
                 fontFamily: "ui-sans-serif, system-ui, sans-serif",
                 color: "#000000",
@@ -78,51 +80,145 @@ export default function LibraryCard({ patron, cardId = "library-card-element" }:
                     height: "128px",
                     opacity: 0.06,
                     zIndex: 0,
-                    pointerEvents: "none"
+                    pointerEvents: "none",
                 }}
                 fill="#f43f5e"
             >
                 <path d="M62 14c-2-1-10-3-22-1l-8 2-8-2c-12-2-20 0-22 1a2 2 0 0 0-1 2v36c0 1 1 2 2 1 2-1 10-2 21 0l8 3 8-3c11-2 19-1 21 0 1 1 2 0 2-1V16a2 2 0 0 0-1-2z" />
             </svg>
 
-            <div style={{ flex: 1, zIndex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", paddingRight: "8px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div
+                style={{
+                    flex: 1,
+                    zIndex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    paddingRight: "8px",
+                }}
+            >
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                    }}
+                >
+                    {" "}
                     <img
                         src="/images/GeronaLibraryLogo.png"
                         alt="Gerona Library"
-                        style={{ width: "26px", height: "26px", objectFit: "contain" }}
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        style={{
+                            width: "32px",
+                            height: "32px",
+                            objectFit: "contain",
+                        }}
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).style.display =
+                                "none";
+                        }}
+                    />
+                    <img
+                        src="/images/MunicipalityLogo.png"
+                        alt="Municipal Logo"
+                        style={{
+                            width: "28px",
+                            height: "28px",
+                            objectFit: "contain",
+                        }}
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).style.display =
+                                "none";
+                        }}
                     />
                     <div>
-                        <h1 style={{ fontSize: "11px", fontWeight: "900", margin: 0, color: "#be185d", letterSpacing: "0.02em", lineHeight: "1" }}>
+                        <h1
+                            style={{
+                                fontSize: "11px",
+                                fontWeight: "900",
+                                margin: 0,
+                                color: "#be185d",
+                                letterSpacing: "0.02em",
+                                lineHeight: "1",
+                                whiteSpace: "nowrap",
+                            }}
+                        >
                             GERONA MUNICIPAL LIBRARY
                         </h1>
-                        <p style={{ fontSize: "7px", fontWeight: "bold", margin: "2px 0 0 0", color: "#db2777", letterSpacing: "0.05em" }}>
+                        <p
+                            style={{
+                                fontSize: "7px",
+                                fontWeight: "bold",
+                                margin: "2px 0 0 0",
+                                color: "#db2777",
+                                letterSpacing: "0.05em",
+                                whiteSpace: "nowrap",
+                            }}
+                        >
                             Dr. Jorge Cleofas Bocobo Library
                         </p>
                     </div>
                 </div>
 
                 <div style={{ marginBottom: "2px", marginTop: "8px" }}>
-                    <h2 style={{ fontSize: "16px", fontWeight: "900", margin: "0 0 4px 0", color: "#0f172a", lineHeight: "1.1" }}>
+                    <h2
+                        style={{
+                            fontSize: "16px",
+                            fontWeight: "900",
+                            margin: "0 0 4px 0",
+                            color: "#0f172a",
+                            lineHeight: "1.1",
+                        }}
+                    >
                         {fullName}
                     </h2>
-                    <p style={{ fontSize: "9px", fontWeight: "600", margin: "0 0 2px 0", color: "#334155" }}>
+                    <p
+                        style={{
+                            fontSize: "9px",
+                            fontWeight: "600",
+                            margin: "0 0 2px 0",
+                            color: "#334155",
+                        }}
+                    >
                         {patron.type}
                     </p>
                     {patron.contact_number && (
-                        <p style={{ fontSize: "8px", fontWeight: "600", margin: "0 0 4px 0", color: "#475569" }}>
+                        <p
+                            style={{
+                                fontSize: "8px",
+                                fontWeight: "600",
+                                margin: "0 0 4px 0",
+                                color: "#475569",
+                            }}
+                        >
                             {patron.contact_number}
                         </p>
                     )}
-                    <p style={{ fontSize: "7px", margin: 0, color: "#64748b", lineHeight: "1.3", maxWidth: "95%" }}>
+                    <p
+                        style={{
+                            fontSize: "7px",
+                            margin: 0,
+                            color: "#64748b",
+                            lineHeight: "1.3",
+                            maxWidth: "95%",
+                        }}
+                    >
                         {fullAddress}
                     </p>
                 </div>
             </div>
 
-            <div style={{ width: "105px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 1 }}>
-
+            <div
+                style={{
+                    width: "105px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    paddingTop: "12px",
+                    zIndex: 1,
+                }}
+            >
                 <QRCodeCanvas
                     value={patron.library_card_number}
                     size={380}
@@ -131,18 +227,20 @@ export default function LibraryCard({ patron, cardId = "library-card-element" }:
                     fgColor="#be185d"
                     style={{
                         width: "95px",
-                        height: "95px"
+                        height: "95px",
                     }}
                 />
 
-                <p style={{
-                    fontSize: "11px",
-                    fontWeight: "900",
-                    margin: "8px 0 0 0",
-                    fontFamily: "monospace",
-                    color: "#be185d",
-                    letterSpacing: "0.05em"
-                }}>
+                <p
+                    style={{
+                        fontSize: "11px",
+                        fontWeight: "900",
+                        margin: "8px 0 0 0",
+                        fontFamily: "monospace",
+                        color: "#be185d",
+                        letterSpacing: "0.05em",
+                    }}
+                >
                     {patron.library_card_number}
                 </p>
             </div>

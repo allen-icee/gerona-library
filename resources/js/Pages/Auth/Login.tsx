@@ -2,14 +2,12 @@
 
 import GuestLayout from "@/Layouts/GuestLayout";
 import { Head, useForm } from "@inertiajs/react";
-import { FormEventHandler } from "react";
+import { FormEventHandler, useState } from "react";
 import { Icon } from "@iconify/react";
 
-export default function Login({
-    status,
-}: {
-    status?: string;
-}) {
+export default function Login({ status }: { status?: string }) {
+    const [showPassword, setShowPassword] = useState(false);
+
     const { data, setData, post, processing, errors, reset } = useForm({
         username: "",
         password: "",
@@ -31,24 +29,35 @@ export default function Login({
                 <div className="w-16 h-16 bg-pink-50 text-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm border border-pink-100">
                     <Icon icon="solar:book-bookmark-bold" className="w-8 h-8" />
                 </div>
-                <h2 className="text-2xl font-black text-slate-800 tracking-tight">Welcome Back Head Librarian</h2>
+                <h2 className="text-2xl font-black text-slate-800 tracking-tight">
+                    Welcome Back!
+                </h2>
             </div>
 
             {status && (
                 <div className="mb-6 text-sm font-bold text-emerald-600 bg-emerald-50 p-4 rounded-2xl text-center border border-emerald-100 flex items-center justify-center gap-2">
-                    <Icon icon="solar:check-circle-bold-duotone" className="w-5 h-5" />
+                    <Icon
+                        icon="solar:check-circle-bold-duotone"
+                        className="w-5 h-5"
+                    />
                     {status}
                 </div>
             )}
 
             <form onSubmit={submit} className="space-y-5">
                 <div>
-                    <label htmlFor="username" className="text-xs font-bold text-stone-600 uppercase mb-1.5 block">
+                    <label
+                        htmlFor="username"
+                        className="text-xs font-bold text-stone-600 uppercase mb-1.5 block"
+                    >
                         Username
                     </label>
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <Icon icon="solar:user-bold-duotone" className="h-5 w-5 text-stone-400" />
+                            <Icon
+                                icon="solar:user-bold-duotone"
+                                className="h-5 w-5 text-stone-400"
+                            />
                         </div>
                         <input
                             id="username"
@@ -59,38 +68,68 @@ export default function Login({
                             autoComplete="username"
                             autoFocus
                             placeholder="Enter your username"
-                            onChange={(e) => setData("username", e.target.value)}
+                            onChange={(e) =>
+                                setData("username", e.target.value)
+                            }
                         />
                     </div>
                     {errors.username && (
                         <span className="text-rose-500 text-xs font-bold mt-1.5 flex items-center gap-1">
-                            <Icon icon="solar:danger-triangle-bold-duotone" /> {errors.username}
+                            <Icon icon="solar:danger-triangle-bold-duotone" />{" "}
+                            {errors.username}
                         </span>
                     )}
                 </div>
 
                 <div>
-                    <label htmlFor="password" className="text-xs font-bold text-stone-600 uppercase mb-1.5 block">
+                    <label
+                        htmlFor="password"
+                        className="text-xs font-bold text-stone-600 uppercase mb-1.5 block"
+                    >
                         Password
                     </label>
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <Icon icon="solar:lock-password-bold-duotone" className="h-5 w-5 text-stone-400" />
+                            <Icon
+                                icon="solar:lock-password-bold-duotone"
+                                className="h-5 w-5 text-stone-400"
+                            />
                         </div>
                         <input
                             id="password"
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             name="password"
                             value={data.password}
-                            className="pl-11 w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3.5 text-sm focus:border-pink-400 focus:ring focus:ring-pink-100 transition-all font-medium text-slate-800"
+                            className="pl-11 pr-11 w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3.5 text-sm focus:border-pink-400 focus:ring focus:ring-pink-100 transition-all font-medium text-slate-800"
                             autoComplete="current-password"
                             placeholder="••••••••"
-                            onChange={(e) => setData("password", e.target.value)}
+                            onChange={(e) =>
+                                setData("password", e.target.value)
+                            }
                         />
+
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute inset-y-0 right-0 pr-4 flex items-center text-stone-400 hover:text-pink-500 transition-colors focus:outline-none"
+                            aria-label={
+                                showPassword ? "Hide password" : "Show password"
+                            }
+                        >
+                            <Icon
+                                icon={
+                                    showPassword
+                                        ? "solar:eye-bold-duotone"
+                                        : "solar:eye-closed-bold-duotone"
+                                }
+                                className="h-5 w-5"
+                            />
+                        </button>
                     </div>
                     {errors.password && (
                         <span className="text-rose-500 text-xs font-bold mt-1.5 flex items-center gap-1">
-                            <Icon icon="solar:danger-triangle-bold-duotone" /> {errors.password}
+                            <Icon icon="solar:danger-triangle-bold-duotone" />{" "}
+                            {errors.password}
                         </span>
                     )}
                 </div>
@@ -101,11 +140,17 @@ export default function Login({
                     className="w-full bg-pink-500 text-white font-black tracking-wide text-sm py-4 rounded-xl hover:bg-pink-600 transition-all flex items-center justify-center gap-2 shadow-[0_5px_15px_rgba(236,72,153,0.3)] hover:shadow-[0_8px_20px_rgba(236,72,153,0.4)] hover:-translate-y-0.5 mt-4 disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                 >
                     {processing ? (
-                        <Icon icon="solar:spinner-bold-duotone" className="w-5 h-5 animate-spin" />
+                        <Icon
+                            icon="solar:spinner-bold-duotone"
+                            className="w-5 h-5 animate-spin"
+                        />
                     ) : (
                         <>
                             Login
-                            <Icon icon="solar:alt-arrow-right-bold-duotone" className="w-5 h-5" />
+                            <Icon
+                                icon="solar:alt-arrow-right-bold-duotone"
+                                className="w-5 h-5"
+                            />
                         </>
                     )}
                 </button>

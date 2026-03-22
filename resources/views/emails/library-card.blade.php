@@ -2,12 +2,13 @@
 <html>
 
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background-color: #fdf2f8;
             padding: 20px;
-            color: #1f2937;
+            color: #000000;
             margin: 0;
         }
 
@@ -45,17 +46,18 @@
             text-transform: uppercase;
         }
 
+        /* CARD REPLICA STYLES */
         .card-replica {
             background: #ffffff;
             border: 1px solid #fbcfe8;
             border-radius: 6px;
-            padding: 20px;
             width: 100%;
             box-sizing: border-box;
             margin-top: 20px;
+            overflow: hidden;
         }
 
-        .card-table {
+        .card-inner-table {
             width: 100%;
             border-collapse: collapse;
         }
@@ -63,69 +65,17 @@
         .card-left {
             width: 65%;
             vertical-align: top;
-            padding-right: 15px;
+            padding: 16px;
+            padding-right: 8px;
         }
 
         .card-right {
             width: 35%;
-            vertical-align: top;
+            vertical-align: middle;
             text-align: center;
-        }
-
-        .card-header-title {
-            color: #be185d;
-            font-size: 11px;
-            font-weight: 900;
-            margin: 0;
-        }
-
-        .card-header-sub {
-            color: #db2777;
-            font-size: 8px;
-            font-weight: bold;
-            margin: 2px 0 15px 0;
-        }
-
-        .patron-name {
-            font-size: 18px;
-            font-weight: 900;
-            color: #0f172a;
-            margin: 0 0 5px 0;
-            line-height: 1.1;
-        }
-
-        .patron-type {
-            font-size: 10px;
-            font-weight: bold;
-            color: #334155;
-            margin: 0 0 5px 0;
-        }
-
-        .patron-address {
-            font-size: 9px;
-            color: #64748b;
-            margin: 0;
-            line-height: 1.3;
-        }
-
-        .qr-wrapper {
-            margin-bottom: 10px;
-        }
-
-        .qr-image {
-            display: inline-block;
-            border-radius: 4px;
-            max-width: 100%;
-            height: auto;
-        }
-
-        .id-number {
-            font-family: monospace;
-            font-size: 12px;
-            font-weight: bold;
-            color: #be185d;
-            letter-spacing: 1px;
-            margin: 0;
+            padding: 16px;
+            padding-left: 0;
+            background-color: #fff0f5; /* Subtle background to make QR pop */
         }
 
         .footer {
@@ -134,6 +84,42 @@
             font-size: 11px;
             color: #9ca3af;
             line-height: 1.5;
+        }
+
+        /* MOBILE RESPONSIVE STYLES */
+        @media screen and (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 15px;
+            }
+            /* Make the table columns stack on top of each other on phones */
+            .card-left, .card-right {
+                display: block !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+                text-align: center !important;
+                padding: 20px !important;
+            }
+            .card-left {
+                border-bottom: 2px dashed #fbcfe8 !important;
+            }
+            /* Center the text elements when stacked */
+            .card-header-table {
+                margin: 0 auto 15px auto !important;
+            }
+            .patron-info {
+                text-align: center !important;
+            }
+            .patron-address {
+                margin: 0 auto !important;
+            }
+            /* Make the QR Code MASSIVE on mobile */
+            .qr-image {
+                width: 180px !important;
+                height: 180px !important;
+            }
         }
     </style>
 </head>
@@ -145,43 +131,65 @@
             <div class="subtitle">DR. JORGE CLEOFAS BOCOBO LIBRARY</div>
         </div>
 
-        <p style="font-size: 14px; color: #374151;">Hi <strong>{{ $patron->first_name }}</strong>,</p>
-        <p style="font-size: 14px; color: #374151; line-height: 1.5;">Your registration was successful! Please present
-            your <strong>Library Access Card</strong> QR code at the kiosk when you visit the library.</p>
+        <p style="font-size: 14px; color: #374151; text-align: center;">Hi <strong>{{ $patron->first_name }}</strong>,</p>
+        <p style="font-size: 14px; color: #374151; line-height: 1.5; text-align: center;">Your registration was successful! Please present
+            this QR code at the kiosk when you visit the library.</p>
 
         <div class="card-replica">
-            <table class="card-table">
+            <table class="card-inner-table">
                 <tr>
                     <td class="card-left">
-                        <p class="card-header-title">GERONA MUNICIPAL LIBRARY</p>
-                        <p class="card-header-sub">DR. JORGE CLEOFAS BOCOBO LIBRARY</p>
+                        <table class="card-header-table" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 12px;">
+                            <tr>
+                                <td valign="middle" style="padding-right: 8px;">
+                                    <img src="{{ $message->embed(public_path('images/MunicipalityLogo.png')) }}" alt="LGU" width="28" height="28" style="display: block; object-fit: contain;">
+                                </td>
+                                <td valign="middle" style="padding-right: 8px;">
+                                    <img src="{{ $message->embed(public_path('images/GeronaLibraryLogo.png')) }}" alt="Library" width="30" height="30" style="display: block; object-fit: contain;">
+                                </td>
+                                <td valign="middle" style="text-align: left;">
+                                    <div style="font-size: 11px; font-weight: 900; color: #be185d; letter-spacing: 0.02em; line-height: 1; white-space: nowrap; margin: 0;">
+                                        GERONA MUNICIPAL LIBRARY
+                                    </div>
+                                    <div style="font-size: 8px; font-weight: bold; color: #db2777; letter-spacing: 0.05em; white-space: nowrap; margin: 2px 0 0 0;">
+                                        Dr. Jorge Cleofas Bocobo Library
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
 
-                        <p class="patron-name">
-                            {{ $patron->first_name }}
-                            {{ $patron->middle_initial ? $patron->middle_initial . '.' : '' }}
-                            {{ $patron->last_name }}
-                            {{ $patron->suffix }}
-                        </p>
-                        <p class="patron-type">{{ $patron->type }}</p>
-
-                        @if($patron->contact_number)
-                            <p class="patron-type" style="color: #475569;">{{ $patron->contact_number }}</p>
-                        @endif
-
-                        <p class="patron-address">
-                            {{ $patron->street ? $patron->street . ', ' : '' }}Brgy. {{ $patron->barangay }},
-                            {{ $patron->municipality }}, {{ $patron->province }}
-                        </p>
+                        <div class="patron-info" style="text-align: left;">
+                            <div style="font-size: 18px; font-weight: 900; color: #0f172a; margin-bottom: 4px; line-height: 1.1;">
+                                {{ $patron->first_name }}
+                                {{ $patron->middle_initial ? $patron->middle_initial . '. ' : '' }}{{ $patron->last_name }}{{ $patron->suffix ? ' ' . $patron->suffix : '' }}
+                            </div>
+                            <div style="font-size: 11px; font-weight: 600; color: #334155; margin-bottom: 4px; text-transform: uppercase;">
+                                {{ $patron->type }}
+                            </div>
+                            @if($patron->contact_number)
+                                <div style="font-size: 10px; font-weight: 600; color: #475569; margin-bottom: 6px;">
+                                    {{ $patron->contact_number }}
+                                </div>
+                            @endif
+                            <div class="patron-address" style="font-size: 10px; color: #64748b; line-height: 1.4; max-width: 95%;">
+                                {{ $patron->street ? $patron->street . ', ' : '' }}Brgy. {{ $patron->barangay }},<br>
+                                {{ $patron->municipality }}, {{ $patron->province }}
+                            </div>
+                        </div>
                     </td>
 
                     <td class="card-right">
-                        <div class="qr-wrapper"
-                            style="background: white; padding: 10px; border-radius: 8px; display: inline-block;">
-                            <img class="qr-image"
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&color=000000&bgcolor=FFFFFF&margin=10&ecc=H&data={{ $patron->library_card_number }}"
-                                style="width: 150px; height: 150px; display: block;" alt="QR Code">
+                        <img
+                            class="qr-image"
+                            src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&color=000000&bgcolor=FFFFFF&margin=0&ecc=M&data={{ urlencode($patron->library_card_number) }}"
+                            width="100"
+                            height="100"
+                            style="display: block; margin: 0 auto; border-radius: 4px; border: 4px solid #ffffff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
+                            alt="QR Code"
+                        >
+                        <div style="font-family: monospace; font-size: 13px; font-weight: 900; color: #be185d; letter-spacing: 0.1em; margin-top: 10px; text-align: center;">
+                            {{ $patron->library_card_number }}
                         </div>
-                        <p class="id-number">{{ $patron->library_card_number }}</p>
                     </td>
                 </tr>
             </table>
