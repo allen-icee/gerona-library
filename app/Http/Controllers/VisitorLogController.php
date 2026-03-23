@@ -80,7 +80,8 @@ class VisitorLogController extends Controller
     {
         $request->validate([
             'library_card_number' => 'required|string',
-            'purpose' => 'required|string',
+   
+            'purpose' => 'nullable|string', 
         ]);
 
         $patron = Patron::where('library_card_number', strtoupper($request->library_card_number))->first();
@@ -90,7 +91,6 @@ class VisitorLogController extends Controller
         }
 
         $visitorName = trim("{$patron->first_name} " . ($patron->middle_initial ? "{$patron->middle_initial}. " : "") . "{$patron->last_name} {$patron->suffix}");
-
         $address = "Brgy. {$patron->barangay}, {$patron->municipality}";
 
         $activeLog = VisitorLog::where('visitor_name', $visitorName)
@@ -101,6 +101,11 @@ class VisitorLogController extends Controller
             $activeLog->update(['time_out' => now()]);
             return back()->with('success', "Goodbye, {$patron->first_name}! You have been timed out.");
         } else {
+          
+            if (!$request->purpose) {
+                 return back()->withErrors(['error' => 'Purpose is required for time in.']);
+            }
+
             VisitorLog::create([
                 'visitor_name' => $visitorName,
                 'address' => $address,

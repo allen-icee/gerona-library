@@ -1,18 +1,23 @@
 @echo off
-title Gerona Library System
+title Gerona Library System Launcher
 echo ===================================================
 echo    STARTING GERONA MUNICIPAL LIBRARY SYSTEM...
 echo ===================================================
 echo.
-echo 1. Starting Laravel Server (Background)...
-start /B php artisan serve --host=0.0.0.0 --port=8000 > NUL 2>&1
 
-echo 2. Starting Background Queue Worker (Background)...
-start /B php artisan queue:work > NUL 2>&1
+echo 1. Starting Laravel Server (Hidden)...
+:: Runs in background, saves output/errors to a log file
+start /B php artisan serve --port=8000 > storage\logs\local_server.log 2>&1
+
+echo 2. Starting Background Queue Worker (Hidden)...
+:: Runs in background, saves output/errors to a log file
+start /B php artisan queue:work > storage\logs\local_queue.log 2>&1
 
 echo 3. Starting Ngrok Secure Tunnel...
 echo.
-echo [!] To safely shut down the system later, simply close this window.
+echo [!] Servers are running in the background. 
+echo [!] If you get a 502 error, check storage\logs\local_server.log
 echo.
-:: This will take over the main window so you can see your link!
+echo To fully shut down later, close this window and run "taskkill /IM php.exe /F" in your terminal.
+echo.
 ngrok.exe http 8000
