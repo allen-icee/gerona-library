@@ -98,30 +98,29 @@ export default function KioskDashboard({
                     scannerRef.current?.pause(true);
                     playBeep();
 
-                    const isAlreadyInside = activeVisitorsRef.current.some(
-                        (v) => v.library_card_number === decodedText || v.patron?.library_card_number === decodedText
-                    );
+                    toast.loading("Verifying Library Card...", { id: "qr-scan" });
 
-                    if (isAlreadyInside) {
-                        toast.loading("Processing Time Out...", { id: "qr-scan" });
-                        
-                        router.post(route("visitor-logs.smart-scan"), {
-                            library_card_number: decodedText,
-                    
-                        }, {
-                            preserveScroll: true,
-                            onSuccess: () => {
-                                toast.success("Goodbye! Time out recorded successfully.", { id: "qr-scan" });
-                                setTimeout(() => scannerRef.current?.resume(), 3000);
-                            },
-                            onError: () => {
-                                toast.error("Error processing Time Out.", { id: "qr-scan" });
+                    router.post(route("visitor-logs.smart-scan"), {
+                        library_card_number: decodedText,
+                    }, {
+                        preserveScroll: true,
+                        onSuccess: () => {
+                            
+                            toast.success("Time Out Successful. Goodbye!", { id: "qr-scan" });
+                            setTimeout(() => scannerRef.current?.resume(), 3000);
+                        },
+                        onError: (errors) => {
+                            if (errors.needs_purpose) {
+                                
+                                toast.dismiss("qr-scan"); 
+                                setScannedQR(decodedText);
+                            } else {
+                 
+                                toast.error(errors.error || "Scan failed.", { id: "qr-scan" });
                                 setTimeout(() => scannerRef.current?.resume(), 3000);
                             }
-                        });
-                    } else {
-                        setScannedQR(decodedText);       
-                    }
+                        }
+                    });
                 },
                 (error) => {}
             );
@@ -137,7 +136,7 @@ export default function KioskDashboard({
     const handlePurposeSelection = (selectedPurpose: string) => {
         if (!scannedQR) return;
 
-        toast.loading("Processing Library Card...", { id: "qr-scan" });
+        toast.loading("Logging Time In...", { id: "qr-scan" });
 
         router.post(route("visitor-logs.smart-scan"), {
             library_card_number: scannedQR,
@@ -149,8 +148,8 @@ export default function KioskDashboard({
                 setScannedQR(null);
                 scannerRef.current?.resume();
             },
-            onError: () => {
-                toast.error("Invalid QR Code or Card not found.", { id: "qr-scan" });
+            onError: (errors) => {
+                toast.error(errors.error || "Invalid QR Code or Card not found.", { id: "qr-scan" });
                 setScannedQR(null);
                 setTimeout(() => scannerRef.current?.resume(), 3000);
             }
