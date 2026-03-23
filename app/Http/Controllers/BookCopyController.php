@@ -18,21 +18,41 @@ class BookCopyController extends Controller
             'copies' => $copies
         ]);
     }
+    private function generateIncrementalAccession()
+    {
+        $year = date('Y');
+        $prefix = "B{$year}-";
+
+        $latestCopy = BookCopy::where('accession_number', 'like', "{$prefix}%")
+            ->orderByRaw('LENGTH(accession_number) DESC')
+            ->orderBy('accession_number', 'desc')
+            ->first();
+
+        if (!$latestCopy) {
+            return "{$prefix}0001";
+        }
+
+        $latestNumber = (int) str_replace($prefix, '', $latestCopy->accession_number);
+        $nextNumber = str_pad($latestNumber + 1, 4, '0', STR_PAD_LEFT);
+        return "{$prefix}{$nextNumber}";
+    }
+
     public function store(Request $request, Book $book)
     {
         $validated = $request->validate([
-            'accession_number' => 'required|string|unique:book_copies,accession_number',
-            'shelf_location' => 'nullable|string|max:255',
-            'status' => 'required|in:Available,Borrowed,Lost,Damaged,Maintenance',
-            'source' => 'nullable|string|max:255',
-            'donator_name' => 'nullable|string|max:255',
-            'date_acquired' => 'nullable|date',
-            'remarks' => 'nullable|string',
+            'shelf_location' => 'nullable|string',
+            'status' => 'required|string',
+            'source' => 'required|string',
+            'donator_name' => 'nullable|string',
+            'date_acquired' => 'required|date',
         ]);
 
-        $book->copies()->create($validated);
+        BookCopy::create(array_merge($validated, [
+            'book_id' => $book->id,
+            'accession_number' => $this->generateIncrementalAccession(),
+        ]));
 
-        return redirect()->back();
+        return back();
     }
     public function update(Request $request, BookCopy $copy)
     {

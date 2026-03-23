@@ -10,9 +10,29 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\BooksExport;
 use Illuminate\Support\Facades\Http;
 use App\Jobs\FetchBookMetadata;
-
+use Illuminate\Support\Facades\DB;
 class BookController extends Controller
 {
+    private function generateIncrementalAccession()
+    {
+        $year = date('Y');
+        $prefix = "B{$year}-";
+
+        $latestCopy = BookCopy::where('accession_number', 'like', "{$prefix}%")
+            ->orderByRaw('LENGTH(accession_number) DESC')
+            ->orderBy('accession_number', 'desc')
+            ->first();
+
+        if (!$latestCopy) {
+            return "{$prefix}0001";
+        }
+
+        $latestNumber = (int) str_replace($prefix, '', $latestCopy->accession_number);
+
+        $nextNumber = str_pad($latestNumber + 1, 4, '0', STR_PAD_LEFT);
+
+        return "{$prefix}{$nextNumber}";
+    }
     private function fetchBookDetails($isbn)
     {
         if (!$isbn) {
@@ -67,6 +87,7 @@ class BookController extends Controller
 
         $books = Book::query()
             ->withCount('copies')
+            ->with('copies')
             ->when($search, function ($query, $search) {
                 $query->where('title', 'like', "%{$search}%")
                     ->orWhere('author', 'like', "%{$search}%")
@@ -76,8 +97,15 @@ class BookController extends Controller
             ->paginate(15)
             ->withQueryString();
 
+        $recentBooks = Book::withCount('copies')
+            ->with('copies')
+            ->whereDate('created_at', today())
+            ->latest()
+            ->get();
+
         return Inertia::render('Admin/Books/Index', [
             'books' => $books,
+            'recentBooks' => $recentBooks,
             'filters' => $request->only(['search'])
         ]);
     }
@@ -92,14 +120,42 @@ class BookController extends Controller
             'year_published' => 'nullable|string|max:4',
             'category' => 'nullable|string|max:255',
             'language' => 'nullable|string|max:50',
+
+            'copies' => 'nullable|array',
+            'copies.*.shelf_location' => 'nullable|string|max:255',
+            'copies.*.source' => 'required|string|max:50',
         ]);
 
         $isbn = $request->isbn ? preg_replace('/[^0-9X]/i', '', $request->isbn) : null;
-        $apiData = $this->fetchBookDetails($isbn);
 
-        Book::create(array_merge($validated, ['isbn' => $isbn], $apiData));
+        $apiData = [];
+        if ($isbn) {
+            $apiData = $this->fetchBookDetails($isbn);
+        }
 
-        return redirect()->back();
+        DB::transaction(function () use ($validated, $isbn, $apiData, $request) {
+            $book = Book::create(array_merge(
+                \Illuminate\Support\Arr::except($validated, ['copies']),
+                ['isbn' => $isbn],
+                $apiData
+            ));
+
+            if ($request->has('copies') && count($request->copies) > 0) {
+                foreach ($request->copies as $copyData) {
+
+                    BookCopy::create([
+                        'book_id' => $book->id,
+                        'accession_number' => $this->generateIncrementalAccession(),
+                        'shelf_location' => $copyData['shelf_location'],
+                        'source' => $copyData['source'] ?? 'Donated',
+                        'status' => 'Available',
+                        'date_acquired' => now(),
+                    ]);
+                }
+            }
+        });
+
+        return redirect()->back()->with('success', 'Book and copies added successfully!');
     }
 
     public function update(Request $request, Book $book)
@@ -153,11 +209,8 @@ class BookController extends Controller
         }
 
         while (($row = fgetcsv($handle, 1000, ",")) !== FALSE) {
-
             if (count($header) == count($row) && array_filter($row)) {
-
                 $data = array_combine($header, $row);
-
                 $title = strtoupper(trim($data['title'] ?? ''));
                 if (!$title)
                     continue;
@@ -195,30 +248,26 @@ class BookController extends Controller
                             'book_id' => $book->id,
                             'shelf_location' => trim($data['shelf location'] ?? ''),
                             'status' => 'Available',
-                            'source' => 'Purchased',
+                            'source' => 'Donated',
                             'date_acquired' => now(),
                         ]
                     );
                 } else {
                     for ($i = 1; $i <= $copiesTotal; $i++) {
-                        $autoAccession = 'AUTO-' . $book->id . '-C' . $i;
-                        BookCopy::firstOrCreate(
-                            ['accession_number' => $autoAccession],
-                            [
-                                'book_id' => $book->id,
-                                'shelf_location' => trim($data['shelf location'] ?? ''),
-                                'status' => 'Available',
-                                'source' => 'Purchased',
-                                'date_acquired' => now(),
-                            ]
-                        );
+
+                        BookCopy::create([
+                            'accession_number' => $this->generateIncrementalAccession(),
+                            'book_id' => $book->id,
+                            'shelf_location' => trim($data['shelf location'] ?? ''),
+                            'status' => 'Available',
+                            'source' => 'Donated',
+                            'date_acquired' => now(),
+                        ]);
                     }
                 }
             }
         }
-
         fclose($handle);
-
         return redirect()->back();
     }
 }
