@@ -4,6 +4,10 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
+    server: {
+        cors: true,
+        host: '0.0.0.0',
+    },
     plugins: [
         laravel({
             input: "resources/js/app.tsx",
