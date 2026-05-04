@@ -1,4 +1,4 @@
-//resources\js\Pages\Admin\Books\Partials\BookActions.tsx
+//resources/js/Pages/Admin/Books/Partials/BookActions.tsx
 import { useState, FormEventHandler, KeyboardEvent } from "react";
 import { useForm, router } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
@@ -82,6 +82,7 @@ export default function BookActions({ book }: { book: any }) {
                 </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* Edit Modal */}
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
                 <DialogContent className="sm:max-w-125 bg-white rounded-2xl border-pink-100 shadow-xl shadow-stone-200/50">
                     <DialogHeader>
@@ -127,6 +128,26 @@ export default function BookActions({ book }: { book: any }) {
                             <Button type="submit" disabled={processing} className="bg-pink-500 hover:bg-pink-600 text-white rounded-xl">Update</Button>
                         </DialogFooter>
                     </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* MISSING Delete Modal HAS BEEN ADDED HERE */}
+            <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+                <DialogContent className="sm:max-w-md bg-white rounded-2xl border-red-100 shadow-xl shadow-stone-200/50">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-black text-red-600 flex items-center gap-2">
+                            <Icon icon="solar:danger-triangle-bold-duotone" className="w-6 h-6" /> Confirm Deletion
+                        </DialogTitle>
+                        <DialogDescription className="text-stone-500 font-medium pt-2">
+                            Are you sure you want to delete this master record? This action will archive the book and it will no longer appear in search results.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="pt-4">
+                        <Button type="button" variant="outline" onClick={() => setIsDeleteOpen(false)} className="rounded-xl">Cancel</Button>
+                        <Button type="button" onClick={confirmDelete} className="bg-red-600 hover:bg-red-700 text-white rounded-xl">
+                            Delete Record
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
 

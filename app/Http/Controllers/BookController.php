@@ -11,6 +11,7 @@ use App\Exports\BooksExport;
 use Illuminate\Support\Facades\Http;
 use App\Jobs\FetchBookMetadata;
 use Illuminate\Support\Facades\DB;
+
 class BookController extends Controller
 {
     private function generateIncrementalAccession()
@@ -18,7 +19,9 @@ class BookController extends Controller
         $year = date('Y');
         $prefix = "B{$year}-";
 
-        $latestCopy = BookCopy::where('accession_number', 'like', "{$prefix}%")
+        // Added withTrashed() to include soft-deleted records
+        $latestCopy = BookCopy::withTrashed()
+            ->where('accession_number', 'like', "{$prefix}%")
             ->orderByRaw('LENGTH(accession_number) DESC')
             ->orderBy('accession_number', 'desc')
             ->first();
@@ -33,6 +36,7 @@ class BookController extends Controller
 
         return "{$prefix}{$nextNumber}";
     }
+
     private function fetchBookDetails($isbn)
     {
         if (!$isbn) {

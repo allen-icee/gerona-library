@@ -116,7 +116,8 @@ export default function BookIndex({
                                     <TableBody>
                                         {displayedRecentBooks.map((book) => (
                                             <TableRow key={`recent-${book.id}`} className="hover:bg-emerald-50/80 transition-colors border-emerald-100/50">
-                                                <TableCell className="font-bold text-slate-800 pl-6 text-xs">{book.title}</TableCell>
+                                                {/* ADDED UPPERCASE HERE */}
+                                                <TableCell className="font-bold text-slate-800 pl-6 text-xs uppercase">{book.title}</TableCell>
                                                 <TableCell className="text-slate-600 text-xs">{book.author}</TableCell>
                                                 <TableCell>
                                                     <span className="font-mono text-[10px] font-bold text-emerald-700 bg-white border border-emerald-200 px-2 py-0.5 rounded-md shadow-sm whitespace-nowrap">
@@ -173,7 +174,8 @@ export default function BookIndex({
                                 ) : (
                                     books.data.map((book: any) => (
                                         <TableRow key={book.id} className="hover:bg-pink-50/30 transition-colors border-pink-50">
-                                            <TableCell className="font-bold text-slate-800 pl-6 py-3">{book.title}</TableCell>
+                                            {/* ADDED UPPERCASE HERE */}
+                                            <TableCell className="font-bold text-slate-800 pl-6 py-3 uppercase">{book.title}</TableCell>
 
                                             <TableCell className="py-3">
                                                 <div
