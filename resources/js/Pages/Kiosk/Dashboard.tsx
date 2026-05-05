@@ -1,6 +1,6 @@
 // resources/js/Pages/Kiosk/Dashboard.tsx
 import { useState, FormEventHandler, useEffect, useRef } from "react";
-import { Head, useForm, router } from "@inertiajs/react";
+import { Head, useForm, router, usePage } from "@inertiajs/react";
 import { PageProps } from "@/types";
 import { Icon } from "@iconify/react";
 import SignatureCanvas from "react-signature-canvas";
@@ -32,6 +32,13 @@ export default function KioskDashboard({
 
     const [scannedQR, setScannedQR] = useState<string | null>(null);
     const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+
+    const isProcessingScan = useRef(false);
+    const lastScannedCode = useRef<string | null>(null);
+    const codeCooldownTimer = useRef<ReturnType<typeof setTimeout> | null>(
+        null,
+    );
+    const [isSubmittingPurpose, setIsSubmittingPurpose] = useState(false);
 
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -119,6 +126,19 @@ export default function KioskDashboard({
 
             scannerRef.current.render(
                 (decodedText) => {
+                    if (isProcessingScan.current) return;
+
+                    if (lastScannedCode.current === decodedText) return;
+
+                    isProcessingScan.current = true;
+                    lastScannedCode.current = decodedText;
+
+                    if (codeCooldownTimer.current)
+                        clearTimeout(codeCooldownTimer.current);
+                    codeCooldownTimer.current = setTimeout(() => {
+                        lastScannedCode.current = null;
+                    }, 8000);
+
                     scannerRef.current?.pause(true);
                     playBeep();
 
@@ -133,14 +153,16 @@ export default function KioskDashboard({
                         },
                         {
                             preserveScroll: true,
-                            onSuccess: () => {
-                                toast.success("Time Out Successful. Goodbye!", {
-                                    id: "qr-scan",
-                                });
-                                setTimeout(
-                                    () => scannerRef.current?.resume(),
-                                    3000,
+                            onSuccess: (page: any) => {
+                                toast.success(
+                                    page.props.flash.success || "Success!",
+                                    { id: "qr-scan" },
                                 );
+
+                                setTimeout(() => {
+                                    scannerRef.current?.resume();
+                                    isProcessingScan.current = false;
+                                }, 3000);
                             },
                             onError: (errors) => {
                                 if (errors.needs_purpose) {
@@ -151,10 +173,11 @@ export default function KioskDashboard({
                                         errors.error || "Scan failed.",
                                         { id: "qr-scan" },
                                     );
-                                    setTimeout(
-                                        () => scannerRef.current?.resume(),
-                                        3000,
-                                    );
+
+                                    setTimeout(() => {
+                                        scannerRef.current?.resume();
+                                        isProcessingScan.current = false;
+                                    }, 3000);
                                 }
                             },
                         },
@@ -174,8 +197,9 @@ export default function KioskDashboard({
     }, [isGuest]);
 
     const handlePurposeSelection = (selectedPurpose: string) => {
-        if (!scannedQR) return;
+        if (!scannedQR || isSubmittingPurpose) return;
 
+        setIsSubmittingPurpose(true);
         toast.loading("Logging Time In...", { id: "qr-scan" });
 
         router.post(
@@ -186,12 +210,19 @@ export default function KioskDashboard({
             },
             {
                 preserveScroll: true,
-                onSuccess: () => {
-                    toast.success("Welcome! Time in successful.", {
-                        id: "qr-scan",
-                    });
+                onSuccess: (page: any) => {
+                    toast.success(
+                        page.props.flash.success ||
+                            "Welcome! Time in successful.",
+                        { id: "qr-scan" },
+                    );
                     setScannedQR(null);
-                    scannerRef.current?.resume();
+                    setIsSubmittingPurpose(false);
+
+                    setTimeout(() => {
+                        scannerRef.current?.resume();
+                        isProcessingScan.current = false;
+                    }, 3000);
                 },
                 onError: (errors) => {
                     toast.error(
@@ -199,7 +230,12 @@ export default function KioskDashboard({
                         { id: "qr-scan" },
                     );
                     setScannedQR(null);
-                    setTimeout(() => scannerRef.current?.resume(), 3000);
+                    setIsSubmittingPurpose(false);
+
+                    setTimeout(() => {
+                        scannerRef.current?.resume();
+                        isProcessingScan.current = false;
+                    }, 3000);
                 },
             },
         );
@@ -209,7 +245,11 @@ export default function KioskDashboard({
         e.preventDefault();
         post(route("visitor-logs.store"), {
             preserveScroll: true,
-            onSuccess: () => {
+            onSuccess: (page: any) => {
+                toast.success(
+                    page.props.flash.success || "Welcome to the library!",
+                    { id: "guest-login" },
+                );
                 reset();
                 sigPad.current?.clear();
             },
@@ -318,7 +358,6 @@ export default function KioskDashboard({
                                     Purpose of Visit{" "}
                                     <span className="text-pink-500">*</span>
                                 </Label>
-
                                 <CustomSelect
                                     id="purpose"
                                     value={data.purpose}
@@ -614,6 +653,7 @@ export default function KioskDashboard({
                     if (!open) {
                         setScannedQR(null);
                         scannerRef.current?.resume();
+                        isProcessingScan.current = false;
                     }
                 }}
             >
@@ -643,8 +683,9 @@ export default function KioskDashboard({
                         ].map((purpose) => (
                             <button
                                 key={purpose}
+                                disabled={isSubmittingPurpose}
                                 onClick={() => handlePurposeSelection(purpose)}
-                                className="bg-pink-50/50 hover:bg-pink-500 text-pink-600 hover:text-white border border-pink-100 py-3 rounded-xl font-bold text-sm transition-colors duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                                className="bg-pink-50/50 hover:bg-pink-500 text-pink-600 hover:text-white border border-pink-100 py-3 rounded-xl font-bold text-sm transition-colors duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {purpose}
                             </button>
