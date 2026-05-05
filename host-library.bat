@@ -1,5 +1,9 @@
 @echo off
+setlocal enabledelayedexpansion
 title Gerona Library - SERVER MODE (Desktop 10)
+
+for /f "delims=[] tokens=2" %%a in ('ping -4 -n 1 %ComputerName% ^| findstr [') do set IP=%%a
+
 echo ===================================================
 echo    LAUNCHING LOCAL AREA NETWORK SERVER
 echo ===================================================
@@ -12,8 +16,8 @@ start /B php artisan queue:work
 
 echo.
 echo [SERVER IS LIVE]
-echo Other PCs can now connect via http://192.168.1.10:8000
-echo (or whatever your static IP is).
+echo Other PCs can now connect via:
+echo http://!IP!:8000
 echo.
 echo Close this window to shut down the server.
 pause >nul

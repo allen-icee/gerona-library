@@ -16,7 +16,9 @@ use App\Http\Controllers\DonationController;
 use App\Http\Controllers\PublicPatronController;
 use App\Http\Controllers\PublicCatalogController;
 
-Route::get('/', [PublicCatalogController::class, 'index'])->name('home');
+Route::get('/', function () {
+    return Inertia::render('Public/Home');
+})->name('home');
 
 Route::get('/catalog', [PublicCatalogController::class, 'index'])->name('catalog.index');
 
