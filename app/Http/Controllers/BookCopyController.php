@@ -1,14 +1,23 @@
 <?php
-//app\Http\Controllers\BookCopyController.php
+
 namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\BookCopy;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Services\AccessionService; // Import the service
 
 class BookCopyController extends Controller
 {
+    protected $accessionService;
+
+    // Inject the service
+    public function __construct(AccessionService $accessionService)
+    {
+        $this->accessionService = $accessionService;
+    }
+
     public function index(Book $book)
     {
         $copies = $book->copies()->latest()->get();
@@ -17,24 +26,6 @@ class BookCopyController extends Controller
             'book' => $book,
             'copies' => $copies
         ]);
-    }
-    private function generateIncrementalAccession()
-    {
-        $year = date('Y');
-        $prefix = "B{$year}-";
-
-        $latestCopy = BookCopy::where('accession_number', 'like', "{$prefix}%")
-            ->orderByRaw('LENGTH(accession_number) DESC')
-            ->orderBy('accession_number', 'desc')
-            ->first();
-
-        if (!$latestCopy) {
-            return "{$prefix}0001";
-        }
-
-        $latestNumber = (int) str_replace($prefix, '', $latestCopy->accession_number);
-        $nextNumber = str_pad($latestNumber + 1, 4, '0', STR_PAD_LEFT);
-        return "{$prefix}{$nextNumber}";
     }
 
     public function store(Request $request, Book $book)
@@ -49,11 +40,13 @@ class BookCopyController extends Controller
 
         BookCopy::create(array_merge($validated, [
             'book_id' => $book->id,
-            'accession_number' => $this->generateIncrementalAccession(),
+            // FIXED: Using the shared safe service
+            'accession_number' => $this->accessionService->generateSafeAccession(),
         ]));
 
         return back();
     }
+
     public function update(Request $request, BookCopy $copy)
     {
         $validated = $request->validate([
@@ -68,10 +61,10 @@ class BookCopyController extends Controller
         $copy->update($validated);
         return back();
     }
+
     public function destroy(BookCopy $copy)
     {
         $copy->delete();
-
         return redirect()->back();
     }
 }

@@ -1,5 +1,3 @@
-// resources/js/Pages/Admin/Dashboard/Index.tsx
-
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head } from "@inertiajs/react";
 import { PageProps } from "@/types";
@@ -29,7 +27,6 @@ export default function Dashboard({
                 <DashboardHeader user={auth.user} />
                 <QuickActions />
                 <MetricCards metrics={metrics} />
-
                 <DashboardCharts charts={charts} />
             </div>
         </AdminLayout>

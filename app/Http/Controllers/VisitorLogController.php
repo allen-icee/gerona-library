@@ -1,5 +1,5 @@
 <?php
-//app\Http\Controllers\VisitorLogController.php
+
 namespace App\Http\Controllers;
 
 use App\Models\VisitorLog;
@@ -8,9 +8,19 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\VisitorLogsExport;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class VisitorLogController extends Controller
+class VisitorLogController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            // Only lock down the admin viewing and exporting features
+            new Middleware('role:Librarian', only: ['adminIndex', 'export']),
+        ];
+    }
+
     public function adminIndex(Request $request)
     {
         $query = VisitorLog::query();
@@ -26,10 +36,12 @@ class VisitorLogController extends Controller
             'isHistoryMode' => $request->history === 'true'
         ]);
     }
+
     public function store(Request $request)
     {
         $visitorName = $request->visitor_name;
         $address = $request->address;
+        $patronId = null;
 
         if ($request->filled('library_card_number')) {
             $patron = Patron::where('library_card_number', strtoupper($request->library_card_number))->first();
@@ -38,14 +50,12 @@ class VisitorLogController extends Controller
                 return back()->withErrors(['library_card_number' => 'Library Card Number not found. Please try again or sign in as a guest.']);
             }
 
-            $request->validate([
-                'purpose' => 'required|string|max:255',
-            ]);
+            $request->validate(['purpose' => 'required|string|max:255']);
 
+            $patronId = $patron->id;
             $visitorName = $patron->first_name . ' ' . $patron->last_name;
-            $address = $patron->school_or_barangay;
+            $address = $patron->school ?? $patron->barangay;
         } else {
-
             $request->validate([
                 'visitor_name' => 'required|string|max:255',
                 'address' => 'required|string|max:255',
@@ -54,6 +64,7 @@ class VisitorLogController extends Controller
         }
 
         VisitorLog::create([
+            'patron_id' => $patronId, // Save the ID
             'visitor_name' => $visitorName,
             'address' => $address,
             'purpose' => $request->purpose,
@@ -65,12 +76,10 @@ class VisitorLogController extends Controller
 
     public function checkout(VisitorLog $visitorLog)
     {
-        $visitorLog->update([
-            'time_out' => now(),
-        ]);
-
+        $visitorLog->update(['time_out' => now()]);
         return redirect()->back()->with('success', 'Time out logged successfully. Goodbye!');
     }
+
     public function export()
     {
         return Excel::download(new VisitorLogsExport, 'gerona_kiosk_logs.csv');
@@ -80,7 +89,7 @@ class VisitorLogController extends Controller
     {
         $request->validate([
             'library_card_number' => 'required|string',
-            'purpose' => 'nullable|string', 
+            'purpose' => 'nullable|string',
         ]);
 
         $patron = Patron::where('library_card_number', strtoupper($request->library_card_number))->first();
@@ -89,25 +98,22 @@ class VisitorLogController extends Controller
             return back()->withErrors(['error' => 'Card not found. Please register or sign in as guest.']);
         }
 
-        $visitorName = trim("{$patron->first_name} " . ($patron->middle_initial ? "{$patron->middle_initial}. " : "") . "{$patron->last_name} {$patron->suffix}");
-
-        $activeLog = VisitorLog::where('visitor_name', $visitorName)
+        // Match by patron_id for perfect accuracy
+        $activeLog = VisitorLog::where('patron_id', $patron->id)
             ->whereNull('time_out')
             ->first();
 
         if ($activeLog) {
-            
             $activeLog->update(['time_out' => now()]);
             return back()->with('success', "Goodbye, {$patron->first_name}! You have been timed out.");
         } else {
-         
             if (!$request->purpose) {
-               
                 return back()->withErrors(['needs_purpose' => 'true']);
             }
 
             VisitorLog::create([
-                'visitor_name' => $visitorName,
+                'patron_id' => $patron->id, // Save the ID
+                'visitor_name' => trim("{$patron->first_name} " . ($patron->middle_initial ? "{$patron->middle_initial}. " : "") . "{$patron->last_name} {$patron->suffix}"),
                 'address' => "Brgy. {$patron->barangay}, {$patron->municipality}",
                 'purpose' => $request->purpose,
                 'time_in' => now(),

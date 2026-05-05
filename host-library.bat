@@ -1,27 +1,19 @@
 @echo off
-setlocal enabledelayedexpansion
-title Gerona Library - LAN HOST MODE
+title Gerona Library - SERVER MODE (Desktop 10)
+echo ===================================================
+echo    LAUNCHING LOCAL AREA NETWORK SERVER
+echo ===================================================
+echo.
+echo [+] Starting Laravel Server on all network interfaces...
+start /B php artisan serve --host=0.0.0.0 --port=8000
 
-:: Auto-detect your Wi-Fi IPv4 Address
-for /f "delims=[] tokens=2" %%a in ('ping -4 -n 1 %ComputerName% ^| findstr [') do set IP=%%a
-
-echo ===================================================
-echo    LAUNCHING GERONA LIBRARY LAN HOSTING
-echo ===================================================
-echo.
-echo    Tell other desktops on the Wi-Fi to visit:
-echo    http://!IP!:8000
-echo.
-echo ===================================================
-echo.
-echo [+] Starting Queue Worker in background...
+echo [+] Starting Queue Worker (for background jobs)...
 start /B php artisan queue:work
 
-echo [+] Starting Laravel Server on Network...
 echo.
-echo All processes are running! Keep this window open.
-echo To stop hosting, press Ctrl+C or close this terminal.
+echo [SERVER IS LIVE]
+echo Other PCs can now connect via http://192.168.1.10:8000
+echo (or whatever your static IP is).
 echo.
-
-:: We removed 'start /B' here so it runs in the foreground and keeps the window clean!
-php artisan serve --host=0.0.0.0 --port=8000
+echo Close this window to shut down the server.
+pause >nul

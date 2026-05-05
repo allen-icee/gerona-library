@@ -1,14 +1,23 @@
 <?php
-//app\Http\Controllers\PublicPatronController.php
+
 namespace App\Http\Controllers;
 
 use App\Models\Patron;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\LibraryCardGenerated;
+use App\Services\LibraryCardService;
+use Illuminate\Support\Facades\DB;
 
 class PublicPatronController extends Controller
 {
+    protected $libraryCardService;
+
+    public function __construct(LibraryCardService $libraryCardService)
+    {
+        $this->libraryCardService = $libraryCardService;
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -19,7 +28,7 @@ class PublicPatronController extends Controller
 
             'type' => 'required|in:Citizen,Student,Teacher/LGU Staff',
 
-            'email' => ['required', 'email', 'ends_with:@gmail.com', 'unique:patrons,email'],
+            'email' => ['required', 'email', 'unique:patrons,email'],
             'gender' => 'required|in:Male,Female,Other',
 
             'contact_number' => ['nullable', 'string', 'regex:/^[0-9]{11}$/'],
@@ -30,7 +39,6 @@ class PublicPatronController extends Controller
             'street' => 'nullable|string|max:255',
             'school' => 'nullable|required_if:type,Student|string|max:255',
         ], [
-            'email.ends_with' => 'Only @gmail.com email addresses are allowed.',
             'contact_number.regex' => 'Contact number must be exactly 11 digits.',
             'first_name.regex' => 'Names can only contain letters, spaces, dashes, and commas.',
             'last_name.regex' => 'Names can only contain letters, spaces, dashes, and commas.',
@@ -42,16 +50,10 @@ class PublicPatronController extends Controller
             default => '03',
         };
 
-        $lastPatron = Patron::orderBy('id', 'desc')->first();
-        $nextSequence = 1;
-
-        if ($lastPatron && preg_match('/GER-\d{2}-(\d+)/', $lastPatron->library_card_number, $matches)) {
-            $nextSequence = intval($matches[1]) + 1;
-        }
-
-        $validated['library_card_number'] = sprintf("GER-%s-%04d", $genderCode, $nextSequence);
-
-        $patron = Patron::create($validated);
+        $patron = DB::transaction(function () use ($validated, $genderCode) {
+            $validated['library_card_number'] = $this->libraryCardService->generateSafeCardNumber($genderCode);
+            return Patron::create($validated);
+        });
 
         Mail::to($patron->email)->send(new LibraryCardGenerated($patron));
 

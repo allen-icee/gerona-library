@@ -1,5 +1,5 @@
 <?php
-//app\Http\Controllers\CirculationController.php
+
 namespace App\Http\Controllers;
 
 use App\Models\BorrowTransaction;
@@ -38,49 +38,66 @@ class CirculationController extends Controller
         ]);
 
         $patron = Patron::findOrFail($request->patron_id);
-        $copy = BookCopy::findOrFail($request->book_copy_id);
 
         if ($patron->status === 'Suspended') {
             return back()->withErrors(['patron_id' => 'This patron is currently suspended.']);
         }
 
-        if ($copy->status !== 'Available') {
-            return back()->withErrors(['book_copy_id' => 'This book copy is not currently available.']);
+        try {
+            DB::transaction(function () use ($request, $patron) {
+                // Lock the specific copy to prevent concurrent checkouts
+                $copy = BookCopy::where('id', $request->book_copy_id)->lockForUpdate()->first();
+
+                // Validation happens inside the lock
+                if ($copy->status !== 'Available') {
+                    throw new \Exception('This book copy is no longer available.');
+                }
+
+                BorrowTransaction::create([
+                    'patron_id' => $patron->id,
+                    'book_copy_id' => $copy->id,
+                    'issued_by' => Auth::id(),
+                    'borrowed_at' => now(),
+                    'due_at' => Carbon::parse($request->due_at),
+                    'status' => 'Borrowed',
+                ]);
+
+                $copy->update(['status' => 'Borrowed']);
+            });
+
+            return redirect()->back()->with('success', 'Book checked out successfully!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['book_copy_id' => $e->getMessage()]);
         }
-
-        // 2. WRAP IN DB::transaction
-        DB::transaction(function () use ($request, $patron, $copy) {
-            BorrowTransaction::create([
-                'patron_id' => $patron->id,
-                'book_copy_id' => $copy->id,
-                'issued_by' => Auth::id(),
-                'borrowed_at' => now(),
-                'due_at' => Carbon::parse($request->due_at),
-                'status' => 'Borrowed',
-            ]);
-
-            $copy->update(['status' => 'Borrowed']);
-        });
-
-        // 3. RETURN WITH FLASH MESSAGE
-        return redirect()->back()->with('success', 'Book checked out successfully!');
     }
 
     public function returnBook(BorrowTransaction $transaction)
     {
-        // 4. WRAP RETURN IN DB::transaction
-        DB::transaction(function () use ($transaction) {
-            $transaction->update([
-                'status' => 'Returned',
-                'returned_at' => now(),
-                'received_by' => Auth::id(),
-            ]);
+        try {
+            DB::transaction(function () use ($transaction) {
+                // Lock the transaction to prevent double returns
+                $lockedTransaction = BorrowTransaction::where('id', $transaction->id)->lockForUpdate()->first();
 
-            $transaction->bookCopy->update(['status' => 'Available']);
-        });
+                if ($lockedTransaction->status === 'Returned') {
+                    throw new \Exception('This transaction has already been completed.');
+                }
 
-        return redirect()->back()->with('success', 'Book returned successfully!');
+                $lockedTransaction->update([
+                    'status' => 'Returned',
+                    'returned_at' => now(),
+                    'received_by' => Auth::id(),
+                ]);
+
+                // Update the associated copy
+                $lockedTransaction->bookCopy->update(['status' => 'Available']);
+            });
+
+            return redirect()->back()->with('success', 'Book returned successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
+
     public function export()
     {
         return Excel::download(new CirculationExport, 'gerona_circulation_logs.csv');

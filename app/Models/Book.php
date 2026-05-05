@@ -1,10 +1,12 @@
 <?php
-//app\Models\Book.php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Book extends Model
 {
     use HasFactory, SoftDeletes;
@@ -25,5 +27,17 @@ class Book extends Model
     public function copies(): HasMany
     {
         return $this->hasMany(BookCopy::class);
+    }
+
+    // ADDED: Computed attribute for Total Copies
+    public function getTotalCopiesAttribute()
+    {
+        return $this->copies()->count();
+    }
+
+    // ADDED: Computed attribute for Available Copies
+    public function getAvailableCopiesAttribute()
+    {
+        return $this->copies()->where('status', 'Available')->count();
     }
 }

@@ -1,8 +1,9 @@
 <?php
-//app\Http\Controllers\PrintStationController.php
+
 namespace App\Http\Controllers;
 
 use App\Models\PrintLog;
+use App\Models\PrintJob;
 use App\Models\VisitorLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -11,9 +12,19 @@ use Inertia\Inertia;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\PrintLogsExport;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class PrintStationController extends Controller
+class PrintStationController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            // Protect only the librarian management routes
+            new Middleware('role:Librarian', only: ['adminIndex', 'download', 'logAndClear', 'destroyQueue', 'export']),
+        ];
+    }
+
     public function activeVisitors()
     {
         return response()->json(
@@ -42,24 +53,25 @@ class PrintStationController extends Controller
             'documents.*.pages' => 'required|string',
         ]);
 
-        $safeName = Str::slug($request->visitor_name);
-        $safeSchool = Str::slug($request->school_or_barangay ?? 'Guest');
-
         foreach ($request->documents as $doc) {
             $file = $doc['file'];
-            $customName = Str::slug($doc['custom_name']);
-            $copies = $doc['copies'];
-            $safePaper = Str::slug($doc['paper_size']);
-            $safePages = preg_replace('/[^a-zA-Z0-9,-]/', '_', $doc['pages']);
-            if (empty($safePages))
-                $safePages = 'All';
-
             $extension = $file->getClientOriginalExtension();
-            $uniqueId = uniqid();
 
-            $filename = time() . "_{$uniqueId}---{$safeName}---{$safeSchool}---{$safePaper}---{$copies}---{$safePages}---{$customName}.{$extension}";
+            // Clean, non-fragile filename
+            $safeFileName = time() . '_' . Str::random(10) . '.' . $extension;
+            $path = $file->storeAs('print_queue', $safeFileName, 'local');
 
-            $file->storeAs('print_queue', $filename, 'local');
+            PrintJob::create([
+                'visitor_name' => $request->visitor_name,
+                'school_or_barangay' => $request->school_or_barangay ?? 'Guest',
+                'custom_name' => $doc['custom_name'],
+                'copies' => $doc['copies'],
+                'paper_size' => $doc['paper_size'],
+                'pages' => empty($doc['pages']) ? 'All' : $doc['pages'],
+                'file_path' => $path,
+                'original_extension' => $extension,
+                'status' => 'Pending'
+            ]);
         }
 
         return back()->with('success', 'Files sent to the Librarian successfully!');
@@ -67,27 +79,20 @@ class PrintStationController extends Controller
 
     public function adminIndex()
     {
-        $files = Storage::disk('local')->files('print_queue');
-        $printQueue = [];
-
-        foreach ($files as $filepath) {
-            $filename = basename($filepath);
-            $parts = explode('---', $filename);
-
-            if (count($parts) >= 7) {
-                $timestamp = explode('_', $parts[0])[0];
-                $printQueue[] = [
-                    'filename' => $filename,
-                    'time_uploaded' => \Carbon\Carbon::createFromTimestamp($timestamp)->diffForHumans(),
-                    'visitor_name' => ucwords(str_replace('-', ' ', $parts[1])),
-                    'school_or_barangay' => ucwords(str_replace('-', ' ', $parts[2])),
-                    'paper_size' => ucwords(str_replace('-', ' ', $parts[3])),
-                    'copies' => $parts[4],
-                    'pages' => str_replace('_', ' ', $parts[5]),
-                    'original_name' => $parts[6],
-                ];
-            }
-        }
+        // Safely fetch queue from the database
+        $printQueue = PrintJob::where('status', 'Pending')->latest()->get()->map(function ($job) {
+            return [
+                'id' => $job->id,
+                'filename' => $job->id, // Passing ID instead of raw filename for the download route
+                'time_uploaded' => $job->created_at->diffForHumans(),
+                'visitor_name' => $job->visitor_name,
+                'school_or_barangay' => $job->school_or_barangay,
+                'paper_size' => $job->paper_size,
+                'copies' => $job->copies,
+                'pages' => $job->pages,
+                'original_name' => $job->custom_name,
+            ];
+        });
 
         $printLogs = PrintLog::with('logger:id,name')->latest()->paginate(15);
 
@@ -97,16 +102,21 @@ class PrintStationController extends Controller
         ]);
     }
 
-    public function download($filename)
+    public function download($id)
     {
-        $path = Storage::disk('local')->path('print_queue/' . $filename);
-        return response()->download($path);
+        $job = PrintJob::findOrFail($id);
+
+        if (Storage::disk('local')->exists($job->file_path)) {
+            return response()->download(Storage::disk('local')->path($job->file_path), $job->custom_name . '.' . $job->original_extension);
+        }
+
+        return back()->with('error', 'File not found on server.');
     }
 
     public function logAndClear(Request $request)
     {
         $request->validate([
-            'filenames' => 'required|array',
+            'job_ids' => 'required|array', // Validates against DB IDs
             'visitor_name' => 'required|string',
             'school_or_barangay' => 'required|string',
             'pages_printed' => 'required|integer|min:1',
@@ -120,9 +130,13 @@ class PrintStationController extends Controller
             'printed_at' => now(),
         ]);
 
-        foreach ($request->filenames as $filename) {
-            if (Storage::disk('local')->exists('print_queue/' . $filename)) {
-                Storage::disk('local')->delete('print_queue/' . $filename);
+        foreach ($request->job_ids as $id) {
+            $job = PrintJob::find($id);
+            if ($job) {
+                if (Storage::disk('local')->exists($job->file_path)) {
+                    Storage::disk('local')->delete($job->file_path);
+                }
+                $job->update(['status' => 'Printed']);
             }
         }
 
@@ -132,12 +146,16 @@ class PrintStationController extends Controller
     public function destroyQueue(Request $request)
     {
         $request->validate([
-            'filenames' => 'required|array'
+            'job_ids' => 'required|array'
         ]);
 
-        foreach ($request->filenames as $filename) {
-            if (Storage::disk('local')->exists('print_queue/' . $filename)) {
-                Storage::disk('local')->delete('print_queue/' . $filename);
+        foreach ($request->job_ids as $id) {
+            $job = PrintJob::find($id);
+            if ($job) {
+                if (Storage::disk('local')->exists($job->file_path)) {
+                    Storage::disk('local')->delete($job->file_path);
+                }
+                $job->update(['status' => 'Discarded']);
             }
         }
 
@@ -148,5 +166,4 @@ class PrintStationController extends Controller
     {
         return Excel::download(new PrintLogsExport, 'gerona_print_logs.csv');
     }
-
 }

@@ -1,5 +1,5 @@
 <?php
-//app\Http\Controllers\BookController.php
+
 namespace App\Http\Controllers;
 
 use App\Models\Book;
@@ -11,30 +11,26 @@ use App\Exports\BooksExport;
 use Illuminate\Support\Facades\Http;
 use App\Jobs\FetchBookMetadata;
 use Illuminate\Support\Facades\DB;
+use App\Services\AccessionService;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class BookController extends Controller
+class BookController extends Controller implements HasMiddleware
 {
-    private function generateIncrementalAccession()
+    protected $accessionService;
+
+    public function __construct(AccessionService $accessionService)
     {
-        $year = date('Y');
-        $prefix = "B{$year}-";
+        $this->accessionService = $accessionService;
+        // REMOVED the old $this->middleware line from here to fix the crash
+    }
 
-        // Added withTrashed() to include soft-deleted records
-        $latestCopy = BookCopy::withTrashed()
-            ->where('accession_number', 'like', "{$prefix}%")
-            ->orderByRaw('LENGTH(accession_number) DESC')
-            ->orderBy('accession_number', 'desc')
-            ->first();
-
-        if (!$latestCopy) {
-            return "{$prefix}0001";
-        }
-
-        $latestNumber = (int) str_replace($prefix, '', $latestCopy->accession_number);
-
-        $nextNumber = str_pad($latestNumber + 1, 4, '0', STR_PAD_LEFT);
-
-        return "{$prefix}{$nextNumber}";
+    // LARAVEL 11 WAY TO ADD MIDDLEWARE
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('role:Librarian'),
+        ];
     }
 
     private function fetchBookDetails($isbn)
@@ -74,7 +70,6 @@ class BookController extends Controller
                     ];
                 }
             }
-
         } catch (\Exception $e) {
             // Ignore network errors
         }
@@ -88,14 +83,21 @@ class BookController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $showTrashed = $request->input('trashed') === 'true'; // Allow viewing deleted books
 
         $books = Book::query()
+            ->when($showTrashed, function ($query) {
+                $query->onlyTrashed();
+            })
             ->withCount('copies')
             ->with('copies')
             ->when($search, function ($query, $search) {
-                $query->where('title', 'like', "%{$search}%")
-                    ->orWhere('author', 'like', "%{$search}%")
-                    ->orWhere('isbn', 'like', "%{$search}%");
+                // Wrapped search in a logical grouping
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                        ->orWhere('author', 'like', "%{$search}%")
+                        ->orWhere('isbn', 'like', "%{$search}%");
+                });
             })
             ->latest()
             ->paginate(15)
@@ -124,7 +126,6 @@ class BookController extends Controller
             'year_published' => 'nullable|string|max:4',
             'category' => 'nullable|string|max:255',
             'language' => 'nullable|string|max:50',
-
             'copies' => 'nullable|array',
             'copies.*.shelf_location' => 'nullable|string|max:255',
             'copies.*.source' => 'required|string|max:50',
@@ -146,10 +147,10 @@ class BookController extends Controller
 
             if ($request->has('copies') && count($request->copies) > 0) {
                 foreach ($request->copies as $copyData) {
-
                     BookCopy::create([
                         'book_id' => $book->id,
-                        'accession_number' => $this->generateIncrementalAccession(),
+                        // Using the safe service
+                        'accession_number' => $this->accessionService->generateSafeAccession(),
                         'shelf_location' => $copyData['shelf_location'],
                         'source' => $copyData['source'] ?? 'Donated',
                         'status' => 'Available',
@@ -188,7 +189,15 @@ class BookController extends Controller
     public function destroy(Book $book)
     {
         $book->delete();
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Book removed successfully.');
+    }
+
+    public function restore($id)
+    {
+        $book = Book::withTrashed()->findOrFail($id);
+        $book->restore();
+
+        return redirect()->back()->with('success', 'Book restored successfully from the archive.');
     }
 
     public function export()
@@ -258,9 +267,8 @@ class BookController extends Controller
                     );
                 } else {
                     for ($i = 1; $i <= $copiesTotal; $i++) {
-
                         BookCopy::create([
-                            'accession_number' => $this->generateIncrementalAccession(),
+                            'accession_number' => $this->accessionService->generateSafeAccession(),
                             'book_id' => $book->id,
                             'shelf_location' => trim($data['shelf location'] ?? ''),
                             'status' => 'Available',

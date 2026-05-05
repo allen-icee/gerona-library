@@ -1,0 +1,32 @@
+{
+    "name": "gerona-library-client",
+    "version": "1.0.0",
+    "description": "ClientGerona - Library Terminal",
+    "main": "main.js",
+    "author": "Gerona RHU",
+    "scripts": {
+        "start": "electron .",
+        "build": "electron-builder --win"
+    },
+    "build": {
+        "appId": "com.geronamanagementsystem.client",
+        "productName": "Gerona Library Client",
+        "directories": {
+            "output": "dist"
+        },
+        "win": {
+            "target": "nsis",
+            "icon": "GeronaLibraryLogo.png"
+        },
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true,
+            "createDesktopShortcut": true,
+            "runAfterFinish": true
+        }
+    },
+    "devDependencies": {
+        "electron": "^29.0.0",
+        "electron-builder": "^24.13.3"
+    }
+}

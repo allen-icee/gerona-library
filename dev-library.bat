@@ -1,7 +1,7 @@
 @echo off
 title Gerona Library - DEVELOPER MODE
 echo ===================================================
-echo    LAUNCHING 1-WINDOW DEVELOPER ENVIRONMENT...
+echo    LAUNCHING DEVELOPER ENVIRONMENT (Hot Reload)
 echo ===================================================
 echo.
 echo [+] Starting Laravel Server...
@@ -11,11 +11,12 @@ echo [+] Starting Queue Worker...
 start /B php artisan queue:work
 
 echo [+] Starting Vite Frontend (Hot Reloading)...
-start /B npm run dev
+:: We add -- --host 127.0.0.1 to prevent the 0.0.0.0 browser error
+start /B npm run dev -- --host 127.0.0.1
 
-echo [+] Starting Ngrok Secure Tunnel...
 echo.
-echo All processes are running in this single window!
-echo Close this window to shut everything down.
+echo [DEV ENVIRONMENT IS LIVE]
+echo Local Access: http://localhost:8000
 echo.
-ngrok.exe http 8000
+echo Close this window to shut down all processes.
+pause >nul

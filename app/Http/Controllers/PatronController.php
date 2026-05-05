@@ -1,5 +1,5 @@
 <?php
-//app\Http\Controllers\PatronController.php
+
 namespace App\Http\Controllers;
 
 use App\Models\Patron;
@@ -9,19 +9,39 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\LibraryCardGenerated;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\PatronsExport;
+use App\Services\LibraryCardService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class PatronController extends Controller
+class PatronController extends Controller implements HasMiddleware
 {
+    protected $libraryCardService;
+
+    public function __construct(LibraryCardService $libraryCardService)
+    {
+        $this->libraryCardService = $libraryCardService;
+    }
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('role:Librarian'),
+        ];
+    }
+
     public function index(Request $request)
     {
         $search = $request->input('search');
 
         $patrons = Patron::query()
             ->when($search, function ($query, $search) {
-                $query->where('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%")
-                    ->orWhere('library_card_number', 'like', "%{$search}%")
-                    ->orWhere('barangay', 'like', "%{$search}%");
+                $query->where(function ($q) use ($search) {
+                    $q->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('library_card_number', 'like', "%{$search}%")
+                        ->orWhere('barangay', 'like', "%{$search}%");
+                });
             })
             ->latest()
             ->paginate(15)
@@ -39,11 +59,11 @@ class PatronController extends Controller
             'first_name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZñÑ\s\-\,]+$/'],
             'last_name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZñÑ\s\-\,]+$/'],
             'middle_initial' => ['nullable', 'string', 'max:2', 'regex:/^[a-zA-ZñÑ]+$/'],
-            'suffix' => ['nullable', 'string', 'in:Jr.,Sr.,II,III,IV,V'],
+            'suffix' => ['nullable', 'string', 'in:JR.,SR.,I,II,III,IV,V'],
 
             'type' => 'required|in:Citizen,Student,Teacher/LGU Staff',
             'gender' => 'required|in:Male,Female,Other',
-            'email' => ['required', 'email', 'ends_with:@gmail.com', 'unique:patrons,email'],
+            'email' => ['required', 'email', 'unique:patrons,email'],
 
             'province' => 'required|string|max:255',
             'municipality' => 'required|string|max:255',
@@ -61,21 +81,14 @@ class PatronController extends Controller
             default => '03',
         };
 
-        $lastPatron = Patron::orderBy('id', 'desc')->first();
-        $nextSequence = 1;
-
-        if ($lastPatron && preg_match('/GER-\d{2}-(\d+)/', $lastPatron->library_card_number, $matches)) {
-            $nextSequence = intval($matches[1]) + 1;
-        }
-
-        $cardNumber = sprintf("GER-%s-%04d", $genderCode, $nextSequence);
-        $validated['library_card_number'] = $cardNumber;
-
-        $patron = Patron::create($validated);
+        $patron = DB::transaction(function () use ($validated, $genderCode) {
+            $validated['library_card_number'] = $this->libraryCardService->generateSafeCardNumber($genderCode);
+            return Patron::create($validated);
+        });
 
         Mail::to($patron->email)->send(new LibraryCardGenerated($patron));
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Patron registered successfully.');
     }
 
     public function update(Request $request, Patron $patron)
@@ -84,12 +97,12 @@ class PatronController extends Controller
             'first_name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZñÑ\s\-\,]+$/'],
             'last_name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZñÑ\s\-\,]+$/'],
             'middle_initial' => ['nullable', 'string', 'max:2', 'regex:/^[a-zA-ZñÑ]+$/'],
-            'suffix' => ['nullable', 'string', 'in:Jr.,Sr.,II,III,IV,V'],
+            'suffix' => ['nullable', 'string', 'in:JR.,SR.,I,II,III,IV,V'],
 
             'type' => 'required|in:Citizen,Student,Teacher/LGU Staff',
             'gender' => 'required|in:Male,Female,Other',
 
-            'email' => ['required', 'email', 'ends_with:@gmail.com', 'unique:patrons,email,' . $patron->id],
+            'email' => ['required', 'email', 'unique:patrons,email,' . $patron->id],
 
             'province' => 'required|string|max:255',
             'municipality' => 'required|string|max:255',
@@ -103,14 +116,13 @@ class PatronController extends Controller
 
         $patron->update($validated);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Patron updated successfully.');
     }
 
     public function destroy(Patron $patron)
     {
         $patron->delete();
-
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Patron removed successfully.');
     }
 
     public function export()
