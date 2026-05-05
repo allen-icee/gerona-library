@@ -46,7 +46,7 @@ class PrintStationController extends Controller implements HasMiddleware
             'school_or_barangay' => 'nullable|string|max:255',
             'documents' => 'required|array|min:1',
 
-            'documents.*.file' => 'required|file|mimes:pdf,doc,docx,png,jpg|max:204800',
+            'documents.*.file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,csv,ppt,pptx,png,jpg,jpeg|max:204800',
             'documents.*.custom_name' => 'required|string|max:255',
             'documents.*.copies' => 'required|integer|min:1',
             'documents.*.paper_size' => 'required|string',
