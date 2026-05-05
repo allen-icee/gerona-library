@@ -1,3 +1,4 @@
+//resources\js\Pages\Admin\Dashboard\Partials\DashboardCharts.tsx
 import {
     Card,
     CardContent,
@@ -29,7 +30,6 @@ interface ChartProps {
 export default function DashboardCharts({ charts }: ChartProps) {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-            {/* Visitors Area Chart */}
             <Card className="shadow-sm border-rose-100 rounded-2xl">
                 <CardHeader className="pb-2">
                     <CardTitle className="text-sm font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2">
@@ -44,7 +44,6 @@ export default function DashboardCharts({ charts }: ChartProps) {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="h-75 mt-4">
-                    {/* FIXED: Added minWidth and minHeight to stop the Recharts warning */}
                     <ResponsiveContainer
                         width="100%"
                         height="100%"
@@ -123,7 +122,6 @@ export default function DashboardCharts({ charts }: ChartProps) {
                 </CardContent>
             </Card>
 
-            {/* Circulation Bar Chart */}
             <Card className="shadow-sm border-rose-100 rounded-2xl">
                 <CardHeader className="pb-2">
                     <CardTitle className="text-sm font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2">
@@ -138,7 +136,6 @@ export default function DashboardCharts({ charts }: ChartProps) {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="h-75 mt-4">
-                    {/* FIXED: Added minWidth and minHeight here too */}
                     <ResponsiveContainer
                         width="100%"
                         height="100%"

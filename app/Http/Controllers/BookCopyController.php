@@ -1,18 +1,17 @@
 <?php
-
+//app\Http\Controllers\BookCopyController.php
 namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\BookCopy;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Services\AccessionService; // Import the service
+use App\Services\AccessionService;
 
 class BookCopyController extends Controller
 {
     protected $accessionService;
 
-    // Inject the service
     public function __construct(AccessionService $accessionService)
     {
         $this->accessionService = $accessionService;
@@ -40,7 +39,6 @@ class BookCopyController extends Controller
 
         BookCopy::create(array_merge($validated, [
             'book_id' => $book->id,
-            // FIXED: Using the shared safe service
             'accession_number' => $this->accessionService->generateSafeAccession(),
         ]));
 

@@ -1,5 +1,5 @@
 <?php
-//routes\web.php
+// routes/web.php
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VisitorLogController;
 use Illuminate\Foundation\Application;
@@ -16,13 +16,7 @@ use App\Http\Controllers\DonationController;
 use App\Http\Controllers\PublicPatronController;
 use App\Http\Controllers\PublicCatalogController;
 
-// ==========================================
-// PUBLIC ROUTES
-// ==========================================
-
-Route::get('/', function () {
-    return Inertia::render('Public/Home');
-})->name('home');
+Route::get('/', [PublicCatalogController::class, 'index'])->name('home');
 
 Route::get('/catalog', [PublicCatalogController::class, 'index'])->name('catalog.index');
 
@@ -34,13 +28,16 @@ Route::get('/print-station', function () {
     return Inertia::render('Public/Print');
 })->name('print.index');
 
-Route::post('/register-patron', [PublicPatronController::class, 'store'])->name('register-patron.store');
-Route::post('/print-station/upload', [PrintStationController::class, 'upload'])->name('print-station.upload');
+Route::post('/register-patron', [PublicPatronController::class, 'store'])
+    ->name('register-patron.store')
+    ->middleware('throttle:10,1');
+
+Route::post('/print-station/upload', [PrintStationController::class, 'upload'])
+    ->name('print-station.upload')
+    ->middleware('throttle:10,1');
+
 Route::get('/api/print-station/active-visitors', [PrintStationController::class, 'activeVisitors']);
 
-// ==========================================
-// AUTHENTICATED ADMIN / KIOSK ROUTES
-// ==========================================
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -79,9 +76,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/patrons/export', [PatronController::class, 'export'])->name('patrons.export');
     Route::get('/patrons', [PatronController::class, 'index'])->name('patrons.index');
     Route::post('/patrons', [PatronController::class, 'store'])->name('patrons.store');
-
     Route::put('/patrons/{patron}', [PatronController::class, 'update'])->name('patrons.update');
-
     Route::delete('/patrons/{patron}', [PatronController::class, 'destroy'])->name('patrons.destroy');
 
     Route::get('/circulation/export', [CirculationController::class, 'export'])->name('circulation.export');
@@ -98,9 +93,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/donations/export', [DonationController::class, 'export'])->name('donations.export');
     Route::get('/donations', [DonationController::class, 'index'])->name('donations.index');
     Route::post('/donations', [DonationController::class, 'store'])->name('donations.store');
-
     Route::put('/donations/{donation}', [DonationController::class, 'update'])->name('donations.update');
-
     Route::delete('/donations/{donation}', [DonationController::class, 'destroy'])->name('donations.destroy');
 });
 

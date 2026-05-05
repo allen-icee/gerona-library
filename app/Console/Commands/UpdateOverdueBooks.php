@@ -1,5 +1,5 @@
 <?php
-
+//app\Console\Commands\UpdateOverdueBooks.php
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
@@ -13,7 +13,7 @@ class UpdateOverdueBooks extends Command
 
     public function handle()
     {
-        // Find all borrowed books past their due date and update them
+
         $updatedCount = BorrowTransaction::where('status', 'Borrowed')
             ->where('due_at', '<', now())
             ->update(['status' => 'Overdue']);

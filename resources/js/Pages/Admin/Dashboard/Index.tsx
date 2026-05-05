@@ -1,3 +1,4 @@
+//resources\js\Pages\Admin\Dashboard\Index.tsx
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head } from "@inertiajs/react";
 import { PageProps } from "@/types";

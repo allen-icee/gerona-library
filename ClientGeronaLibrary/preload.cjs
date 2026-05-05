@@ -1,3 +1,4 @@
+//ClientGeronaLibrary\preload.cjs
 const { contextBridge, ipcRenderer, webFrame } = require("electron");
 
 webFrame.setVisualZoomLevelLimits(1, 3);

@@ -11,7 +11,6 @@ echo [+] Starting Queue Worker...
 start /B php artisan queue:work
 
 echo [+] Starting Vite Frontend (Hot Reloading)...
-:: We add -- --host 127.0.0.1 to prevent the 0.0.0.0 browser error
 start /B npm run dev -- --host 127.0.0.1
 
 echo.

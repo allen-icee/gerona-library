@@ -1,5 +1,5 @@
 <?php
-
+//app\Http\Controllers\PrintStationController.php
 namespace App\Http\Controllers;
 
 use App\Models\PrintLog;
@@ -20,7 +20,6 @@ class PrintStationController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            // Protect only the librarian management routes
             new Middleware('role:Librarian', only: ['adminIndex', 'download', 'logAndClear', 'destroyQueue', 'export']),
         ];
     }
@@ -46,7 +45,8 @@ class PrintStationController extends Controller implements HasMiddleware
             'visitor_name' => 'required|string|max:255',
             'school_or_barangay' => 'nullable|string|max:255',
             'documents' => 'required|array|min:1',
-            'documents.*.file' => 'required|file|max:204800',
+
+            'documents.*.file' => 'required|file|mimes:pdf,doc,docx,png,jpg|max:204800',
             'documents.*.custom_name' => 'required|string|max:255',
             'documents.*.copies' => 'required|integer|min:1',
             'documents.*.paper_size' => 'required|string',
@@ -57,7 +57,6 @@ class PrintStationController extends Controller implements HasMiddleware
             $file = $doc['file'];
             $extension = $file->getClientOriginalExtension();
 
-            // Clean, non-fragile filename
             $safeFileName = time() . '_' . Str::random(10) . '.' . $extension;
             $path = $file->storeAs('print_queue', $safeFileName, 'local');
 
@@ -79,11 +78,10 @@ class PrintStationController extends Controller implements HasMiddleware
 
     public function adminIndex()
     {
-        // Safely fetch queue from the database
         $printQueue = PrintJob::where('status', 'Pending')->latest()->get()->map(function ($job) {
             return [
                 'id' => $job->id,
-                'filename' => $job->id, // Passing ID instead of raw filename for the download route
+                'filename' => $job->id,
                 'time_uploaded' => $job->created_at->diffForHumans(),
                 'visitor_name' => $job->visitor_name,
                 'school_or_barangay' => $job->school_or_barangay,
@@ -116,7 +114,7 @@ class PrintStationController extends Controller implements HasMiddleware
     public function logAndClear(Request $request)
     {
         $request->validate([
-            'job_ids' => 'required|array', // Validates against DB IDs
+            'job_ids' => 'required|array',
             'visitor_name' => 'required|string',
             'school_or_barangay' => 'required|string',
             'pages_printed' => 'required|integer|min:1',

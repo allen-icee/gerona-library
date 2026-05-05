@@ -1,3 +1,4 @@
+//ClientGeronaLibrary\main.js
 const { app, BrowserWindow, ipcMain, shell, Menu } = require("electron");
 const path = require("path");
 const fs = require("fs");
@@ -9,13 +10,11 @@ process.on("unhandledRejection", (error) =>
     console.error("Unhandled Rejection:", error),
 );
 
-// Changed config name to match the library context
 const configPath = path.join(
     app.getPath("userData"),
     "library-server-config.json",
 );
 
-// CRITICAL: Set the flag BEFORE app is ready so the camera works over local HTTP.
 let currentIp = null;
 if (fs.existsSync(configPath)) {
     try {
@@ -35,7 +34,7 @@ function createWindow() {
         width: 1280,
         height: 800,
         autoHideMenuBar: true,
-        icon: path.join(__dirname, "GeronaLibraryLogo.png"), // Updated Logo
+        icon: path.join(__dirname, "GeronaLibraryLogo.png"),
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
@@ -94,11 +93,11 @@ function createWindow() {
     mainWindow.setMenu(Menu.buildFromTemplate(menuTemplate));
 
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-        return { action: "allow" }; // Allows PDF downloads to trigger naturally
+        return { action: "allow" };
     });
 
     const loadServer = (ip) => {
-        const serverUrl = `http://${ip}:8000/login`;
+        const serverUrl = `http://${ip}:8000/`;
         let loaded = false;
 
         mainWindow
@@ -124,7 +123,6 @@ function createWindow() {
                 }
             });
 
-        // 8 second timeout fallback
         setTimeout(() => {
             if (!loaded && !mainWindow.isDestroyed()) {
                 mainWindow.webContents.stop();
@@ -152,7 +150,6 @@ function createWindow() {
 
     ipcMain.on("save-ip", (event, ip) => {
         fs.writeFileSync(configPath, JSON.stringify({ ip }));
-        // CRITICAL FIX: Restart the app so the camera security flag applies to the new IP
         app.relaunch();
         app.exit();
     });

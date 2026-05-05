@@ -187,7 +187,6 @@ export default function AddPatronModal() {
                     onKeyDown={handleFormKeyDown}
                     className="space-y-5 py-2"
                 >
-                    {/* NAMES */}
                     <div className="grid grid-cols-12 gap-4">
                         <div className="col-span-12 sm:col-span-4 space-y-1.5">
                             <Label

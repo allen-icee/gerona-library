@@ -33,10 +33,8 @@ export default function AdminLayout({ children }: PropsWithChildren) {
     const user = usePage<PageProps>().props.auth.user;
     const { url } = usePage();
 
-    // 3. Extract flash from props (you may need to add 'flash' to your PageProps type later)
     const { flash } = usePage<PageProps>().props as any;
 
-    // 4. Add the useEffect hook right after your navItems array
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
         if (flash?.error) toast.error(flash.error);

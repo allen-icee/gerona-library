@@ -12,16 +12,15 @@ export default function Home() {
             <Head title="Welcome to Gerona Library" />
 
             <div className="w-full py-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
-
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-10 w-full items-stretch">
-
                     <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-6 w-full">
-
                         <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-6 bg-rose-50/30 p-6 md:p-8 rounded-3xl border border-rose-100 shadow-sm relative overflow-hidden">
-
                             <div className="flex flex-col items-center md:items-start text-center md:text-left space-y-3 z-10 flex-1">
                                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-white text-rose-600 rounded-full font-potta text-[10px] uppercase tracking-widest border border-rose-100 shadow-sm">
-                                    <Icon icon="solar:stars-bold-duotone" className="w-3 h-3 text-rose-500" />
+                                    <Icon
+                                        icon="solar:stars-bold-duotone"
+                                        className="w-3 h-3 text-rose-500"
+                                    />
                                     Gerona Municipal Library
                                 </div>
 
@@ -33,7 +32,9 @@ export default function Home() {
                                 </h1>
 
                                 <p className="max-w-md text-stone-500 font-medium text-sm leading-relaxed mt-2">
-                                    Explore the Gerona Municipal Library. A place for learning, discovery, and community.
+                                    Explore the Gerona Municipal Library. A
+                                    place for learning, discovery, and
+                                    community.
                                 </p>
                             </div>
 
@@ -47,23 +48,29 @@ export default function Home() {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
-
                             <Link
                                 href={route("catalog.index")}
                                 className="h-full min-h-50 bg-linear-to-br from-white to-rose-50 p-6 md:p-8 rounded-3xl border border-rose-100 shadow-sm hover:shadow-md group relative overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:border-rose-300"
                             >
                                 <div className="relative z-10">
                                     <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-rose-100 flex items-center justify-center mb-5 group-hover:rotate-12 group-hover:scale-110 transition-transform duration-300">
-                                        <Icon icon="solar:magnifer-bold-duotone" className="w-6 h-6 text-rose-500" />
+                                        <Icon
+                                            icon="solar:magnifer-bold-duotone"
+                                            className="w-6 h-6 text-rose-500"
+                                        />
                                     </div>
                                     <h2 className="text-2xl font-serif font-black text-slate-800 mb-1.5 group-hover:text-rose-600 transition-colors">
                                         Browse Catalog
                                     </h2>
                                     <p className="text-stone-500 text-sm max-w-56 leading-relaxed">
-                                        Access physical books and digital modules instantly.
+                                        Access physical books and digital
+                                        modules instantly.
                                     </p>
                                 </div>
-                                <Icon icon="solar:book-bookmark-bold-duotone" className="absolute -right-4 -bottom-4 w-32 h-32 text-rose-500 opacity-5 group-hover:scale-110 transition-transform duration-500 pointer-events-none" />
+                                <Icon
+                                    icon="solar:book-bookmark-bold-duotone"
+                                    className="absolute -right-4 -bottom-4 w-32 h-32 text-rose-500 opacity-5 group-hover:scale-110 transition-transform duration-500 pointer-events-none"
+                                />
                             </Link>
 
                             <div className="flex flex-col gap-4 justify-between h-full">
@@ -91,11 +98,13 @@ export default function Home() {
                             <Carousel />
                         </div>
                         <p className="mt-4 text-center text-xs text-stone-400 font-medium tracking-wide uppercase">
-                            <Icon icon="solar:gallery-wide-bold-duotone" className="inline w-4 h-4 mr-1.5 -mt-0.5" />
+                            <Icon
+                                icon="solar:gallery-wide-bold-duotone"
+                                className="inline w-4 h-4 mr-1.5 -mt-0.5"
+                            />
                             On-site Images
                         </p>
                     </div>
-
                 </div>
             </div>
         </PublicLayout>
@@ -107,12 +116,19 @@ interface SecondaryActionCardProps {
     icon: string;
     title: string;
     description: string;
-    theme: 'fuchsia' | 'amber';
+    theme: "fuchsia" | "amber";
 }
 
-function SecondaryActionCard({ href, icon, title, description, theme }: SecondaryActionCardProps) {
+function SecondaryActionCard({
+    href,
+    icon,
+    title,
+    description,
+    theme,
+}: SecondaryActionCardProps) {
     const themeStyles = {
-        fuchsia: "hover:bg-fuchsia-50/40 border-fuchsia-100 hover:border-fuchsia-300",
+        fuchsia:
+            "hover:bg-fuchsia-50/40 border-fuchsia-100 hover:border-fuchsia-300",
         amber: "hover:bg-amber-50/40 border-amber-100 hover:border-amber-300",
     };
 
@@ -126,7 +142,9 @@ function SecondaryActionCard({ href, icon, title, description, theme }: Secondar
             href={href}
             className={`flex items-center gap-4 p-5 bg-white rounded-3xl border shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md group flex-1 ${themeStyles[theme]}`}
         >
-            <div className={`w-12 h-12 rounded-xl border flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 ${iconColors[theme]}`}>
+            <div
+                className={`w-12 h-12 rounded-xl border flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 ${iconColors[theme]}`}
+            >
                 <Icon icon={icon} className="w-6 h-6" />
             </div>
 
@@ -134,12 +152,13 @@ function SecondaryActionCard({ href, icon, title, description, theme }: Secondar
                 <h3 className="text-lg font-serif font-black text-slate-800 leading-tight mb-0.5 group-hover:text-slate-900">
                     {title}
                 </h3>
-                <p className="text-stone-500 text-xs">
-                    {description}
-                </p>
+                <p className="text-stone-500 text-xs">{description}</p>
             </div>
 
-            <Icon icon="solar:arrow-right-bold-duotone" className="w-5 h-5 text-stone-300 group-hover:text-slate-800 transition-colors group-hover:translate-x-1" />
+            <Icon
+                icon="solar:arrow-right-bold-duotone"
+                className="w-5 h-5 text-stone-300 group-hover:text-slate-800 transition-colors group-hover:translate-x-1"
+            />
         </Link>
     );
 }

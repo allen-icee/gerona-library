@@ -1,3 +1,4 @@
+<!--resources\views\emails\library-card.blade.php-->
 <!DOCTYPE html>
 <html>
 
@@ -45,8 +46,6 @@
             letter-spacing: 1px;
             text-transform: uppercase;
         }
-
-        /* CARD REPLICA STYLES */
         .card-replica {
             background: #ffffff;
             border: 1px solid #fbcfe8;
@@ -75,7 +74,7 @@
             text-align: center;
             padding: 16px;
             padding-left: 0;
-            background-color: #fff0f5; /* Subtle background to make QR pop */
+            background-color: #fff0f5;
         }
 
         .footer {
@@ -86,7 +85,6 @@
             line-height: 1.5;
         }
 
-        /* MOBILE RESPONSIVE STYLES */
         @media screen and (max-width: 480px) {
             body {
                 padding: 10px;
@@ -94,7 +92,6 @@
             .container {
                 padding: 15px;
             }
-            /* Make the table columns stack on top of each other on phones */
             .card-left, .card-right {
                 display: block !important;
                 width: 100% !important;
@@ -105,7 +102,6 @@
             .card-left {
                 border-bottom: 2px dashed #fbcfe8 !important;
             }
-            /* Center the text elements when stacked */
             .card-header-table {
                 margin: 0 auto 15px auto !important;
             }
@@ -115,7 +111,6 @@
             .patron-address {
                 margin: 0 auto !important;
             }
-            /* Make the QR Code MASSIVE on mobile */
             .qr-image {
                 width: 180px !important;
                 height: 180px !important;

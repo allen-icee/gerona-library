@@ -1,5 +1,5 @@
 <?php
-
+//app\Http\Controllers\VisitorLogController.php
 namespace App\Http\Controllers;
 
 use App\Models\VisitorLog;
@@ -16,7 +16,6 @@ class VisitorLogController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            // Only lock down the admin viewing and exporting features
             new Middleware('role:Librarian', only: ['adminIndex', 'export']),
         ];
     }
@@ -64,7 +63,7 @@ class VisitorLogController extends Controller implements HasMiddleware
         }
 
         VisitorLog::create([
-            'patron_id' => $patronId, // Save the ID
+            'patron_id' => $patronId,
             'visitor_name' => $visitorName,
             'address' => $address,
             'purpose' => $request->purpose,
@@ -98,7 +97,6 @@ class VisitorLogController extends Controller implements HasMiddleware
             return back()->withErrors(['error' => 'Card not found. Please register or sign in as guest.']);
         }
 
-        // Match by patron_id for perfect accuracy
         $activeLog = VisitorLog::where('patron_id', $patron->id)
             ->whereNull('time_out')
             ->first();
@@ -112,7 +110,7 @@ class VisitorLogController extends Controller implements HasMiddleware
             }
 
             VisitorLog::create([
-                'patron_id' => $patron->id, // Save the ID
+                'patron_id' => $patron->id,
                 'visitor_name' => trim("{$patron->first_name} " . ($patron->middle_initial ? "{$patron->middle_initial}. " : "") . "{$patron->last_name} {$patron->suffix}"),
                 'address' => "Brgy. {$patron->barangay}, {$patron->municipality}",
                 'purpose' => $request->purpose,

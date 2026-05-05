@@ -1,5 +1,5 @@
 <?php
-
+//app\Http\Controllers\BookController.php
 namespace App\Http\Controllers;
 
 use App\Models\Book;
@@ -22,10 +22,8 @@ class BookController extends Controller implements HasMiddleware
     public function __construct(AccessionService $accessionService)
     {
         $this->accessionService = $accessionService;
-        // REMOVED the old $this->middleware line from here to fix the crash
     }
 
-    // LARAVEL 11 WAY TO ADD MIDDLEWARE
     public static function middleware(): array
     {
         return [
@@ -83,7 +81,7 @@ class BookController extends Controller implements HasMiddleware
     public function index(Request $request)
     {
         $search = $request->input('search');
-        $showTrashed = $request->input('trashed') === 'true'; // Allow viewing deleted books
+        $showTrashed = $request->input('trashed') === 'true';
 
         $books = Book::query()
             ->when($showTrashed, function ($query) {
@@ -92,7 +90,7 @@ class BookController extends Controller implements HasMiddleware
             ->withCount('copies')
             ->with('copies')
             ->when($search, function ($query, $search) {
-                // Wrapped search in a logical grouping
+
                 $query->where(function ($q) use ($search) {
                     $q->where('title', 'like', "%{$search}%")
                         ->orWhere('author', 'like', "%{$search}%")
@@ -149,7 +147,7 @@ class BookController extends Controller implements HasMiddleware
                 foreach ($request->copies as $copyData) {
                     BookCopy::create([
                         'book_id' => $book->id,
-                        // Using the safe service
+
                         'accession_number' => $this->accessionService->generateSafeAccession(),
                         'shelf_location' => $copyData['shelf_location'],
                         'source' => $copyData['source'] ?? 'Donated',

@@ -1,5 +1,5 @@
 <?php
-
+//app\Http\Controllers\CirculationController.php
 namespace App\Http\Controllers;
 
 use App\Models\BorrowTransaction;
@@ -45,10 +45,8 @@ class CirculationController extends Controller
 
         try {
             DB::transaction(function () use ($request, $patron) {
-                // Lock the specific copy to prevent concurrent checkouts
                 $copy = BookCopy::where('id', $request->book_copy_id)->lockForUpdate()->first();
 
-                // Validation happens inside the lock
                 if ($copy->status !== 'Available') {
                     throw new \Exception('This book copy is no longer available.');
                 }
@@ -75,7 +73,6 @@ class CirculationController extends Controller
     {
         try {
             DB::transaction(function () use ($transaction) {
-                // Lock the transaction to prevent double returns
                 $lockedTransaction = BorrowTransaction::where('id', $transaction->id)->lockForUpdate()->first();
 
                 if ($lockedTransaction->status === 'Returned') {
@@ -88,7 +85,6 @@ class CirculationController extends Controller
                     'received_by' => Auth::id(),
                 ]);
 
-                // Update the associated copy
                 $lockedTransaction->bookCopy->update(['status' => 'Available']);
             });
 

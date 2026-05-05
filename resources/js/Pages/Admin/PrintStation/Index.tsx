@@ -7,7 +7,7 @@ import PrintQueueManager from "./Partials/PrintQueueManager";
 import PrintHistoryTable from "./Partials/PrintHistoryTable";
 
 export interface PrintJob {
-    id: number; // Changed from filename to DB id
+    id: number;
     time_uploaded: string;
     visitor_name: string;
     school_or_barangay: string;

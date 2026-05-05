@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Potta+One&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Potta+One&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
 .font-potta {
-    font-family: 'Potta One', system-ui, sans-serif;
+    font-family: "Potta One", system-ui, sans-serif;
 }
 
 @custom-variant dark (&:is(.dark *));

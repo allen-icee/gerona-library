@@ -1,3 +1,4 @@
+//resources\js\Pages\Admin\PrintStation\Partials\PrintQueueManager.tsx
 import { useState, useMemo } from "react";
 import { useForm, router } from "@inertiajs/react";
 import { Icon } from "@iconify/react";
@@ -71,13 +72,11 @@ export default function PrintQueueManager({ queue }: { queue: PrintJob[] }) {
         return Object.values(groups);
     }, [queue]);
 
-    // FIXED: Now tracking IDs (numbers) instead of filenames
     const [selectedJobIds, setSelectedJobIds] = useState<number[]>([]);
     const [logModalOpen, setLogModalOpen] = useState(false);
     const [discardModalOpen, setDiscardModalOpen] = useState(false);
     const [activeJobs, setActiveJobs] = useState<PrintJob[]>([]);
 
-    // FIXED: Payload now sends job_ids
     const { data, setData, post, processing, reset } = useForm({
         job_ids: [] as number[],
         visitor_name: "",
@@ -121,7 +120,7 @@ export default function PrintQueueManager({ queue }: { queue: PrintJob[] }) {
         );
 
         setData({
-            job_ids: toLog.map((j) => j.id), // Using IDs
+            job_ids: toLog.map((j) => j.id),
             visitor_name,
             school_or_barangay,
             pages_printed: estimatedPapers,
@@ -156,7 +155,7 @@ export default function PrintQueueManager({ queue }: { queue: PrintJob[] }) {
 
     const confirmDiscard = () => {
         router.delete(route("print-queue.destroy"), {
-            data: { job_ids: activeJobs.map((j) => j.id) }, // Sending IDs
+            data: { job_ids: activeJobs.map((j) => j.id) },
             preserveScroll: true,
             onSuccess: () => {
                 toast.success("Files discarded successfully!");
@@ -333,7 +332,6 @@ export default function PrintQueueManager({ queue }: { queue: PrintJob[] }) {
                                                         </span>
                                                     </td>
                                                     <td className="px-4 py-2.5 text-right">
-                                                        {/* FIXED: Download link now expects the job ID */}
                                                         <a
                                                             href={route(
                                                                 "print-queue.download",
@@ -360,7 +358,6 @@ export default function PrintQueueManager({ queue }: { queue: PrintJob[] }) {
                 </div>
             )}
 
-            {/* LOG MODAL */}
             <Dialog open={logModalOpen} onOpenChange={setLogModalOpen}>
                 <DialogContent className="sm:max-w-sm bg-white rounded-2xl">
                     <DialogHeader>
@@ -435,7 +432,6 @@ export default function PrintQueueManager({ queue }: { queue: PrintJob[] }) {
                 </DialogContent>
             </Dialog>
 
-            {/* DISCARD MODAL */}
             <Dialog open={discardModalOpen} onOpenChange={setDiscardModalOpen}>
                 <DialogContent className="sm:max-w-sm bg-white rounded-2xl">
                     <DialogHeader>

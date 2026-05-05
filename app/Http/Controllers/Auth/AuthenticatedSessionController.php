@@ -1,5 +1,5 @@
 <?php
-
+//app\Http\Controllers\Auth\AuthenticatedSessionController.php
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -27,7 +27,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        // ROUTING FIX: Send Kiosk users to the terminal, and Librarians to the Admin Dashboard
         if ($request->user()->hasRole('Kiosk')) {
             return redirect()->intended(route('kiosk.dashboard', absolute: false));
         }

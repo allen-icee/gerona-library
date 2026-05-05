@@ -1,5 +1,5 @@
 <?php
-
+//config\permission.php
 return [
 
     'models' => [

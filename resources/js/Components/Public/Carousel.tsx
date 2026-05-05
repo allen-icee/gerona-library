@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import { createPortal } from "react-dom";
 
-// Loads your images
 const modules = import.meta.glob(
     "/public/images/carousel/*.{png,jpg,jpeg,webp}",
     {
@@ -25,24 +24,22 @@ export default function Carousel() {
     const [active, setActive] = useState(0);
     const [viewerIndex, setViewerIndex] = useState<number | null>(null);
     const MAX_VISIBILITY = 3;
-    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const openViewer = (i: number) => setViewerIndex(i);
     const closeViewer = () => setViewerIndex(null);
 
-    // Auto-play interval
     useEffect(() => {
         if (viewerIndex === null && IMAGES.length > 0) {
             intervalRef.current = setInterval(() => {
                 setActive((prev) => (prev + 1) % IMAGES.length);
-            }, 4000); // changes every 4 seconds
+            }, 4000);
         }
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
     }, [viewerIndex]);
 
-    // Lock body scroll when fullscreen is open
     useEffect(() => {
         if (viewerIndex !== null) {
             document.body.style.overflow = "hidden";
@@ -52,7 +49,6 @@ export default function Carousel() {
         }
     }, [viewerIndex]);
 
-    // Keyboard navigation
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             if (viewerIndex === null) return;
@@ -77,10 +73,7 @@ export default function Carousel() {
 
     return (
         <>
-            {/* 3D Stack Container */}
             <div className="relative w-full h-full flex items-center justify-center perspective-[1000px]">
-
-                {/* Left Arrow */}
                 {active > 0 && (
                     <button
                         onClick={() => setActive((i) => i - 1)}
@@ -93,7 +86,6 @@ export default function Carousel() {
                     </button>
                 )}
 
-                {/* Pure CSS Animated Cards Container - REVERTED TO PORTRAIT */}
                 <div className="relative w-[14rem] h-[18rem] sm:w-[16rem] sm:h-[21rem] lg:w-[22rem] lg:h-[28rem] z-30">
                     {IMAGES.map((src, i) => {
                         const isActiveSlide = i === active;
@@ -101,7 +93,6 @@ export default function Carousel() {
                         const absOffset = Math.abs(offset);
                         const direction = Math.sign(active - i);
 
-                        // Reverted Math for the CSS transforms (Portrait spread)
                         const scale = isActiveSlide ? 1 : 1 - absOffset * 0.2;
                         const x = isActiveSlide ? 0 : -(direction * 60);
                         const opacity = absOffset >= MAX_VISIBILITY ? 0 : 1;
@@ -126,10 +117,11 @@ export default function Carousel() {
                                 <img
                                     src={src}
                                     alt={`Carousel item ${i + 1}`}
-                                    className={`w-full h-full object-cover rounded-[1.5rem] cursor-pointer select-none transition-shadow duration-300 ${isActiveSlide
-                                        ? "shadow-[0_15px_40px_rgba(244,114,182,0.5)] border-4 border-white"
-                                        : "shadow-lg border-2 border-white/60"
-                                        }`}
+                                    className={`w-full h-full object-cover rounded-[1.5rem] cursor-pointer select-none transition-shadow duration-300 ${
+                                        isActiveSlide
+                                            ? "shadow-[0_15px_40px_rgba(244,114,182,0.5)] border-4 border-white"
+                                            : "shadow-lg border-2 border-white/60"
+                                    }`}
                                     draggable={false}
                                     onClick={() => openViewer(i)}
                                 />
@@ -138,7 +130,6 @@ export default function Carousel() {
                     })}
                 </div>
 
-                {/* Right Arrow */}
                 {active < IMAGES.length - 1 && (
                     <button
                         onClick={() => setActive((i) => i + 1)}
@@ -152,12 +143,10 @@ export default function Carousel() {
                 )}
             </div>
 
-            {/* LIGHTWEIGHT FULLSCREEN VIEWER - TELEPORTED TO BODY! */}
             {viewerIndex !== null &&
                 typeof document !== "undefined" &&
                 createPortal(
                     <div className="fixed inset-0 z-[9999] flex items-center justify-center">
-                        {/* Backdrop */}
                         <div
                             className="absolute inset-0 bg-slate-950/90 backdrop-blur-md"
                             onClick={closeViewer}
@@ -203,7 +192,6 @@ export default function Carousel() {
                             </button>
                         )}
 
-                        {/* View Image */}
                         <div className="relative z-40 animate-in zoom-in-95 duration-300">
                             <img
                                 src={IMAGES[viewerIndex]}

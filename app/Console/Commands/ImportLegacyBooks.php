@@ -87,7 +87,8 @@ class ImportLegacyBooks extends Command
                         'status' => $data['Status'] ?? 'Available',
                         'date_acquired' => $dateAcquired,
                         'remarks' => $data['Remarks'] ?? null,
-                        'library_id' => 1
+
+                        'library_id' => config('library.default_id', 1)
                     ]);
                 }
 

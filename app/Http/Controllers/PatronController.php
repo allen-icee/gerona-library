@@ -1,8 +1,9 @@
 <?php
-
+//app\Http\Controllers\PatronController.php
 namespace App\Http\Controllers;
 
 use App\Models\Patron;
+use App\Http\Requests\StorePatronRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Mail;
@@ -53,29 +54,11 @@ class PatronController extends Controller implements HasMiddleware
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StorePatronRequest $request)
     {
-        $validated = $request->validate([
-            'first_name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZñÑ\s\-\,]+$/'],
-            'last_name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZñÑ\s\-\,]+$/'],
-            'middle_initial' => ['nullable', 'string', 'max:2', 'regex:/^[a-zA-ZñÑ]+$/'],
-            'suffix' => ['nullable', 'string', 'in:JR.,SR.,I,II,III,IV,V'],
+        $validated = $request->validated();
 
-            'type' => 'required|in:Citizen,Student,Teacher/LGU Staff',
-            'gender' => 'required|in:Male,Female,Other',
-            'email' => ['required', 'email', 'unique:patrons,email'],
-
-            'province' => 'required|string|max:255',
-            'municipality' => 'required|string|max:255',
-            'barangay' => 'required|string|max:255',
-            'street' => 'nullable|string|max:255',
-            'school' => 'nullable|string|max:255',
-
-            'contact_number' => ['nullable', 'numeric', 'digits_between:7,11'],
-            'status' => 'required|in:Active,Suspended',
-        ]);
-
-        $genderCode = match ($request->gender) {
+        $genderCode = match ($validated['gender']) {
             'Male' => '01',
             'Female' => '02',
             default => '03',
@@ -86,35 +69,14 @@ class PatronController extends Controller implements HasMiddleware
             return Patron::create($validated);
         });
 
-        Mail::to($patron->email)->send(new LibraryCardGenerated($patron));
+        Mail::to($patron->email)->queue(new LibraryCardGenerated($patron));
 
         return redirect()->back()->with('success', 'Patron registered successfully.');
     }
 
-    public function update(Request $request, Patron $patron)
+    public function update(StorePatronRequest $request, Patron $patron)
     {
-        $validated = $request->validate([
-            'first_name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZñÑ\s\-\,]+$/'],
-            'last_name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZñÑ\s\-\,]+$/'],
-            'middle_initial' => ['nullable', 'string', 'max:2', 'regex:/^[a-zA-ZñÑ]+$/'],
-            'suffix' => ['nullable', 'string', 'in:JR.,SR.,I,II,III,IV,V'],
-
-            'type' => 'required|in:Citizen,Student,Teacher/LGU Staff',
-            'gender' => 'required|in:Male,Female,Other',
-
-            'email' => ['required', 'email', 'unique:patrons,email,' . $patron->id],
-
-            'province' => 'required|string|max:255',
-            'municipality' => 'required|string|max:255',
-            'barangay' => 'required|string|max:255',
-            'street' => 'nullable|string|max:255',
-            'school' => 'nullable|string|max:255',
-
-            'contact_number' => ['nullable', 'numeric', 'digits_between:7,11'],
-            'status' => 'required|in:Active,Suspended',
-        ]);
-
-        $patron->update($validated);
+        $patron->update($request->validated());
 
         return redirect()->back()->with('success', 'Patron updated successfully.');
     }

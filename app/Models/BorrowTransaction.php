@@ -27,13 +27,11 @@ class BorrowTransaction extends Model
 
     public function patron()
     {
-        // withTrashed() ensures historical logs don't crash if the patron was deleted
         return $this->belongsTo(Patron::class)->withTrashed();
     }
 
     public function bookCopy()
     {
-        // withTrashed() ensures historical logs don't crash if the book was deleted
         return $this->belongsTo(BookCopy::class)->withTrashed();
     }
 
@@ -41,5 +39,4 @@ class BorrowTransaction extends Model
     {
         return $this->belongsTo(User::class, 'issued_by');
     }
-
 }
