@@ -1,6 +1,6 @@
 // resources/js/Pages/Kiosk/Dashboard.tsx
 import { useState, FormEventHandler, useEffect, useRef } from "react";
-import { Head, useForm, router, usePage } from "@inertiajs/react";
+import { Head, useForm, router } from "@inertiajs/react";
 import { PageProps } from "@/types";
 import { Icon } from "@iconify/react";
 import SignatureCanvas from "react-signature-canvas";
@@ -34,10 +34,7 @@ export default function KioskDashboard({
     const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
     const isProcessingScan = useRef(false);
-    const lastScannedCode = useRef<string | null>(null);
-    const codeCooldownTimer = useRef<ReturnType<typeof setTimeout> | null>(
-        null,
-    );
+    const recentScans = useRef<Map<string, number>>(new Map());
     const [isSubmittingPurpose, setIsSubmittingPurpose] = useState(false);
 
     useEffect(() => {
@@ -126,18 +123,18 @@ export default function KioskDashboard({
 
             scannerRef.current.render(
                 (decodedText) => {
+                    const now = Date.now();
+                    const lastScanTime =
+                        recentScans.current.get(decodedText) || 0;
+
+                    if (now - lastScanTime < 10000) {
+                        return;
+                    }
+
                     if (isProcessingScan.current) return;
 
-                    if (lastScannedCode.current === decodedText) return;
-
                     isProcessingScan.current = true;
-                    lastScannedCode.current = decodedText;
-
-                    if (codeCooldownTimer.current)
-                        clearTimeout(codeCooldownTimer.current);
-                    codeCooldownTimer.current = setTimeout(() => {
-                        lastScannedCode.current = null;
-                    }, 8000);
+                    recentScans.current.set(decodedText, now);
 
                     scannerRef.current?.pause(true);
                     playBeep();
@@ -159,10 +156,15 @@ export default function KioskDashboard({
                                     { id: "qr-scan" },
                                 );
 
+                                recentScans.current.set(
+                                    decodedText,
+                                    Date.now(),
+                                );
+
                                 setTimeout(() => {
                                     scannerRef.current?.resume();
                                     isProcessingScan.current = false;
-                                }, 3000);
+                                }, 2000);
                             },
                             onError: (errors) => {
                                 if (errors.needs_purpose) {
@@ -177,7 +179,7 @@ export default function KioskDashboard({
                                     setTimeout(() => {
                                         scannerRef.current?.resume();
                                         isProcessingScan.current = false;
-                                    }, 3000);
+                                    }, 2000);
                                 }
                             },
                         },
@@ -216,13 +218,16 @@ export default function KioskDashboard({
                             "Welcome! Time in successful.",
                         { id: "qr-scan" },
                     );
+
+                    recentScans.current.set(scannedQR, Date.now());
+
                     setScannedQR(null);
                     setIsSubmittingPurpose(false);
 
                     setTimeout(() => {
                         scannerRef.current?.resume();
                         isProcessingScan.current = false;
-                    }, 3000);
+                    }, 2000);
                 },
                 onError: (errors) => {
                     toast.error(
@@ -235,7 +240,7 @@ export default function KioskDashboard({
                     setTimeout(() => {
                         scannerRef.current?.resume();
                         isProcessingScan.current = false;
-                    }, 3000);
+                    }, 2000);
                 },
             },
         );
@@ -651,6 +656,9 @@ export default function KioskDashboard({
                 open={!!scannedQR}
                 onOpenChange={(open) => {
                     if (!open) {
+                        if (scannedQR) {
+                            recentScans.current.delete(scannedQR);
+                        }
                         setScannedQR(null);
                         scannerRef.current?.resume();
                         isProcessingScan.current = false;
