@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "ClientGerona - Library Terminal",
     "main": "main.js",
-    "author": "Gerona RHU",
+    "author": "Mr.Dearest (Shoutout to My Dearest Beloved Miss)",
     "scripts": {
         "start": "electron .",
         "build": "electron-builder --win"
