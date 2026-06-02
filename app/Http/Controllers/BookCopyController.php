@@ -7,14 +7,23 @@ use App\Models\BookCopy;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Services\AccessionService;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class BookCopyController extends Controller
+class BookCopyController extends Controller implements HasMiddleware
 {
     protected $accessionService;
 
     public function __construct(AccessionService $accessionService)
     {
         $this->accessionService = $accessionService;
+    }
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('role:Librarian'),
+        ];
     }
 
     public function index(Book $book)
@@ -30,10 +39,10 @@ class BookCopyController extends Controller
     public function store(Request $request, Book $book)
     {
         $validated = $request->validate([
-            'shelf_location' => 'nullable|string',
-            'status' => 'required|string',
-            'source' => 'required|string',
-            'donator_name' => 'nullable|string',
+            'shelf_location' => 'nullable|string|max:255',
+            'status' => 'required|in:Available,Borrowed,Lost,Damaged,Maintenance',
+            'source' => 'required|string|max:50',
+            'donator_name' => 'nullable|string|max:255',
             'date_acquired' => 'required|date',
         ]);
 
@@ -47,12 +56,18 @@ class BookCopyController extends Controller
 
     public function update(Request $request, BookCopy $copy)
     {
+        if ($request->filled('accession_number')) {
+            $request->merge([
+                'accession_number' => strtoupper(trim($request->accession_number)),
+            ]);
+        }
+
         $validated = $request->validate([
-            'accession_number' => 'required|string|unique:book_copies,accession_number,' . $copy->id,
-            'shelf_location' => 'nullable|string',
-            'status' => 'required|string',
-            'source' => 'required|string',
-            'donator_name' => 'nullable|string',
+            'accession_number' => 'required|string|max:50|unique:book_copies,accession_number,' . $copy->id,
+            'shelf_location' => 'nullable|string|max:255',
+            'status' => 'required|in:Available,Borrowed,Lost,Damaged,Maintenance',
+            'source' => 'required|string|max:50',
+            'donator_name' => 'nullable|string|max:255',
             'date_acquired' => 'required|date',
         ]);
 

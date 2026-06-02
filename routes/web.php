@@ -52,7 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('Kiosk/Dashboard', [
             'activeVisitors' => $activeVisitors
         ]);
-    })->name('kiosk.dashboard');
+    })->name('kiosk.dashboard')->middleware('role:Librarian|Kiosk');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -73,6 +73,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/books/{book}/copies', [BookCopyController::class, 'index'])->name('books.copies.index');
     Route::post('/books/{book}/copies', [BookCopyController::class, 'store'])->name('books.copies.store');
+    Route::put('/copies/{copy}', [BookCopyController::class, 'update'])->name('copies.update');
     Route::delete('/copies/{copy}', [BookCopyController::class, 'destroy'])->name('copies.destroy');
 
     Route::get('/patrons/export', [PatronController::class, 'export'])->name('patrons.export');

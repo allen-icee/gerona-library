@@ -1,5 +1,5 @@
 // resources/js/Pages/Kiosk/Dashboard.tsx
-import { useState, FormEventHandler, useEffect, useRef } from "react";
+import { useState, FormEventHandler, useEffect, useRef, useCallback } from "react";
 import { Head, useForm, router } from "@inertiajs/react";
 import { PageProps } from "@/types";
 import { Icon } from "@iconify/react";
@@ -17,6 +17,8 @@ import {
 import CustomSelect from "@/Components/CustomSelect";
 import { toast } from "sonner";
 import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
+
+const PURPOSE_SELECTION_TIMEOUT_MS = 30000;
 
 export default function KioskDashboard({
     activeVisitors = [],
@@ -36,6 +38,58 @@ export default function KioskDashboard({
     const isProcessingScan = useRef(false);
     const recentScans = useRef<Map<string, number>>(new Map());
     const [isSubmittingPurpose, setIsSubmittingPurpose] = useState(false);
+    const purposeTimeoutRef = useRef<number | null>(null);
+    const resumeTimerRef = useRef<number | null>(null);
+    const pendingPurposeQrRef = useRef<string | null>(null);
+
+    const clearPurposeTimeout = useCallback(() => {
+        if (purposeTimeoutRef.current) {
+            window.clearTimeout(purposeTimeoutRef.current);
+            purposeTimeoutRef.current = null;
+        }
+    }, []);
+
+    const resumeScanning = useCallback(() => {
+        try {
+            scannerRef.current?.resume();
+        } catch (error) {
+            console.error("Failed to resume scanner", error);
+        }
+        isProcessingScan.current = false;
+    }, []);
+
+    const scheduleScannerResume = useCallback(
+        (delay = 1200) => {
+            if (resumeTimerRef.current) {
+                window.clearTimeout(resumeTimerRef.current);
+            }
+
+            resumeTimerRef.current = window.setTimeout(() => {
+                resumeScanning();
+                resumeTimerRef.current = null;
+            }, delay);
+        },
+        [resumeScanning],
+    );
+
+    const resetPendingPurpose = useCallback(
+        (forgetRecentScan = false) => {
+            const pendingQr = pendingPurposeQrRef.current;
+
+            clearPurposeTimeout();
+            pendingPurposeQrRef.current = null;
+
+            if (forgetRecentScan && pendingQr) {
+                recentScans.current.delete(pendingQr);
+            }
+
+            setScannedQR(null);
+            setIsSubmittingPurpose(false);
+            toast.dismiss("qr-scan");
+            resumeScanning();
+        },
+        [clearPurposeTimeout, resumeScanning],
+    );
 
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -114,8 +168,9 @@ export default function KioskDashboard({
             scannerRef.current = new Html5QrcodeScanner(
                 "reader",
                 {
-                    fps: 10,
-                    qrbox: { width: 250, height: 250 },
+                    fps: 15,
+                    qrbox: { width: 220, height: 220 },
+                    rememberLastUsedCamera: true,
                     supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
                 },
                 false,
@@ -161,25 +216,25 @@ export default function KioskDashboard({
                                     Date.now(),
                                 );
 
-                                setTimeout(() => {
-                                    scannerRef.current?.resume();
-                                    isProcessingScan.current = false;
-                                }, 2000);
+                                scheduleScannerResume();
                             },
                             onError: (errors) => {
                                 if (errors.needs_purpose) {
                                     toast.dismiss("qr-scan");
+                                    clearPurposeTimeout();
+                                    pendingPurposeQrRef.current = decodedText;
                                     setScannedQR(decodedText);
+                                    purposeTimeoutRef.current =
+                                        window.setTimeout(() => {
+                                            resetPendingPurpose(true);
+                                        }, PURPOSE_SELECTION_TIMEOUT_MS);
                                 } else {
                                     toast.error(
                                         errors.error || "Scan failed.",
                                         { id: "qr-scan" },
                                     );
 
-                                    setTimeout(() => {
-                                        scannerRef.current?.resume();
-                                        isProcessingScan.current = false;
-                                    }, 2000);
+                                    scheduleScannerResume();
                                 }
                             },
                         },
@@ -190,17 +245,27 @@ export default function KioskDashboard({
         }
 
         return () => {
+            clearPurposeTimeout();
+            if (resumeTimerRef.current) {
+                window.clearTimeout(resumeTimerRef.current);
+                resumeTimerRef.current = null;
+            }
+            pendingPurposeQrRef.current = null;
+            isProcessingScan.current = false;
+
             if (scannerRef.current) {
                 scannerRef.current
                     .clear()
                     .catch((e) => console.error("Failed to clear scanner", e));
+                scannerRef.current = null;
             }
         };
-    }, [isGuest]);
+    }, [clearPurposeTimeout, isGuest, resetPendingPurpose, scheduleScannerResume]);
 
     const handlePurposeSelection = (selectedPurpose: string) => {
         if (!scannedQR || isSubmittingPurpose) return;
 
+        clearPurposeTimeout();
         setIsSubmittingPurpose(true);
         toast.loading("Logging Time In...", { id: "qr-scan" });
 
@@ -220,27 +285,23 @@ export default function KioskDashboard({
                     );
 
                     recentScans.current.set(scannedQR, Date.now());
+                    pendingPurposeQrRef.current = null;
 
                     setScannedQR(null);
                     setIsSubmittingPurpose(false);
 
-                    setTimeout(() => {
-                        scannerRef.current?.resume();
-                        isProcessingScan.current = false;
-                    }, 2000);
+                    scheduleScannerResume();
                 },
                 onError: (errors) => {
                     toast.error(
                         errors.error || "Invalid QR Code or Card not found.",
                         { id: "qr-scan" },
                     );
+                    pendingPurposeQrRef.current = null;
                     setScannedQR(null);
                     setIsSubmittingPurpose(false);
 
-                    setTimeout(() => {
-                        scannerRef.current?.resume();
-                        isProcessingScan.current = false;
-                    }, 2000);
+                    scheduleScannerResume();
                 },
             },
         );
@@ -656,12 +717,7 @@ export default function KioskDashboard({
                 open={!!scannedQR}
                 onOpenChange={(open) => {
                     if (!open) {
-                        if (scannedQR) {
-                            recentScans.current.delete(scannedQR);
-                        }
-                        setScannedQR(null);
-                        scannerRef.current?.resume();
-                        isProcessingScan.current = false;
+                        resetPendingPurpose(true);
                     }
                 }}
             >

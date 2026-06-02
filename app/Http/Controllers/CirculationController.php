@@ -12,9 +12,18 @@ use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CirculationExport;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class CirculationController extends Controller
+class CirculationController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('role:Librarian'),
+        ];
+    }
+
     public function index()
     {
         $activeTransactions = BorrowTransaction::with(['patron', 'bookCopy.book', 'issuer'])

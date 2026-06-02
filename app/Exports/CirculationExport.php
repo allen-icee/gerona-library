@@ -28,7 +28,7 @@ class CirculationExport implements FromCollection, WithHeadings, WithMapping
             $transaction->bookCopy->book->title ?? 'Unknown Book',
             $transaction->bookCopy->accession_number ?? 'N/A',
             $transaction->borrowed_at ? \Carbon\Carbon::parse($transaction->borrowed_at)->format('Y-m-d h:i A') : '',
-            $transaction->due_date ? \Carbon\Carbon::parse($transaction->due_date)->format('Y-m-d') : '',
+            $transaction->due_at ? \Carbon\Carbon::parse($transaction->due_at)->format('Y-m-d') : '',
             $transaction->returned_at ? \Carbon\Carbon::parse($transaction->returned_at)->format('Y-m-d h:i A') : '',
             $transaction->status
         ];

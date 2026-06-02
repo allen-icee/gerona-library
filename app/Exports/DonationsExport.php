@@ -11,22 +11,34 @@ class DonationsExport implements FromCollection, WithHeadings, WithMapping
 {
     public function collection()
     {
-        return Donation::with('user')->orderBy('donation_date', 'desc')->get();
+        return Donation::with('receiver:id,name')->orderBy('date_received', 'desc')->get();
     }
 
     public function headings(): array
     {
-        return ['ID', 'Donor Name', 'Items Donated', 'Received By (Admin)', 'Date Donated'];
+        return [
+            'ID',
+            'Donator Name',
+            'Donator Type',
+            'Category',
+            'Description',
+            'Estimated Value',
+            'Received By',
+            'Date Received',
+        ];
     }
 
     public function map($donation): array
     {
         return [
             $donation->id,
-            $donation->donor_name,
-            $donation->items_donated,
-            $donation->user->name ?? 'System',
-            $donation->donation_date ? \Carbon\Carbon::parse($donation->donation_date)->format('Y-m-d') : '',
+            $donation->donator_name,
+            $donation->donator_type,
+            $donation->donation_category,
+            $donation->description,
+            $donation->estimated_value,
+            $donation->receiver->name ?? 'System',
+            $donation->date_received ? $donation->date_received->format('Y-m-d') : '',
         ];
     }
 }

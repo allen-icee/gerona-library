@@ -8,9 +8,18 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\DonationsExport;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class DonationController extends Controller
+class DonationController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('role:Librarian'),
+        ];
+    }
+
     public function index(Request $request)
     {
         $donations = Donation::with('receiver:id,name')

@@ -38,7 +38,6 @@ class HandleInertiaRequests extends Middleware
                 'patron' => fn() => $request->session()->get('patron'),
                 'error' => fn() => $request->session()->get('error'),
             ],
-            'recentDonations' => fn() => \App\Models\Donation::latest()->take(10)->get(),
         ];
     }
 }

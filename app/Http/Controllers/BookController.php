@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\DB;
 use App\Services\AccessionService;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class BookController extends Controller implements HasMiddleware
 {
@@ -78,6 +80,52 @@ class BookController extends Controller implements HasMiddleware
         ];
     }
 
+    private function normalizeIsbn(?string $isbn): ?string
+    {
+        $normalized = $isbn ? strtoupper(preg_replace('/[^0-9X]/i', '', $isbn)) : null;
+
+        return $normalized ?: null;
+    }
+
+    private function normalizeText(?string $value): string
+    {
+        return preg_replace('/\s+/', ' ', Str::upper(trim((string) $value)));
+    }
+
+    private function findDuplicateBook(?string $isbn, string $title, string $author, ?int $ignoreBookId = null): ?Book
+    {
+        if ($isbn) {
+            $isbnMatch = Book::withTrashed()
+                ->when($ignoreBookId, fn ($query) => $query->whereKeyNot($ignoreBookId))
+                ->where('isbn', $isbn)
+                ->first();
+
+            if ($isbnMatch) {
+                return $isbnMatch;
+            }
+        }
+
+        return Book::withTrashed()
+            ->when($ignoreBookId, fn ($query) => $query->whereKeyNot($ignoreBookId))
+            ->whereRaw('UPPER(TRIM(title)) = ?', [$this->normalizeText($title)])
+            ->whereRaw('UPPER(TRIM(author)) = ?', [$this->normalizeText($author)])
+            ->first();
+    }
+
+    private function createGeneratedCopies(Book $book, array $copies): void
+    {
+        foreach ($copies as $copyData) {
+            BookCopy::create([
+                'book_id' => $book->id,
+                'accession_number' => $this->accessionService->generateSafeAccession(),
+                'shelf_location' => $copyData['shelf_location'] ?? null,
+                'source' => $copyData['source'] ?? 'Donated',
+                'status' => 'Available',
+                'date_acquired' => now(),
+            ]);
+        }
+    }
+
     public function index(Request $request)
     {
         $search = $request->input('search');
@@ -129,7 +177,7 @@ class BookController extends Controller implements HasMiddleware
             'copies.*.source' => 'required|string|max:50',
         ]);
 
-        $isbn = $request->isbn ? preg_replace('/[^0-9X]/i', '', $request->isbn) : null;
+        $isbn = $this->normalizeIsbn($request->isbn);
 
         $apiData = [];
         if ($isbn) {
@@ -137,24 +185,31 @@ class BookController extends Controller implements HasMiddleware
         }
 
         DB::transaction(function () use ($validated, $isbn, $apiData, $request) {
-            $book = Book::create(array_merge(
-                \Illuminate\Support\Arr::except($validated, ['copies']),
+            $bookData = array_merge(
+                Arr::except($validated, ['copies']),
                 ['isbn' => $isbn],
                 $apiData
-            ));
+            );
+
+            $book = $this->findDuplicateBook($isbn, $validated['title'], $validated['author']);
+
+            if ($book) {
+                if ($book->trashed()) {
+                    $book->restore();
+                }
+
+                foreach ($bookData as $field => $value) {
+                    if (($book->{$field} === null || $book->{$field} === '') && $value !== null && $value !== '') {
+                        $book->{$field} = $value;
+                    }
+                }
+                $book->save();
+            } else {
+                $book = Book::create($bookData);
+            }
 
             if ($request->has('copies') && count($request->copies) > 0) {
-                foreach ($request->copies as $copyData) {
-                    BookCopy::create([
-                        'book_id' => $book->id,
-
-                        'accession_number' => $this->accessionService->generateSafeAccession(),
-                        'shelf_location' => $copyData['shelf_location'],
-                        'source' => $copyData['source'] ?? 'Donated',
-                        'status' => 'Available',
-                        'date_acquired' => now(),
-                    ]);
-                }
+                $this->createGeneratedCopies($book, $request->copies);
             }
         });
 
@@ -173,7 +228,15 @@ class BookController extends Controller implements HasMiddleware
             'language' => 'nullable|string|max:50',
         ]);
 
-        $isbn = $request->isbn ? preg_replace('/[^0-9X]/i', '', $request->isbn) : null;
+        $isbn = $this->normalizeIsbn($request->isbn);
+
+        $duplicate = $this->findDuplicateBook($isbn, $validated['title'], $validated['author'], $book->id);
+
+        if ($duplicate) {
+            return back()->withErrors([
+                'isbn' => 'Another catalog record already uses this ISBN or title/author combination.',
+            ]);
+        }
 
         $apiData = ($isbn !== $book->isbn || !$book->cover_url)
             ? $this->fetchBookDetails($isbn)
@@ -222,34 +285,39 @@ class BookController extends Controller implements HasMiddleware
         while (($row = fgetcsv($handle, 1000, ",")) !== FALSE) {
             if (count($header) == count($row) && array_filter($row)) {
                 $data = array_combine($header, $row);
-                $title = strtoupper(trim($data['title'] ?? ''));
+                $title = trim($data['title'] ?? '');
                 if (!$title)
                     continue;
 
                 $rawIsbn = $data['isbn'] ?? '';
-                $isbn = $rawIsbn ? preg_replace('/[^0-9X]/i', '', $rawIsbn) : null;
+                $isbn = $this->normalizeIsbn($rawIsbn);
+                $author = trim($data['author'] ?? '') ?: 'Unknown Author';
 
-                $book = Book::firstOrCreate(
-                    [
+                $book = $this->findDuplicateBook($isbn, $title, $author);
+
+                if ($book) {
+                    if ($book->trashed()) {
+                        $book->restore();
+                    }
+                } else {
+                    $book = Book::create([
                         'title' => $title,
-                        'isbn' => $isbn ?: null
-                    ],
-                    [
-                        'author' => trim($data['author'] ?? '') ?: 'Unknown Author',
+                        'isbn' => $isbn,
+                        'author' => $author,
                         'publisher' => trim($data['publisher'] ?? '') ?: 'Unknown Publisher',
                         'year_published' => trim($data['year published'] ?? '') ?: null,
                         'category' => trim($data['category'] ?? '') ?: 'Uncategorized',
                         'language' => trim($data['language'] ?? '') ?: 'Unknown',
                         'description' => null,
                         'cover_url' => null
-                    ]
-                );
+                    ]);
+                }
 
                 if ($isbn && empty($book->cover_url)) {
                     FetchBookMetadata::dispatch($book);
                 }
 
-                $accessionNo = trim($data['accession no.'] ?? '');
+                $accessionNo = strtoupper(trim($data['accession no.'] ?? ''));
                 $copiesTotal = (int) ($data['copies total'] ?? 1);
 
                 if ($accessionNo) {
@@ -264,7 +332,9 @@ class BookController extends Controller implements HasMiddleware
                         ]
                     );
                 } else {
-                    for ($i = 1; $i <= $copiesTotal; $i++) {
+                    $missingCopies = max(0, $copiesTotal - $book->copies()->count());
+
+                    for ($i = 1; $i <= $missingCopies; $i++) {
                         BookCopy::create([
                             'accession_number' => $this->accessionService->generateSafeAccession(),
                             'book_id' => $book->id,

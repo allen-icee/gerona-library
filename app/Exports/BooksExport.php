@@ -11,7 +11,10 @@ class BooksExport implements FromCollection, WithHeadings, WithMapping
 {
     public function collection()
     {
-        return Book::all();
+        return Book::withCount([
+            'copies as total_copies',
+            'copies as available_copies' => fn ($query) => $query->where('status', 'Available'),
+        ])->get();
     }
 
     public function headings(): array
@@ -38,7 +41,7 @@ class BooksExport implements FromCollection, WithHeadings, WithMapping
             $book->title,
             $book->author,
             $book->category,
-            $book->published_year,
+            $book->year_published,
             $book->publisher,
             $book->total_copies,
             $book->available_copies,
