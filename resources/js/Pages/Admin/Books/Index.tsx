@@ -1,5 +1,5 @@
 // resources/js/Pages/Admin/Books/Index.tsx
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, router, Link } from "@inertiajs/react";
 import { PageProps } from "@/types";
@@ -30,14 +30,12 @@ export default function BookIndex({
         search?: string;
         titleSort?: string;
         authorSort?: string;
-        year?: string;
     };
 }>) {
     // State for Search & Filters
     const [search, setSearch] = useState(filters.search || "");
     const [titleSort, setTitleSort] = useState(filters.titleSort || "");
     const [authorSort, setAuthorSort] = useState(filters.authorSort || "");
-    const [yearFilter, setYearFilter] = useState(filters.year || "");
 
     const [isRecentExpanded, setIsRecentExpanded] = useState(false);
 
@@ -47,24 +45,44 @@ export default function BookIndex({
             if (
                 search !== filters.search ||
                 titleSort !== filters.titleSort ||
-                authorSort !== filters.authorSort ||
-                yearFilter !== filters.year
+                authorSort !== filters.authorSort
             ) {
                 router.get(
                     route("books.index"),
-                    { search, titleSort, authorSort, year: yearFilter },
+                    { search, titleSort, authorSort },
                     { preserveState: true, replace: true },
                 );
             }
         }, 500);
         return () => clearTimeout(delayBounceFn);
-    }, [search, titleSort, authorSort, yearFilter]);
+    }, [search, titleSort, authorSort]);
+
+    // Advanced Handlers for Sorting to prevent simultaneous selection
+    const handleTitleSortChange = (val: string) => {
+        if (val !== "" && authorSort !== "") {
+            toast.warning("Cannot sort by both. Author sort was cleared.", {
+                icon: "⚠️",
+            });
+            setAuthorSort("");
+        }
+        setTitleSort(val);
+    };
+
+    const handleAuthorSortChange = (val: string) => {
+        if (val !== "" && titleSort !== "") {
+            toast.warning("Cannot sort by both. Title sort was cleared.", {
+                icon: "⚠️",
+            });
+            setTitleSort("");
+        }
+        setAuthorSort(val);
+    };
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        toast.loading("Importing CSV records...", { id: "csv-import" });
+        toast.loading("Importing records...", { id: "csv-import" });
 
         const formData = new FormData();
         formData.append("csv_file", file);
@@ -72,42 +90,17 @@ export default function BookIndex({
         router.post(route("books.import"), formData, {
             preserveScroll: true,
             onSuccess: () =>
-                toast.success("Master catalog updated from CSV!", {
+                toast.success("Master catalog updated!", {
                     id: "csv-import",
                 }),
             onError: () =>
-                toast.error("Failed to import CSV. Check file format.", {
+                toast.error("Failed to import. Check file format.", {
                     id: "csv-import",
                 }),
         });
 
         e.target.value = "";
     };
-
-    // Calculate Dynamic Years Range
-    const yearOptions = useMemo(() => {
-        // Extract years safely (handles either published_year or year field)
-        const allYears = [
-            ...books.data.map((b: any) => b.published_year || b.year),
-            ...recentBooks.map((b: any) => b.published_year || b.year),
-        ]
-            .filter((y) => y)
-            .map(Number)
-            .filter((y) => !isNaN(y));
-
-        const maxYear =
-            allYears.length > 0
-                ? Math.max(...allYears)
-                : new Date().getFullYear();
-        const minYear =
-            allYears.length > 0 ? Math.min(...allYears) : maxYear - 10;
-
-        const options = [{ value: "", label: "All Years" }];
-        for (let y = maxYear; y >= minYear; y--) {
-            options.push({ value: y.toString(), label: y.toString() });
-        }
-        return options;
-    }, [books.data, recentBooks]);
 
     const recentLimit = 3;
     const displayedRecentBooks = isRecentExpanded
@@ -153,7 +146,12 @@ export default function BookIndex({
 
                             <div className="flex flex-col min-[480px]:flex-row w-full gap-2 shrink-0">
                                 <a
-                                    href={route("books.export")}
+                                    // Add the current filters to the export route!
+                                    href={route("books.export", {
+                                        search,
+                                        titleSort,
+                                        authorSort,
+                                    })}
                                     className="flex-1 min-[480px]:flex-none flex items-center justify-center px-4 h-10 text-xs font-bold transition-all bg-pink-50 text-pink-600 hover:bg-pink-500 hover:text-white rounded-xl border border-pink-200 shadow-sm group whitespace-nowrap"
                                 >
                                     <Icon
@@ -186,42 +184,32 @@ export default function BookIndex({
 
                     {/* Filter Row */}
                     <div className="mt-4 pt-4 border-t border-pink-50 flex flex-col sm:flex-row gap-3">
-                        <div className="w-full sm:w-48">
+                        <div className="w-full sm:w-1/2">
                             <CustomSelect
                                 value={titleSort}
-                                // Extract the string value from the option object
-                                onChange={(option: any) =>
-                                    setTitleSort(option?.value ?? "")
-                                }
+                                onChange={handleTitleSortChange} // Using the new smart handler
                                 options={[
-                                    { value: "", label: "Title: Default" },
+                                    {
+                                        value: "",
+                                        label: "Sort by Title (Default)",
+                                    },
                                     { value: "asc", label: "Title: A to Z" },
                                     { value: "desc", label: "Title: Z to A" },
                                 ]}
                             />
                         </div>
-                        <div className="w-full sm:w-48">
+                        <div className="w-full sm:w-1/2">
                             <CustomSelect
                                 value={authorSort}
-                                // Extract the string value from the option object
-                                onChange={(option: any) =>
-                                    setAuthorSort(option?.value ?? "")
-                                }
+                                onChange={handleAuthorSortChange} // Using the new smart handler
                                 options={[
-                                    { value: "", label: "Author: Default" },
+                                    {
+                                        value: "",
+                                        label: "Sort by Author (Default)",
+                                    },
                                     { value: "asc", label: "Author: A to Z" },
                                     { value: "desc", label: "Author: Z to A" },
                                 ]}
-                            />
-                        </div>
-                        <div className="w-full sm:w-48">
-                            <CustomSelect
-                                value={yearFilter}
-                                // Extract the string value from the option object
-                                onChange={(option: any) =>
-                                    setYearFilter(option?.value ?? "")
-                                }
-                                options={yearOptions}
                             />
                         </div>
                     </div>

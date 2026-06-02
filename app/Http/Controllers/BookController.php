@@ -17,7 +17,6 @@ use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
-// Imports required for reading Excel files inline
 use Maatwebsite\Excel\Concerns\ToArray;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
@@ -95,7 +94,6 @@ class BookController extends Controller implements HasMiddleware
         return preg_replace('/\s+/', ' ', Str::upper(trim((string) $value)));
     }
 
-    // UPDATED: Smarter Duplicate Checking
     private function findDuplicateBook(?string $isbn, string $title, string $author, ?int $ignoreBookId = null): ?Book
     {
         $normalizedTitle = $this->normalizeText($title);
@@ -104,14 +102,11 @@ class BookController extends Controller implements HasMiddleware
         return Book::withTrashed()
             ->when($ignoreBookId, fn($query) => $query->whereKeyNot($ignoreBookId))
             ->where(function ($query) use ($isbn, $normalizedTitle, $normalizedAuthor) {
-                // Rule 1: Match if Title AND Author are exactly the same
                 $query->where(function ($q) use ($normalizedTitle, $normalizedAuthor) {
                     $q->whereRaw('UPPER(TRIM(title)) = ?', [$normalizedTitle])
                         ->whereRaw('UPPER(TRIM(author)) = ?', [$normalizedAuthor]);
                 });
 
-                // Rule 2: If ISBN matches, we ALSO require the Title to match.
-                // This prevents fake/placeholder ISBNs from merging completely different books.
                 if ($isbn) {
                     $query->orWhere(function ($q) use ($isbn, $normalizedTitle) {
                         $q->where('isbn', $isbn)
@@ -141,10 +136,8 @@ class BookController extends Controller implements HasMiddleware
         $search = $request->input('search');
         $showTrashed = $request->input('trashed') === 'true';
 
-        // Updated with sorting and filtering from earlier
         $titleSort = $request->input('titleSort');
         $authorSort = $request->input('authorSort');
-        $yearFilter = $request->input('year');
 
         $books = Book::query()
             ->when($showTrashed, function ($query) {
@@ -158,9 +151,6 @@ class BookController extends Controller implements HasMiddleware
                         ->orWhere('author', 'like', "%{$search}%")
                         ->orWhere('isbn', 'like', "%{$search}%");
                 });
-            })
-            ->when($yearFilter, function ($query, $year) {
-                $query->where('year_published', $year);
             })
             ->when($titleSort, function ($query, $sort) {
                 $query->orderBy('title', $sort);
@@ -183,7 +173,7 @@ class BookController extends Controller implements HasMiddleware
         return Inertia::render('Admin/Books/Index', [
             'books' => $books,
             'recentBooks' => $recentBooks,
-            'filters' => $request->only(['search', 'titleSort', 'authorSort', 'year'])
+            'filters' => $request->only(['search', 'titleSort', 'authorSort'])
         ]);
     }
 
@@ -285,10 +275,13 @@ class BookController extends Controller implements HasMiddleware
 
         return redirect()->back()->with('success', 'Book restored successfully from the archive.');
     }
-
-    public function export()
+    public function export(Request $request)
     {
-        return Excel::download(new BooksExport, 'gerona_library_books.xlsx');
+        // Grab the active filters from the URL
+        $filters = $request->only(['search', 'titleSort', 'authorSort']);
+
+        // Pass the filters into the Export class
+        return Excel::download(new BooksExport($filters), 'gerona_library_books.xlsx');
     }
 
     public function import(Request $request)
