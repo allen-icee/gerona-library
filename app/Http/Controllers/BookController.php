@@ -1,5 +1,5 @@
 <?php
-//app\Http\Controllers\BookController.php
+// app\Http\Controllers\BookController.php
 namespace App\Http\Controllers;
 
 use App\Models\Book;
@@ -16,6 +16,10 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+
+// Imports required for reading Excel files inline
+use Maatwebsite\Excel\Concerns\ToArray;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class BookController extends Controller implements HasMiddleware
 {
@@ -83,7 +87,6 @@ class BookController extends Controller implements HasMiddleware
     private function normalizeIsbn(?string $isbn): ?string
     {
         $normalized = $isbn ? strtoupper(preg_replace('/[^0-9X]/i', '', $isbn)) : null;
-
         return $normalized ?: null;
     }
 
@@ -92,23 +95,30 @@ class BookController extends Controller implements HasMiddleware
         return preg_replace('/\s+/', ' ', Str::upper(trim((string) $value)));
     }
 
+    // UPDATED: Smarter Duplicate Checking
     private function findDuplicateBook(?string $isbn, string $title, string $author, ?int $ignoreBookId = null): ?Book
     {
-        if ($isbn) {
-            $isbnMatch = Book::withTrashed()
-                ->when($ignoreBookId, fn ($query) => $query->whereKeyNot($ignoreBookId))
-                ->where('isbn', $isbn)
-                ->first();
-
-            if ($isbnMatch) {
-                return $isbnMatch;
-            }
-        }
+        $normalizedTitle = $this->normalizeText($title);
+        $normalizedAuthor = $this->normalizeText($author);
 
         return Book::withTrashed()
-            ->when($ignoreBookId, fn ($query) => $query->whereKeyNot($ignoreBookId))
-            ->whereRaw('UPPER(TRIM(title)) = ?', [$this->normalizeText($title)])
-            ->whereRaw('UPPER(TRIM(author)) = ?', [$this->normalizeText($author)])
+            ->when($ignoreBookId, fn($query) => $query->whereKeyNot($ignoreBookId))
+            ->where(function ($query) use ($isbn, $normalizedTitle, $normalizedAuthor) {
+                // Rule 1: Match if Title AND Author are exactly the same
+                $query->where(function ($q) use ($normalizedTitle, $normalizedAuthor) {
+                    $q->whereRaw('UPPER(TRIM(title)) = ?', [$normalizedTitle])
+                        ->whereRaw('UPPER(TRIM(author)) = ?', [$normalizedAuthor]);
+                });
+
+                // Rule 2: If ISBN matches, we ALSO require the Title to match.
+                // This prevents fake/placeholder ISBNs from merging completely different books.
+                if ($isbn) {
+                    $query->orWhere(function ($q) use ($isbn, $normalizedTitle) {
+                        $q->where('isbn', $isbn)
+                            ->whereRaw('UPPER(TRIM(title)) = ?', [$normalizedTitle]);
+                    });
+                }
+            })
             ->first();
     }
 
@@ -131,6 +141,11 @@ class BookController extends Controller implements HasMiddleware
         $search = $request->input('search');
         $showTrashed = $request->input('trashed') === 'true';
 
+        // Updated with sorting and filtering from earlier
+        $titleSort = $request->input('titleSort');
+        $authorSort = $request->input('authorSort');
+        $yearFilter = $request->input('year');
+
         $books = Book::query()
             ->when($showTrashed, function ($query) {
                 $query->onlyTrashed();
@@ -138,14 +153,24 @@ class BookController extends Controller implements HasMiddleware
             ->withCount('copies')
             ->with('copies')
             ->when($search, function ($query, $search) {
-
                 $query->where(function ($q) use ($search) {
                     $q->where('title', 'like', "%{$search}%")
                         ->orWhere('author', 'like', "%{$search}%")
                         ->orWhere('isbn', 'like', "%{$search}%");
                 });
             })
-            ->latest()
+            ->when($yearFilter, function ($query, $year) {
+                $query->where('year_published', $year);
+            })
+            ->when($titleSort, function ($query, $sort) {
+                $query->orderBy('title', $sort);
+            })
+            ->when($authorSort, function ($query, $sort) {
+                $query->orderBy('author', $sort);
+            })
+            ->when(!$titleSort && !$authorSort, function ($query) {
+                $query->latest(); // Default sort
+            })
             ->paginate(15)
             ->withQueryString();
 
@@ -158,7 +183,7 @@ class BookController extends Controller implements HasMiddleware
         return Inertia::render('Admin/Books/Index', [
             'books' => $books,
             'recentBooks' => $recentBooks,
-            'filters' => $request->only(['search'])
+            'filters' => $request->only(['search', 'titleSort', 'authorSort', 'year'])
         ]);
     }
 
@@ -263,91 +288,86 @@ class BookController extends Controller implements HasMiddleware
 
     public function export()
     {
-        return Excel::download(new BooksExport, 'gerona_library_books.csv');
+        return Excel::download(new BooksExport, 'gerona_library_books.xlsx');
     }
 
     public function import(Request $request)
     {
         $request->validate([
-            'csv_file' => 'required|file|mimes:csv,txt'
+            'csv_file' => 'required|file|mimes:csv,txt,xlsx,xls'
         ]);
 
         $file = $request->file('csv_file');
-        $handle = fopen($file->getRealPath(), "r");
-        $header = fgetcsv($handle, 1000, ",");
 
-        if ($header) {
-            $header[0] = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header[0]);
-            $header = array_map('strtolower', $header);
-            $header = array_map('trim', $header);
-        }
+        $import = new class implements ToArray, WithHeadingRow {
+            public function array(array $array) {}
+        };
 
-        while (($row = fgetcsv($handle, 1000, ",")) !== FALSE) {
-            if (count($header) == count($row) && array_filter($row)) {
-                $data = array_combine($header, $row);
-                $title = trim($data['title'] ?? '');
-                if (!$title)
-                    continue;
+        $sheets = Excel::toArray($import, $file);
+        $rows = $sheets[0] ?? [];
 
-                $rawIsbn = $data['isbn'] ?? '';
-                $isbn = $this->normalizeIsbn($rawIsbn);
-                $author = trim($data['author'] ?? '') ?: 'Unknown Author';
+        foreach ($rows as $data) {
+            $title = trim($data['title'] ?? '');
+            if (!$title) continue;
 
-                $book = $this->findDuplicateBook($isbn, $title, $author);
+            $rawIsbn = $data['isbn'] ?? '';
+            $isbn = $this->normalizeIsbn($rawIsbn);
+            $author = trim($data['author'] ?? '') ?: 'Unknown Author';
 
-                if ($book) {
-                    if ($book->trashed()) {
-                        $book->restore();
-                    }
-                } else {
-                    $book = Book::create([
-                        'title' => $title,
-                        'isbn' => $isbn,
-                        'author' => $author,
-                        'publisher' => trim($data['publisher'] ?? '') ?: 'Unknown Publisher',
-                        'year_published' => trim($data['year published'] ?? '') ?: null,
-                        'category' => trim($data['category'] ?? '') ?: 'Uncategorized',
-                        'language' => trim($data['language'] ?? '') ?: 'Unknown',
-                        'description' => null,
-                        'cover_url' => null
+            $book = $this->findDuplicateBook($isbn, $title, $author);
+
+            if ($book) {
+                if ($book->trashed()) {
+                    $book->restore();
+                }
+            } else {
+                $book = Book::create([
+                    'title' => $title,
+                    'isbn' => $isbn,
+                    'author' => $author,
+                    'publisher' => trim($data['publisher'] ?? '') ?: 'Unknown Publisher',
+                    'year_published' => trim($data['published_year'] ?? $data['year_published'] ?? '') ?: null,
+                    'category' => trim($data['category'] ?? '') ?: 'Uncategorized',
+                    'language' => trim($data['language'] ?? '') ?: 'Unknown',
+                    'description' => null,
+                    'cover_url' => null
+                ]);
+            }
+
+            if ($isbn && empty($book->cover_url)) {
+                FetchBookMetadata::dispatch($book);
+            }
+
+            $accessionNo = strtoupper(trim($data['accession_no'] ?? $data['accession_number'] ?? ''));
+            $copiesTotal = (int) ($data['total_copies'] ?? $data['copies_total'] ?? 1);
+
+            if ($accessionNo) {
+                BookCopy::firstOrCreate(
+                    ['accession_number' => $accessionNo],
+                    [
+                        'book_id' => $book->id,
+                        'shelf_location' => trim($data['shelf_location'] ?? ''),
+                        'status' => 'Available',
+                        'source' => 'Donated',
+                        'date_acquired' => now(),
+                    ]
+                );
+            } else {
+                $missingCopies = max(0, $copiesTotal - $book->copies()->count());
+
+                for ($i = 1; $i <= $missingCopies; $i++) {
+                    BookCopy::create([
+                        'accession_number' => $this->accessionService->generateSafeAccession(),
+                        'book_id' => $book->id,
+                        'shelf_location' => trim($data['shelf_location'] ?? ''),
+                        'status' => 'Available',
+                        'source' => 'Donated',
+                        'date_acquired' => now(),
                     ]);
-                }
-
-                if ($isbn && empty($book->cover_url)) {
-                    FetchBookMetadata::dispatch($book);
-                }
-
-                $accessionNo = strtoupper(trim($data['accession no.'] ?? ''));
-                $copiesTotal = (int) ($data['copies total'] ?? 1);
-
-                if ($accessionNo) {
-                    BookCopy::firstOrCreate(
-                        ['accession_number' => $accessionNo],
-                        [
-                            'book_id' => $book->id,
-                            'shelf_location' => trim($data['shelf location'] ?? ''),
-                            'status' => 'Available',
-                            'source' => 'Donated',
-                            'date_acquired' => now(),
-                        ]
-                    );
-                } else {
-                    $missingCopies = max(0, $copiesTotal - $book->copies()->count());
-
-                    for ($i = 1; $i <= $missingCopies; $i++) {
-                        BookCopy::create([
-                            'accession_number' => $this->accessionService->generateSafeAccession(),
-                            'book_id' => $book->id,
-                            'shelf_location' => trim($data['shelf location'] ?? ''),
-                            'status' => 'Available',
-                            'source' => 'Donated',
-                            'date_acquired' => now(),
-                        ]);
-                    }
                 }
             }
         }
-        fclose($handle);
+
         return redirect()->back();
     }
 }

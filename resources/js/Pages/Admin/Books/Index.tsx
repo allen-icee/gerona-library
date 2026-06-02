@@ -1,5 +1,5 @@
 // resources/js/Pages/Admin/Books/Index.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, router, Link } from "@inertiajs/react";
 import { PageProps } from "@/types";
@@ -17,6 +17,7 @@ import {
 
 import AddBookModal from "./Partials/AddBookModal";
 import BookActions from "./Partials/BookActions";
+import CustomSelect from "@/Components/CustomSelect";
 
 export default function BookIndex({
     books,
@@ -25,23 +26,39 @@ export default function BookIndex({
 }: PageProps<{
     books: any;
     recentBooks?: any[];
-    filters: { search?: string };
+    filters: {
+        search?: string;
+        titleSort?: string;
+        authorSort?: string;
+        year?: string;
+    };
 }>) {
+    // State for Search & Filters
     const [search, setSearch] = useState(filters.search || "");
+    const [titleSort, setTitleSort] = useState(filters.titleSort || "");
+    const [authorSort, setAuthorSort] = useState(filters.authorSort || "");
+    const [yearFilter, setYearFilter] = useState(filters.year || "");
+
     const [isRecentExpanded, setIsRecentExpanded] = useState(false);
 
+    // Debounced Search & Filter Execution
     useEffect(() => {
         const delayBounceFn = setTimeout(() => {
-            if (search !== filters.search) {
+            if (
+                search !== filters.search ||
+                titleSort !== filters.titleSort ||
+                authorSort !== filters.authorSort ||
+                yearFilter !== filters.year
+            ) {
                 router.get(
                     route("books.index"),
-                    { search },
+                    { search, titleSort, authorSort, year: yearFilter },
                     { preserveState: true, replace: true },
                 );
             }
         }, 500);
         return () => clearTimeout(delayBounceFn);
-    }, [search]);
+    }, [search, titleSort, authorSort, yearFilter]);
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -67,6 +84,31 @@ export default function BookIndex({
         e.target.value = "";
     };
 
+    // Calculate Dynamic Years Range
+    const yearOptions = useMemo(() => {
+        // Extract years safely (handles either published_year or year field)
+        const allYears = [
+            ...books.data.map((b: any) => b.published_year || b.year),
+            ...recentBooks.map((b: any) => b.published_year || b.year),
+        ]
+            .filter((y) => y)
+            .map(Number)
+            .filter((y) => !isNaN(y));
+
+        const maxYear =
+            allYears.length > 0
+                ? Math.max(...allYears)
+                : new Date().getFullYear();
+        const minYear =
+            allYears.length > 0 ? Math.min(...allYears) : maxYear - 10;
+
+        const options = [{ value: "", label: "All Years" }];
+        for (let y = maxYear; y >= minYear; y--) {
+            options.push({ value: y.toString(), label: y.toString() });
+        }
+        return options;
+    }, [books.data, recentBooks]);
+
     const recentLimit = 3;
     const displayedRecentBooks = isRecentExpanded
         ? recentBooks
@@ -76,67 +118,111 @@ export default function BookIndex({
         <AdminLayout>
             <Head title="Master Catalog" />
             <div className="max-w-full space-y-6">
-                <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-4 rounded-2xl border border-pink-100 shadow-sm shadow-pink-100/50">
-                    <div className="flex items-center gap-3 w-full xl:w-auto">
-                        <div className="bg-linear-to-br from-pink-400 to-pink-600 w-12 h-12 rounded-xl flex items-center justify-center shadow-md shadow-pink-300 text-white shrink-0">
-                            <Icon
-                                icon="solar:book-bookmark-bold-duotone"
-                                className="w-6 h-6"
-                            />
+                <div className="flex flex-col bg-white p-4 rounded-2xl border border-pink-100 shadow-sm shadow-pink-100/50">
+                    <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
+                        <div className="flex items-center gap-3 w-full xl:w-auto">
+                            <div className="bg-linear-to-br from-pink-400 to-pink-600 w-12 h-12 rounded-xl flex items-center justify-center shadow-md shadow-pink-300 text-white shrink-0">
+                                <Icon
+                                    icon="solar:book-bookmark-bold-duotone"
+                                    className="w-6 h-6"
+                                />
+                            </div>
+                            <div>
+                                <h1 className="text-xl font-black text-slate-800 tracking-tight leading-none">
+                                    Master Catalog
+                                </h1>
+                                <p className="text-slate-500 text-xs font-medium mt-1">
+                                    Manage master book records and inventory.
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h1 className="text-xl font-black text-slate-800 tracking-tight leading-none">
-                                Master Catalog
-                            </h1>
-                            <p className="text-slate-500 text-xs font-medium mt-1">
-                                Manage master book records and inventory.
-                            </p>
+
+                        <div className="flex flex-col md:flex-row w-full xl:w-auto items-stretch md:items-center gap-3">
+                            <div className="relative w-full md:w-72 shrink-0">
+                                <Icon
+                                    icon="solar:magnifer-bold-duotone"
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-pink-400"
+                                />
+                                <Input
+                                    placeholder="Search title, author, or ISBN..."
+                                    className="pl-9 bg-stone-50 border-pink-100 focus-visible:ring-pink-500 h-10 rounded-xl shadow-sm text-sm w-full"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="flex flex-col min-[480px]:flex-row w-full gap-2 shrink-0">
+                                <a
+                                    href={route("books.export")}
+                                    className="flex-1 min-[480px]:flex-none flex items-center justify-center px-4 h-10 text-xs font-bold transition-all bg-pink-50 text-pink-600 hover:bg-pink-500 hover:text-white rounded-xl border border-pink-200 shadow-sm group whitespace-nowrap"
+                                >
+                                    <Icon
+                                        icon="solar:download-square-bold-duotone"
+                                        className="w-4 h-4 mr-2 group-hover:-translate-y-0.5 transition-transform"
+                                    />{" "}
+                                    Export
+                                </a>
+
+                                <label className="flex-1 min-[480px]:flex-none flex items-center justify-center px-4 h-10 text-xs font-bold transition-all bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white rounded-xl border border-emerald-200 shadow-sm cursor-pointer group whitespace-nowrap">
+                                    <Icon
+                                        icon="solar:upload-square-bold-duotone"
+                                        className="w-4 h-4 mr-2 group-hover:-translate-y-0.5 transition-transform"
+                                    />
+                                    Import Excel/CSV
+                                    <input
+                                        type="file"
+                                        accept=".csv, .xlsx, .xls"
+                                        className="hidden"
+                                        onChange={handleFileUpload}
+                                    />
+                                </label>
+
+                                <div className="flex-1 min-[480px]:flex-none flex *:w-full">
+                                    <AddBookModal />
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="flex flex-col md:flex-row w-full xl:w-auto items-stretch md:items-center gap-3">
-                        <div className="relative w-full md:w-72 shrink-0">
-                            <Icon
-                                icon="solar:magnifer-bold-duotone"
-                                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-pink-400"
-                            />
-                            <Input
-                                placeholder="Search title, author, or ISBN..."
-                                className="pl-9 bg-stone-50 border-pink-100 focus-visible:ring-pink-500 h-10 rounded-xl shadow-sm text-sm w-full"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
+                    {/* Filter Row */}
+                    <div className="mt-4 pt-4 border-t border-pink-50 flex flex-col sm:flex-row gap-3">
+                        <div className="w-full sm:w-48">
+                            <CustomSelect
+                                value={titleSort}
+                                // Extract the string value from the option object
+                                onChange={(option: any) =>
+                                    setTitleSort(option?.value ?? "")
+                                }
+                                options={[
+                                    { value: "", label: "Title: Default" },
+                                    { value: "asc", label: "Title: A to Z" },
+                                    { value: "desc", label: "Title: Z to A" },
+                                ]}
                             />
                         </div>
-
-                        <div className="flex flex-col min-[480px]:flex-row w-full gap-2 shrink-0">
-                            <a
-                                href={route("books.export")}
-                                className="flex-1 min-[480px]:flex-none flex items-center justify-center px-4 h-10 text-xs font-bold transition-all bg-pink-50 text-pink-600 hover:bg-pink-500 hover:text-white rounded-xl border border-pink-200 shadow-sm group whitespace-nowrap"
-                            >
-                                <Icon
-                                    icon="solar:download-square-bold-duotone"
-                                    className="w-4 h-4 mr-2 group-hover:-translate-y-0.5 transition-transform"
-                                />{" "}
-                                Export
-                            </a>
-
-                            <label className="flex-1 min-[480px]:flex-none flex items-center justify-center px-4 h-10 text-xs font-bold transition-all bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white rounded-xl border border-emerald-200 shadow-sm cursor-pointer group whitespace-nowrap">
-                                <Icon
-                                    icon="solar:upload-square-bold-duotone"
-                                    className="w-4 h-4 mr-2 group-hover:-translate-y-0.5 transition-transform"
-                                />
-                                Import CSV
-                                <input
-                                    type="file"
-                                    accept=".csv"
-                                    className="hidden"
-                                    onChange={handleFileUpload}
-                                />
-                            </label>
-
-                            <div className="flex-1 min-[480px]:flex-none flex *:w-full">
-                                <AddBookModal />
-                            </div>
+                        <div className="w-full sm:w-48">
+                            <CustomSelect
+                                value={authorSort}
+                                // Extract the string value from the option object
+                                onChange={(option: any) =>
+                                    setAuthorSort(option?.value ?? "")
+                                }
+                                options={[
+                                    { value: "", label: "Author: Default" },
+                                    { value: "asc", label: "Author: A to Z" },
+                                    { value: "desc", label: "Author: Z to A" },
+                                ]}
+                            />
+                        </div>
+                        <div className="w-full sm:w-48">
+                            <CustomSelect
+                                value={yearFilter}
+                                // Extract the string value from the option object
+                                onChange={(option: any) =>
+                                    setYearFilter(option?.value ?? "")
+                                }
+                                options={yearOptions}
+                            />
                         </div>
                     </div>
                 </div>
@@ -181,11 +267,21 @@ export default function BookIndex({
                                                 key={`recent-${book.id}`}
                                                 className="hover:bg-emerald-50/80 transition-colors border-emerald-100/50"
                                             >
-                                                <TableCell className="font-bold text-slate-800 pl-6 text-xs uppercase">
-                                                    {book.title}
+                                                <TableCell className="pl-6">
+                                                    <div
+                                                        className="font-bold text-slate-800 text-xs uppercase truncate max-w-[150px] sm:max-w-[200px] cursor-help"
+                                                        title={book.title}
+                                                    >
+                                                        {book.title}
+                                                    </div>
                                                 </TableCell>
                                                 <TableCell className="text-slate-600 text-xs">
-                                                    {book.author}
+                                                    <div
+                                                        className="truncate max-w-[120px] sm:max-w-[150px] cursor-help"
+                                                        title={book.author}
+                                                    >
+                                                        {book.author}
+                                                    </div>
                                                 </TableCell>
                                                 <TableCell>
                                                     <span className="font-mono text-[10px] font-bold text-emerald-700 bg-white border border-emerald-200 px-2 py-0.5 rounded-md shadow-sm whitespace-nowrap">
@@ -263,7 +359,6 @@ export default function BookIndex({
                                     <TableHead className="text-[10px] uppercase text-stone-400 font-bold">
                                         Category
                                     </TableHead>
-
                                     <TableHead className="text-[10px] uppercase text-stone-400 font-bold">
                                         Latest Accession No.
                                     </TableHead>
@@ -291,13 +386,18 @@ export default function BookIndex({
                                             key={book.id}
                                             className="hover:bg-pink-50/30 transition-colors border-pink-50"
                                         >
-                                            <TableCell className="font-bold text-slate-800 pl-6 py-3 uppercase">
-                                                {book.title}
+                                            <TableCell className="pl-6 py-3">
+                                                <div
+                                                    className="font-bold text-slate-800 uppercase truncate max-w-[150px] sm:max-w-[250px] cursor-help"
+                                                    title={book.title}
+                                                >
+                                                    {book.title}
+                                                </div>
                                             </TableCell>
 
                                             <TableCell className="py-3">
                                                 <div
-                                                    className="text-stone-600 font-medium text-sm truncate max-w-[150px] sm:max-w-[200px] cursor-help"
+                                                    className="text-stone-600 font-medium text-sm truncate max-w-[120px] sm:max-w-[180px] cursor-help"
                                                     title={book.author}
                                                 >
                                                     {book.author}
